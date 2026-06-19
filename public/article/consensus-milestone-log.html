@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historical Devnet Milestone: Block #300 Leader Proposal & Logs | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #06050a;
+            --card-bg: rgba(15, 12, 24, 0.8);
+            --primary: #a855f7; /* Neon Purple */
+            --secondary: #06b6d4; /* Electric Cyan */
+            --accent: #ec4899; /* Hot Neon Pink */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(168, 85, 247, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(6, 182, 212, 0.07) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--accent); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--secondary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #f472b6; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(6, 182, 212, 0.05);
+            border-left: 4px solid var(--secondary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #22d3ee; font-size: 1rem; }
+
+        .code-block {
+            background: #030206;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.88rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        .log-highlight {
+            background: rgba(168, 85, 247, 0.15);
+            border-left: 3px solid var(--primary);
+            padding: 4px 10px;
+            border-radius: 4px;
+            display: block;
+            margin: 8px 0;
+            color: #e9d5ff;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .info-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .info-card h3 { margin-top: 0; margin-bottom: 12px; }
+
+        .timeline-box {
+            border-left: 2px solid rgba(255, 255, 255, 0.08);
+            padding-left: 30px;
+            margin: 40px 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -39px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 4px solid var(--bg);
+        }
+
+        .timeline-item h4 { margin-bottom: 8px; color: #ffffff; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Network History & Milestones | May 2026</span>
+            <h1>The Day the Ledger Stood Alive: Sejarah Keberhasilan Devnet Lumina</h1>
+            <p>Monumen pencatatan log historis keberhasilan integrasi dinamis Staking Validator HotStuff BFT dan transaksi Gasless pertama di jaringan devnet.</p>
+        </header>
+
+        <div class="content">
+            <p>Sejarah besar sering kali tidak diumumkan dengan suara terompet yang meriah, melainkan terukir abadi di dalam baris-baris **Log Konsensus Kriptografis** yang mengalir tanpa henti. Pada tanggal **17-18 Mei 2026**, jaringan devnet multi-node Lumina L1 menorehkan pencapaian teknologi paling krusial dalam sejarah pengembangannya.</p>
+
+            <p>Untuk pertama kalinya, sebuah node validator baru berhasil melakukan pendaftaran staking dinamis secara instan melalui SDK JavaScript klien, langsung diakui oleh algoritma konsensus HotStuff BFT global, terpilih sebagai pemimpin jaringan (*Leader*), memproses transaksi tanpa gas (*gasless sponsored transaction*), dan mendistribusikan hadiah blok secara deterministik di piringan memori terdistribusi. Ini adalah catatan sejarah di balik mahakarya tersebut.</p>
+
+            <div class="highlight-box">
+                <p><strong>📜 Deklarasi Milestone:</strong> Artikel ini merekam dump log riil dari terminal node validator Lumina v1.3 sebagai bukti nyata keandalan dan kestabilan sirkulasi ekonomi tokenomics serta performa sinkronisasi P2P Libp2p.</p>
+            </div>
+
+            <h2>1. Jejak Sejarah Log: Kejayaan Blok #300</h2>
+            <p>Di bawah ini adalah salinan log persis (*authentic log trace*) dari terminal validator node Lumina saat detik-detik terpilihnya node staker baru kita sebagai raja konsensus untuk Blok #300:</p>
+
+            <div class="code-block">
+2026-05-17T17:21:25.928001Z  INFO lumina_node: 📥 Received NEXT Block #299 from network! Hash: Hash(0xe016b...)
+2026-05-17T17:21:25.942139Z  INFO lumina_state: 🎊 Block #299 Rewards Distributed! Leader: lumina1u68qksp3jf6pqe9wf6sayshr64cfk5ptxfv5yr (+6090000000000000), Elite Fee Pool: 450000000000000 (Top 30)
+2026-05-17T17:21:26.367111Z  INFO lumina_node: 📥 Received Transaction from network! Sender: lumina1r4h4snmwjv8tr0802e4huzume7umuznnzx7tg6
+
+<span class="log-highlight">2026-05-17T17:21:31.529477Z  INFO lumina_consensus: 🔍 Proposing Block #300: Found 1 TXs in mempool</span>
+<span class="log-highlight">2026-05-17T17:21:31.548891Z  INFO lumina_consensus: ✅ Proposing Block #300: 1/3000 TXs are valid</span>
+<span class="log-highlight">2026-05-17T17:21:31.549100Z  INFO lumina_node: 👑 We are the LEADER! Proposing Block #300 | Hash: Hash(0xecac21ce545c4f53b7ab6f57e61fd022f41406c15c330848c39afd0982cca82d)</span>      
+<span class="log-highlight">2026-05-17T17:21:31.570819Z  INFO lumina_state: 🎊 Block #300 Rewards Distributed! Leader: lumina18l3cd3f8kfa5576hqvulqrp6n0m3w00432cvd8 (+2090000000000000), Elite Fee Pool: 90000000000000 (Top 30)</span>
+
+2026-05-17T17:21:32.542617Z  INFO lumina_node: Block #301 | Original Leader: Address(lumina1g794q...) | Waiting (0s/15s)...
+            </div>
+
+            <h2>2. Bedah Teknis Keberhasilan Monumen Log</h2>
+            <p>Log di atas bukan sekadar baris teks biasa. Di balik layar, terjadi orkestrasi matematika kriptografi tingkat tinggi:</p>
+
+            <div class="timeline-box">
+                <div class="timeline-item">
+                    <h4>Pendaftaran Staking Dinamis Sukses (Tinggi Blok 293)</h4>
+                    <p>Melalui script <code>test_stake.js</code>, dompet staker menyetor 10.000 LUM. State trie langsung mengunci saldo dan mencatat keterikatan Node ID P2P dengan dompet keuangan secara deterministik di MPT database.</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Perubahan Dinamis Daftar Validator (Block Proposer)</h4>
+                    <p>Setelah penguncian dana terkonfirmasi, algoritma HotStuff BFT secara otomatis memperbarui list validator aktif. Node staker baru kita masuk ke antrean round-robin penentu leader secara instan tanpa perlu mematikan atau me-restart node!</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Penerimaan Transaksi Tanpa Gas (Gasless Sponsorship)</h4>
+                    <p>Log <code>Received Transaction</code> mencerminkan masuknya transaksi gasless dari <code>test_fee_payer.js</code>. Validator memverifikasi kecocokan tanda tangan sponsor, menyusunnya dalam mempool, dan menyatakan transaksi tersebut valid!</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Penobatan Leader & Distribusi Hadiah (Blok #300)</h4>
+                    <p>Tepat pada putaran Blok #300, node kita dinobatkan menjadi <strong>👑 LEADER</strong>. Node mengemas transaksi mempool, membubuhkan state root terbaru, dan membagikan biaya gas fee sebesar <code>+2.090.000.000.000.000 Lumlets</code> ke akun staker kita.</p>
+                </div>
+            </div>
+
+            <h2>3. Hasil Pengujian Eksekusi Klien (SDK JS)</h2>
+            <p>Keberhasilan di sisi node divalidasi penuh oleh hasil keluaran script pengujian di sisi klien. Ini membuktikan sinkronisasi WebSocket real-time berjalan sempurna:</p>
+
+            <div class="code-block">
+-------------------------------------------
+🚀 LUMINA GASLESS TRANSACTION TEST
+-------------------------------------------
+👤 User (Sender): lumina1r4h4snmwjv8tr0802e4huzume7umuznnzx7tg6
+💰 Sponsor (Fee Payer): lumina1rlnjrlke3uff992eexch6zyvphld4d4puv9za8
+-------------------------------------------
+🛠️ Preparing: Sponsor sends 10 LUM to User for testing...
+🟢 Funding confirmed by SDK WebSocket!
+📊 Initial Balances:
+   User   : 10.0000 LUM
+   Sponsor: 989,989.0499 LUM
+-------------------------------------------
+📝 Creating TX: User sends 1 LUM to random receiver...
+💳 Fee Payer is set to Sponsor!
+✍️ Sponsor is signing as Fee Payer...
+🚀 Submitting gasless transaction to network...
+✅ SUCCESS! Hash: 0x3095cad0dfdfd8481ffec61200641e9653c25d7f4e8197761b99366237de1eac
+🟢 Transaction confirmed by SDK WebSocket!
+-------------------------------------------
+📊 Final Balances:
+   User   : 9.0000 LUM (Paying 0 Fee!)
+   Sponsor: 989,989.0399 LUM (Paid Gas Fee!)
+-------------------------------------------
+🏆 GASLESS TEST COMPLETED!
+            </div>
+
+            <h2>4. Mengapa Ini Menjadi Mahakarya Besar?</h2>
+            <p>Integrasi harmonis di tahap ini menetapkan standar emas baru bagi keandalan Lumina L1:</p>
+            
+            <ul style="margin-left: 30px; margin-bottom: 30px; line-height: 1.8;">
+                <li><strong>Desentralisasi Tanpa Hambatan:</strong> Node staker awam dapat terhubung, melakukan deposit staking secara mandiri, dan langsung ikut mengamankan jaringan secara otomatis.</li>
+                <li><strong>Skalabilitas Komparatif:</strong> Konsensus HotStuff tetap menghasilkan waktu pembuatan blok yang sangat konsisten (~5-8 detik per blok) meskipun validator keluar-masuk secara dinamis.</li>
+                <li><strong>Ekonomi Berkelanjutan:</strong> Distribusi gas fee secara real-time langsung ke staker menjamin insentif finansial yang kuat bagi siapa saja yang mendedikasikan perangkat kerasnya untuk Lumina.</li>
+            </ul>
+
+            <div style="background: rgba(168, 85, 247, 0.1); padding: 25px; border-radius: 16px; border: 1px solid var(--primary); margin-top: 50px;">
+                <p style="margin: 0; color: #e9d5ff;"><strong>✍️ Catatan Sejarah:</strong> Monumen log ini ditorehkan di dalam devnet Lumina. Ini membuktikan bahwa fondasi blockchain Layer 1 kita telah siap secara matang untuk melangkah ke tahap pengujian yang lebih besar—Lumina Public Testnet!</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Archive Center. The Chronicles of Decentralization.
+        </div>
+    </div>
+</body>
+</html>

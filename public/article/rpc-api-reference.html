@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Reference: Core JSON-RPC 2.0 & REST API | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #05080c;
+            --card-bg: rgba(10, 16, 26, 0.85);
+            --primary: #22d3ee; /* Cyber Cyan */
+            --secondary: #818cf8; /* Electric Indigo */
+            --accent: #34d399; /* Mint Green */
+            --text: #f3f4f6;
+            --text-dim: #94a3b8;
+            --code-bg: #000000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(34, 211, 238, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(129, 140, 248, 0.08) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #a5f3fc; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-right: 12px;
+        }
+        .method.post { background: var(--accent); color: #022c22; }
+        .method.get { background: var(--secondary); color: #0f172a; }
+        .method.ws { background: #ec4899; color: #500730; }
+
+        .api-route {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: 0.3s;
+        }
+        .api-route:hover {
+            border-color: rgba(34, 211, 238, 0.15);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .route-path {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.15rem;
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #38bdf8;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .unit-box {
+            background: rgba(34, 211, 238, 0.04);
+            border: 1px dashed var(--primary);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        th {
+            background: rgba(34, 211, 238, 0.05);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        td {
+            color: #cbd5e1;
+        }
+
+        .tag {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(129, 140, 248, 0.15);
+            color: #a5f3fc;
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Developer Reference & Core API | May 2026</span>
+            <h1>RPC API Reference</h1>
+            <p>Spesifikasi teknis super-detail dari antarmuka HTTP JSON-RPC 2.0 dan REST API di dalam kernel node Lumina.</p>
+        </header>
+
+        <div class="content">
+            <p>Node Lumina secara default meluncurkan server RPC berkinerja tinggi yang ditenagai oleh framework Axum pada port dinamis yang dihitung dari konfigurasi P2P port:</p>
+            
+            <div class="code-block" style="color: #fde047;">
+                RPC Port = 9090 + (p2p_port % 10)   // Port Default = 9098 (P2P = 61688)
+            </div>
+
+            <div class="unit-box">
+                <h3>⚠️ Konversi Satuan & Presisi Aman (Floating Point Loss Prevention)</h3>
+                <p style="margin-top: 10px; margin-bottom: 0;">Lumina menggunakan presisi **18 digit desimal** (seperti Ethereum). Satuan terkecil disebut **Lumlets**. Karena keterbatasan parser integer JavaScript dalam menangani nilai $u128$ raksasa, RPC Lumina **wajib** menerima angka besar dalam format **String-based JSON** (misal: <code>"valueString"</code> dan <code>"feeString"</code>).</p>
+                <ul style="margin-left: 20px; margin-top: 10px; color: #a5f3fc;">
+                    <li>• 1 LUM = 1.000.000.000.000.000.000 Lumlets (u128)</li>
+                    <li>• Minimal Priority Gas Fee = 10.000.000.000.000 Lumlets</li>
+                </ul>
+            </div>
+
+            <h2>🌐 Protokol JSON-RPC 2.0 (Spesifikasi Penuh)</h2>
+            <p>Node Lumina mengekspos rute tunggal <code>POST /rpc</code> yang sepenuhnya kompatibel dengan standar protokol <strong>JSON-RPC 2.0</strong>. Endpoint ini mendukung fitur mutakhir seperti <strong>Batch Requests</strong> (mengeksekusi banyak panggilan metode dalam satu array JSON) untuk efisiensi latensi maksimal.</p>
+
+            <h3>Branded JSON-RPC 2.0 Interface</h3>
+            <p>Untuk konsistensi merek dan standarisasi API Lumina L1, seluruh metode JSON-RPC diekspos di bawah penamaan namespace resmi <span class="tag">lum_*</span>:</p>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metode Lumina Resmi</th>
+                            <th>Deskripsi Fungsi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="tag">lum_getLatestBlockHeight</span></td>
+                            <td>Mengambil tinggi blok tertinggi saat ini di blockchain Lumina.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getBalance</span></td>
+                            <td>Membaca saldo koin, jumlah stake, dan nonce dari alamat dompet Lumina.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getBlockByNumber</span></td>
+                            <td>Mengambil data blok detail berdasarkan tinggi nomor blok.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_sendRawTransaction</span></td>
+                            <td>Mengirim transaksi yang telah ditandatangani ke Mempool node.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getFee</span></td>
+                            <td>Mengambil estimasi priority gas fee dinamis saat ini.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getContractBytecode</span></td>
+                            <td>Mengambil bytecode smart contract WASM yang dideploy.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getContractStorage</span></td>
+                            <td>Membaca storage internal state variables dari kontrak WASM.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getRecentBlocks</span></td>
+                            <td>Mengambil metadata 20 blok teranyar secara efisien.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getNetworkStats</span></td>
+                            <td>Membaca statistik validator aktif, peer terhubung, ID rantai, dan TPS saat ini.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getRecentTransactions</span></td>
+                            <td>Mengambil daftar 10 transaksi teranyar yang masuk ke blok.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getTransactionByHash</span></td>
+                            <td>Mengambil data transaksi individual berdasarkan hash 32-byte.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_globalSearch</span></td>
+                            <td>Mencari entitas instan secara cerdas (address, height, block/tx hash).</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getRecentMempool</span></td>
+                            <td>Mengambil hingga 50 antrean transaksi pending mempool.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getMempoolByAddress</span></td>
+                            <td>Filter transaksi pending mempool berdasarkan alamat pengirim/penerima.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getTransactionsByAddress</span></td>
+                            <td>Membaca riwayat transaksi historis akun dengan pagination.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tag">lum_getBlockEvents</span></td>
+                            <td>Membaca seluruh log event yang dipancarkan smart contract di blok.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <hr style="border-color: rgba(255,255,255,0.05); margin: 40px 0;" />
+
+            <h2>📚 Dokumentasi Detail 16 Metode Resmi JSON-RPC 2.0</h2>
+            <p>Di bawah ini adalah spesifikasi request payload dan response lengkap untuk setiap metode resmi yang aktif di Node Lumina:</p>
+
+            <!-- 1. lum_getLatestBlockHeight -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getLatestBlockHeight</div>
+                <p>Mengambil indeks/tinggi nomor blok tertinggi saat ini yang berhasil divalidasi oleh konsensus BFT.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getLatestBlockHeight",
+  "params": [],
+  "id": 1
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": 14205,
+  "id": 1
+}
+                </div>
+            </div>
+
+            <!-- 2. lum_getBalance -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getBalance</div>
+                <p>Membaca status real-time saldo akun (LUM), status stake, dan nonce pengirim berikutnya dari database state.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getBalance",
+  "params": ["lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62"],
+  "id": 2
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "address": "lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62",
+    "balance": "99500000000000000000",
+    "staked": "500000000000000000",
+    "nonce": 3
+  },
+  "id": 2
+}
+                </div>
+            </div>
+
+            <!-- 3. lum_getBlockByNumber -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getBlockByNumber</div>
+                <p>Mengambil detail struktur data blok lengkap (Header & Body Transaksi) berdasarkan nomor tinggi blok.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getBlockByNumber",
+  "params": [300],
+  "id": 3
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "header": {
+      "parent_hash": "0x56a1b2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1",
+      "state_root": "0x12a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3",
+      "tx_root": "0x89e21df9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7",
+      "timestamp": 1779836372,
+      "height": 300,
+      "proposer": "lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62"
+    },
+    "body": [
+      {
+        "transaction": {
+          "from": "lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62",
+          "to": "lumina1c3f2d...",
+          "value": "1000000000000000000",
+          "nonce": 5,
+          "fee": "10000000000000",
+          "data": []
+        },
+        "signature": "0xd32d45...",
+        "pubkey": "0x2814..."
+      }
+    ]
+  },
+  "id": 3
+}
+                </div>
+            </div>
+
+            <!-- 4. lum_sendRawTransaction -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_sendRawTransaction</div>
+                <p>Mengirim transaksi baru yang telah ditandatangani oleh keypair ke antrean mempool node.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_sendRawTransaction",
+  "params": [
+    {
+      "valueString": "1000000000000000000",
+      "feeString": "25000000000000",
+      "payload": {
+        "transaction": {
+          "from": [108, 117, 109, 105, 110, 97, 49, 117, 54, 56, 113, 107, 115, 112, 51, 106, 102, 100, 118, 112],
+          "to": [108, 117, 109, 105, 110, 97, 49, 99, 51, 102, 50, 100, 53, 54, 55, 56, 57, 48, 97, 98],
+          "value": 0,
+          "nonce": 5,
+          "data": [],
+          "fee": 0,
+          "fee_payer": null
+        },
+        "signature": [211, 45, 12, 89, 230, 45, 120, 89, 56, 32, 112, 90, 87, 43, 98, 76, 54, 32, 10, 9],
+        "pubkey": [40, 20, 87, 90, 12, 45, 89, 32, 11, 56, 90, 87, 43, 98, 76, 54, 32, 10, 9, 8],
+        "fee_payer_signature": null,
+        "fee_payer_pubkey": null
+      }
+    }
+  ],
+  "id": 4
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "status": "success",
+    "hash": "0x8eee9a615b3f2bfdeaea803ea07b2b28eee9a615b3f2bfdeaea803ea07b2b212"
+  },
+  "id": 4
+}
+                </div>
+            </div>
+
+            <!-- 5. lum_getFee -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getFee</div>
+                <p>Mengambil estimasi priority gas fee dinamis per byte yang sedang berlaku di jaringan saat ini.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getFee",
+  "params": [],
+  "id": 5
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": "12500000000000",
+  "id": 5
+}
+                </div>
+            </div>
+
+            <!-- 6. lum_getContractBytecode -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getContractBytecode</div>
+                <p>Mengambil byte representasi hexadecimal dari bytecode biner WASM smart contract yang dideploy.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getContractBytecode",
+  "params": ["lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62"],
+  "id": 6
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": "0x0061736d010000000104210003020004010105030100010606037f0041000b",
+  "id": 6
+}
+                </div>
+            </div>
+
+            <!-- 7. lum_getContractStorage -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getContractStorage</div>
+                <p>Membaca storage internal (variabel state persistent) dari WASM smart contract berdasarkan kunci pencarian key-value.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getContractStorage",
+  "params": ["lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62", "total_supply"],
+  "id": 7
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": "1000000000000000000000000",
+  "id": 7
+}
+                </div>
+            </div>
+
+            <!-- 8. lum_getRecentBlocks -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getRecentBlocks</div>
+                <p>Mengambil metadata efisien dari 20 blok teranyar secara berurutan mundur (terbaru ke terlama).</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getRecentBlocks",
+  "params": [],
+  "id": 8
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "height": 14205,
+      "hash": "0x8eee9a615b3f2bfdeaea803ea07b2b28eee9a615b3f2bfdeaea803ea07b2b212",
+      "proposer": "lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62",
+      "tx_count": 2,
+      "timestamp": 1779836372
+    }
+  ],
+  "id": 8
+}
+                </div>
+            </div>
+
+            <!-- 9. lum_getNetworkStats -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getNetworkStats</div>
+                <p>Mengambil metadata kondisi kesehatan node, validator aktif, jumlah peer terhubung di jaringan peer-to-peer (P2P), chain ID, dan throughput TPS.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getNetworkStats",
+  "params": [],
+  "id": 9
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "active_validators": 5,
+    "connected_peers": 3,
+    "tps": 120.5,
+    "chain_id": "lumina-testnet-1"
+  },
+  "id": 9
+}
+                </div>
+            </div>
+
+            <!-- 10. lum_getRecentTransactions -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getRecentTransactions</div>
+                <p>Mengambil daftar 10 transaksi teranyar yang berhasil tereksekusi masuk ke dalam blockchain untuk live dashboard explorer.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getRecentTransactions",
+  "params": [],
+  "id": 10
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "hash": "0x8eee9a615b3f2bfdeaea803ea07b2b28eee9a615b3f2bfdeaea803ea07b2b212",
+      "from": "lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62",
+      "to": "lumina1c3f2d...",
+      "value": "1000000000000000000",
+      "fee": "10000000000000",
+      "nonce": 5,
+      "timestamp": 1779836372,
+      "status": "Success",
+      "method": "Transfer",
+      "token_info": null
+    }
+  ],
+  "id": 10
+}
+                </div>
+            </div>
+
+            <!-- 11. lum_getTransactionByHash -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getTransactionByHash</div>
+                <p>Mencari detail lengkap transaksi individual (baik yang sudah sukses di blok, maupun yang masih pending antre di mempool) berdasarkan hash 32-byte.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getTransactionByHash",
+  "params": ["0x8eee9a615b3f2bfdeaea803ea07b2b28eee9a615b3f2bfdeaea803ea07b2b212"],
+  "id": 11
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "hash": "0x8eee9a615b3f2bfdeaea803ea07b2b28eee9a615b3f2bfdeaea803ea07b2b212",
+    "transaction": {
+      "from": "lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62",
+      "to": "lumina1c3f2d...",
+      "value": "1000000000000000000",
+      "nonce": 5,
+      "fee": "10000000000000",
+      "data": []
+    },
+    "signature": "0xd32d45...",
+    "pubkey": "0x2814...",
+    "status": "Success",
+    "method": "Transfer"
+  },
+  "id": 11
+}
+                </div>
+            </div>
+
+            <!-- 12. lum_globalSearch -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_globalSearch</div>
+                <p>Pencarian cerdas global node yang mendeteksi jenis input secara otomatis (apakah alamat bech32, nomor tinggi blok, hash blok, atau hash transaksi).</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_globalSearch",
+  "params": ["14205"],
+  "id": 12
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "type": "BlockHeight",
+    "payload": {
+      "height": 14205,
+      "hash": "0x8eee9a615b3f2bfdeaea803ea07b2b28eee9a615b3f2bfdeaea803ea07b2b212"
+    }
+  },
+  "id": 12
+}
+                </div>
+            </div>
+
+            <!-- 13. lum_getRecentMempool -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getRecentMempool</div>
+                <p>Mengambil daftar hingga 50 transaksi pending teranyar yang sedang mengantre di mempool node untuk diusulkan ke blok baru.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getRecentMempool",
+  "params": [],
+  "id": 13
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "hash": "0x9fff9a615b3f...",
+      "from": "lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62",
+      "to": "lumina1c3f2d...",
+      "value": "5000000000000000000",
+      "fee": "12500000000000",
+      "nonce": 6,
+      "method": "Transfer"
+    }
+  ],
+  "id": 13
+}
+                </div>
+            </div>
+
+            <!-- 14. lum_getMempoolByAddress -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getMempoolByAddress</div>
+                <p>Filter transaksi pending mempool berdasarkan alamat pengirim atau penerima wallet tertentu.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getMempoolByAddress",
+  "params": ["lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62"],
+  "id": 14
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "hash": "0x9fff9a615b3f...",
+      "from": "lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62",
+      "to": "lumina1c3f2d...",
+      "value": "5000000000000000000",
+      "fee": "12500000000000",
+      "nonce": 6,
+      "method": "Transfer"
+    }
+  ],
+  "id": 14
+}
+                </div>
+            </div>
+
+            <!-- 15. lum_getTransactionsByAddress -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getTransactionsByAddress</div>
+                <p>Membaca seluruh riwayat transaksi historis (masuk & keluar) dari alamat akun tertentu dengan fitur pagination data.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getTransactionsByAddress",
+  "params": ["lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62", 0, 10],
+  "id": 15
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "transactions": [
+      {
+        "hash": "0x8eee9a615b3f2bfdeaea803ea07b2b28eee9a615b3f2bfdeaea803ea07b2b212",
+        "from": "lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62",
+        "to": "lumina1c3f2d...",
+        "value": "1000000000000000000",
+        "fee": "10000000000000",
+        "nonce": 5,
+        "timestamp": 1779836372,
+        "status": "Success",
+        "method": "Transfer",
+        "token_info": null
+      }
+    ],
+    "total_count": 1
+  },
+  "id": 15
+}
+                </div>
+            </div>
+
+            <!-- 16. lum_getBlockEvents -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">JSON-RPC</span> lum_getBlockEvents</div>
+                <p>Mengambil seluruh log event yang dipancarkan oleh eksekusi WASM Smart Contract pada nomor tinggi blok tertentu.</p>
+                <strong>Request Payload:</strong>
+                <div class="code-block" style="color: #cbd5e1;">
+{
+  "jsonrpc": "2.0",
+  "method": "lum_getBlockEvents",
+  "params": [14205],
+  "id": 16
+}
+                </div>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "contract": "lumina1u68qksp3jfdvpxdcyk5whsypqqukqkyq4z6f62",
+      "event_name": "Transfer",
+      "attributes": "from=lumina1u68...,to=lumina1c3...,amount=1000000"
+    }
+  ],
+  "id": 16
+}
+                </div>
+            </div>
+
+            <hr style="border-color: rgba(255,255,255,0.05); margin: 40px 0;" />
+
+            <h2>⚡ REST API Endpoints (Backward Compatibility)</h2>
+            <p>Selain antarmuka JSON-RPC 2.0 tunggal, Lumina Node juga menyediakan rute REST API klasik berbasis rute GET untuk kompatibilitas instan:</p>
+
+            <!-- submit -->
+            <div class="api-route">
+                <div class="route-path"><span class="method post">POST</span> /submit</div>
+                <p>Mengirim transaksi baru yang ditandatangani ke mempool jaringan untuk divalidasi dan diusulkan.</p>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{ "status": "success", "hash": "0x56a1b2d..." }
+                </div>
+            </div>
+
+            <!-- balance -->
+            <div class="api-route">
+                <div class="route-path"><span class="method get">GET</span> /balance/:address</div>
+                <p>Membaca saldo, koin yang di-stake, dan nonce terbaru dari akun secara real-time dari global state.</p>
+                <strong>Response JSON:</strong>
+                <div class="code-block">
+{
+  "address": "lumina1c3f2d...",
+  "balance": "99955000000000000000",
+  "staked": "500000000000000000",
+  "nonce": 12
+}
+                </div>
+            </div>
+
+            <!-- explorer/ws -->
+            <div class="api-route">
+                <div class="route-path"><span class="method ws">WS</span> /explorer/ws</div>
+                <p>WebSocket Live Broadcaster. dApps atau block explorer dapat melakukan koneksi untuk menerima notifikasi real-time setiap kali transaksi baru dikirimkan, block baru diproduksi, atau staker baru ditambahkan.</p>
+                <strong>Event Message Payload:</strong>
+                <div class="code-block">
+{
+  "type": "NEW_BLOCK",
+  "data": {
+    "height": 300,
+    "hash": "0x89e21d...",
+    "proposer": "lumina1...",
+    "tx_count": 14,
+    "timestamp": 1779836372
+  }
+}
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. API & Reference Series.
+        </div>
+    </div>
+</body>
+</html>

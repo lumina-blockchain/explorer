@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network: Gossipsub & Mesh Routing | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #05070c;
+            --card-bg: rgba(9, 12, 24, 0.85);
+            --primary: #38bdf8; /* Cyber Blue */
+            --secondary: #c084fc; /* Cyber Purple */
+            --accent: #f43f5e; /* Cyber Rose */
+            --text: #f8fafc;
+            --text-dim: #64748b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(56, 189, 248, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(192, 132, 252, 0.06) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(56, 189, 248, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #bae6fd; font-size: 1rem; }
+
+        .code-block {
+            background: #03050a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .feature-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .feature-card h3 { margin-top: 0; margin-bottom: 12px; color: var(--secondary); }
+
+        .warning-box {
+            background: rgba(244, 63, 94, 0.05);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+        .warning-box h3 { color: #fda4af; margin-bottom: 10px; }
+        .warning-box p { margin-bottom: 0; color: #fecdd3; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">P2P Mesh Network & Protocols | May 2026</span>
+            <h1>P2P Gossipsub & Mesh Routing</h1>
+            <p style="color: var(--text-dim); font-size: 1.2rem;">Mekanisme Penghematan Bandwidth & Proteksi Banjir Data Broadcast pada Blockchain Lumina</p>
+        </header>
+
+        <main class="content">
+            <p>
+                Dalam topologi jaringan Blockchain peer-to-peer (P2P), setiap node staker terhubung ke banyak node tetangga demi menjaga ketersediaan jalur komunikasi. Namun, hal ini memicu bahaya laten: jika setiap node menyebarkan (broadcast) transaksi atau blok baru ke semua peer yang terhubung secara membabi buta (disebut <em>Naive Flooding</em>), jaringan akan mengalami <strong>kemacetan lalu lintas data (congestion)</strong> akibat transmisi duplikat yang mubazir.
+            </p>
+
+            <p>
+                Untuk menjamin efisiensi bandwidth yang luar biasa dengan latensi mikrodetik, Lumina mengadopsi protokol <strong>libp2p Gossipsub (Gossip + Subscription)</strong> terintegrasi dengan <strong>Kademlia DHT Self-Healing Peer Discovery</strong>.
+            </p>
+
+            <div class="highlight-box">
+                <p><strong>Filosofi Efisiensi:</strong> Amankan redundansi koneksi fisik untuk ketahanan jaringan, namun minimalkan transmisi data logis untuk efisiensi bandwidth!</p>
+            </div>
+
+            <h2>1. Anatomi Gossipsub: Mesh vs Gossip</h2>
+            <p>
+                Gossipsub membagi koneksi fisik aktif di dalam jaringan menjadi dua lapisan logis untuk menyeimbangkan keandalan dan efisiensi:
+            </p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Mesh Peers (Aktif & Cepat)</h3>
+                    <p>
+                        Node secara dinamis memilih sebagian kecil dari peer terhubungnya (biasanya <strong>4 hingga 8 peer</strong>) sebagai "Mesh". Begitu ada blok atau transaksi baru, data payload utuh langsung dipush secara instan ke node-node Mesh ini untuk transmisi super cepat.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <h3>Gossip Peers (Hemat Bandwidth)</h3>
+                    <p>
+                        Untuk semua peer di luar lingkaran Mesh, node kita <strong>tidak akan mengirimkan payload utuh</strong>. Kita hanya menyiarkan bisikan metadata berupa pesan <code>IHAVE</code> yang super ringan berisi daftar hash pesan. Node lain hanya akan meminta data penuh via <code>IWANT</code> jika ia belum memilikinya.
+                    </p>
+                </div>
+            </div>
+
+            <h2>2. Seen Message Cache (Proteksi Duplikasi)</h2>
+            <p>
+                Bagaimana jika dua peer mengirimkan transaksi yang sama pada detik yang sama? Di sinilah peran <strong>Seen Message Cache</strong> (in-memory) di dalam runtime rust-libp2p:
+            </p>
+            <p>
+                Setiap pesan P2P yang melintasi node Lumina memiliki pengidentifikasi unik (Message ID / Hash). Node menyimpan catatan hash pesan yang baru saja diterima di dalam cache berkecepatan tinggi. Jika ada peer lain yang mencoba membroadcast pesan dengan hash yang sama, sistem akan <strong>langsung membuangnya di gerbang masuk</strong> tanpa membuang-buang resource CPU untuk parsing atau validasi ulang!
+            </p>
+
+            <h2>3. Auto-Mesh DHT & Self-Healing (Kademlia + Identify)</h2>
+            <p>
+                Pada internet publik (VPS / Cloud Server), protokol broadcast lokal seperti mDNS diblokir oleh router dan ISP. Jaringan Lumina mengatasi hal ini dengan mengombinasikan <strong>Identify Protocol</strong> dan <strong>Kademlia DHT Bootstrap</strong> secara otomatis.
+            </p>
+
+            <p>
+                Di dalam main loop <code>main.rs</code>, Lumina mendengarkan informasi multiaddress eksternal yang dipertukarkan selama jabat tangan (handshake) awal:
+            </p>
+
+            <div class="code-block">
+<span class="comment">// 1. Tangkap alamat eksternal via Identify Protocol</span>
+libp2p::swarm::SwarmEvent::Behaviour(lumina_network::behavior::LuminaEvent::Identify(
+    libp2p::identify::Event::Received { peer_id, info, .. }
+)) => {
+    <span class="keyword">for</span> addr <span class="keyword">in</span> info.listen_addrs {
+        <span class="comment">// Masukin ke Kademlia DHT & Gossipsub</span>
+        network.swarm.behaviour_mut().kademlia.add_address(&peer_id, addr.clone());
+        network.swarm.behaviour_mut().gossipsub.add_explicit_peer(&peer_id);
+    }
+}</div>
+
+            <p>
+                Sesaat setelah koneksi stabil terbentuk, node baru akan langsung memicu query bootstrap Kademlia DHT:
+            </p>
+
+            <div class="code-block">
+<span class="comment">// 2. Lakukan Kademlia Bootstrap untuk auto-discovery</span>
+libp2p::swarm::SwarmEvent::ConnectionEstablished { peer_id, .. } => {
+    rpc_context.scoring.write().unwrap().set_connected(peer_id, <span class="keyword">true</span>);
+    
+    <span class="comment">// Picu bootstrap agar menanyakan peers lain ke bootnode</span>
+    <span class="keyword">if let</span> <span class="type">Err</span>(e) = network.swarm.behaviour_mut().kademlia.bootstrap() {
+        <span class="macro">tracing::warn!</span>(<span class="string">"⚠️ Failed to trigger Kademlia bootstrap: {:?}"</span>, e);
+    }
+}</div>
+
+            <div class="warning-box">
+                <h3>Ketahanan Jaringan 100% (Zero-Downtime)</h3>
+                <p>
+                    Berkat kombinasi ini, begitu satu node (seperti Bootnode utama) mengalami offline/mati, node-node lainnya yang telah saling mengenal (VPS 2, VPS 3, VPS 4) akan **tetap mempertahankan komunikasi mesh langsung** di antara mereka. Konsensus tidak akan pernah berhenti dan node tidak akan terisolasi sendirian!
+                </p>
+            </div>
+        </main>
+
+        <div class="footer">
+            <p>&copy; 2026 Lumina Node Ecosystem. Dokumen arsitektur P2P diperbarui secara berkala dari spesifikasi libp2p.</p>
+        </div>
+    </div>
+</body>
+</html>

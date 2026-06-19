@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aliran Event Real-Time: JSON-RPC 2.0 WebSockets Pub/Sub Bidirectional | Dokumentasi Teknis Lumina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #05070b;
+            --card-bg: rgba(10, 15, 25, 0.85);
+            --primary: #10b981; /* Emerald Green */
+            --secondary: #fbbf24; /* Amber Gold */
+            --accent: #3b82f6; /* Cyber Blue */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--accent);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 2.8rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--accent), var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--accent); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .analogy-box {
+            background: rgba(59, 130, 246, 0.03);
+            border-left: 4px solid var(--accent);
+            padding: 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 35px 0;
+        }
+        .analogy-box p { margin-bottom: 15px; color: #cbd5e1; font-size: 1rem; }
+        .analogy-box p:last-child { margin-bottom: 0; }
+        .analogy-title { font-weight: 800; color: var(--accent) !important; margin-bottom: 10px !important; text-transform: uppercase; letter-spacing: 0.05em; font-size: 1.05rem; }
+
+        .code-block {
+            background: #030508;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.6;
+        }
+
+        .highlight-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        @media(max-width: 768px) {
+            .features-grid { grid-template-columns: 1fr; }
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 20px;
+            border-radius: 16px;
+        }
+        .feature-card h4 {
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        .feature-card p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link" id="btn-back-to-hub">← Kembali ke Hub Dokumentasi</a>
+        
+        <header>
+            <span class="meta" id="article-meta-info">APIS & DEVELOPER TOOLS | MEI 2026</span>
+            <h1 id="article-main-title">Aliran Event Real-Time: JSON-RPC 2.0 WebSockets Pub/Sub Bidirectional</h1>
+            <p>Bagaimana Lumina L1 memancarkan notifikasi blok baru, transaksi mempool, filter logs, dan aktivitas akun secara real-time menggunakan engine Pub/Sub asinkronus dua arah di atas Axum WebSocket.</p>
+        </header>
+
+        <div class="content">
+            <span class="highlight-badge" id="badge-ws-status">STATUS SISTEM: WEBSOCKET SERVICE LIVE DI PORT 9098 (/ws)</span>
+            
+            <p>Dalam ekosistem dApp (Decentralized Application) modern, kemampuan untuk menerima pembaruan status blockchain secara instan tanpa melakukan <em>polling</em> (permintaan HTTP berulang) adalah kunci kenyamanan pengguna. Mulai dari pembaruan saldo dompet, notifikasi keberhasilan transaksi, hingga pemantauan cetakan blok baru, semua membutuhkan koneksi persisten berlatensi rendah.</p>
+            
+            <p>Lumina L1 secara resmi mengintegrasikan <strong>JSON-RPC 2.0 WebSockets Pub/Sub Bidirectional</strong> langsung ke dalam crate <code>api</code> dengan arsitektur asinkronus terdistribusi berbasis Axum. Implementasi ini memungkinkan client untuk mengirim perintah kontrol dan berlangganan ke saluran data real-time secara dua arah melalui satu koneksi TCP tunggal.</p>
+
+            <div class="analogy-box" id="ws-analogy-section">
+                <p class="analogy-title" id="title-ws-analogy">💡 ANALOGI NYATA: Ketuk Pintu Berulang vs Lonceng Otomatis Pintu Masuk</p>
+                
+                <p><strong>1. HTTP Polling (REST/JSON-RPC Biasa):</strong> Seperti Anda menunggu paket kurir di rumah, lalu setiap 5 detik Anda membuka pintu dan bertanya ke jalan: *"Apakah paket saya sudah sampai?"*. Ini sangat melelahkan bagi Anda (CPU overhead) dan mengganggu lingkungan sekitar (pemborosan bandwidth jaringan).</p>
+                
+                <p><strong>2. WebSocket Pub/Sub (Lonceng Otomatis):</strong> Seperti memasang bel pintu pintar. Anda cukup mendaftarkan bel tersebut sekali (<code>lumina_subscribe</code>). Kurir datang, bel berbunyi otomatis secara instan. Anda dapat bersantai tanpa memikirkan antrean status, dan dApp Anda akan terupdate dalam milidetik setelah block baru dicetak.</p>
+            </div>
+
+            <h2>Metode Kontrol & Topik Langganan</h2>
+            <p>Protokol WebSocket Lumina mematuhi spesifikasi JSON-RPC 2.0 secara ketat. Handshake awal akan disambut oleh notifikasi sambutan <code>lumina_connected</code>, setelah itu client dapat menggunakan metode berikut:</p>
+
+            <div class="features-grid" id="topics-overview">
+                <div class="feature-card" id="card-newheads">
+                    <h4>1. Topic: newHeads</h4>
+                    <p>Mengalirkan objek header blok terbaru segera setelah disepakati oleh konsensus BFT Hotstuff. Berguna untuk sinkronisasi antarmuka UI blockchain explorer.</p>
+                </div>
+                <div class="feature-card" id="card-pendingtxs">
+                    <h4>2. Topic: pendingTransactions</h4>
+                    <p>Mengalirkan hash transaksi baru sesaat setelah masuk ke mempool lokal sebelum dipaketkan ke dalam blok baru.</p>
+                </div>
+                <div class="feature-card" id="card-addresstxs">
+                    <h4>3. Topic: addressTransactions</h4>
+                    <p>Memfilter dan mengirimkan data transaksi yang memengaruhi alamat target tertentu (baik sebagai pengirim maupun penerima), lengkap dengan validasi Bech32m.</p>
+                </div>
+                <div class="feature-card" id="card-contractlogs">
+                    <h4>4. Topic: logs</h4>
+                    <p>Menyaring log keluaran eksekusi smart contract WASM berdasarkan alamat kontrak pintar dan topik event tertentu.</p>
+                </div>
+            </div>
+
+            <h2>Validasi Bech32m Alamat Ketat</h2>
+            <p>Sesuai dengan spesifikasi keamanan blockchain Lumina L1, setiap parameter alamat yang didaftarkan ke subskripsi <code>addressTransactions</code> wajib melalui tahap validasi format Bech32m (awalan <code>lumina1...</code>). Jika format tidak sesuai, server akan langsung menolak permintaan dengan kode error standar JSON-RPC 2.0 <strong>-32602 (Invalid Params)</strong> dan pesan <code>"Invalid address format"</code>.</p>
+
+            <h3>Contoh Request Langganan (Subscription):</h3>
+            <div class="code-block" id="code-req-subscribe">
+{
+  "jsonrpc": "2.0",
+  "method": "lumina_subscribe",
+  "params": ["addressTransactions", { "address": "lumina18l3cd3f8kfa5576hqvulqrp6n0m3w00432cvd8" }],
+  "id": 1
+}
+            </div>
+
+            <h3>Contoh Response Sukses:</h3>
+            <div class="code-block" id="code-res-success">
+{
+  "jsonrpc": "2.0",
+  "result": "0xedd16e92043a96e2",
+  "id": 1
+}
+            </div>
+
+            <h3>Contoh Response Error (Alamat Invalid):</h3>
+            <div class="code-block" id="code-res-error">
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32602,
+    "message": "Invalid address format"
+  },
+  "id": 1
+}
+            </div>
+
+            <h2>Pembatalan Langganan (Unsubscribe)</h2>
+            <p>Untuk menghindari kebocoran memori pada server, client disarankan melakukan unsubscribe jika sudah tidak memerlukan pembaruan event dengan metode <code>lumina_unsubscribe</code> menggunakan ID subskripsi heksadesimal yang sebelumnya diperoleh:</p>
+
+            <div class="code-block" id="code-req-unsubscribe">
+{
+  "jsonrpc": "2.0",
+  "method": "lumina_unsubscribe",
+  "params": ["0xedd16e92043a96e2"],
+  "id": 99
+}
+            </div>
+
+            <h2>Performa Skalabilitas Asinkronus</h2>
+            <p>Di balik layar, server Axum WebSocket Lumina memutar event loop asinkronus menggunakan perintah non-blocking <code>tokio::select!</code> secara terisolasi per koneksi client. Ini berarti data dialirkan dari broadcast channel <code>explorer_tx</code> secara langsung tanpa membutuhkan <em>global mutex locks</em> yang menghambat kinerja CPU, menjamin TPS tinggi (Transactions Per Second) tetap terjaga meskipun melayani ribuan koneksi secara simultan.</p>
+        </div>
+
+        <div class="footer" id="article-footer-copyright">
+            &copy; 2026 Lumina Developer Network. Seluruh hak cipta dilindungi undang-undang.
+        </div>
+    </div>
+</body>
+</html>

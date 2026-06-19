@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Architecture: Crate Layout & Modular Flow | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #09070f;
+            --card-bg: rgba(15, 10, 25, 0.85);
+            --primary: #a855f7; /* Neon Violet */
+            --secondary: #3b82f6; /* Cobalt Blue */
+            --accent: #ec4899; /* Cyber Pink */
+            --text: #f3f4f6;
+            --text-dim: #a1a1aa;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(168, 85, 247, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(59, 130, 246, 0.07) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--primary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .diagram-box {
+            background: #040207;
+            border: 1px solid rgba(168, 85, 247, 0.15);
+            padding: 30px;
+            border-radius: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #d8b4fe;
+            margin: 35px 0;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+
+        .crate-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin: 35px 0;
+        }
+        .crate-card {
+            background: rgba(10, 5, 20, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--primary);
+            padding: 25px;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+        .crate-card:hover {
+            transform: scale(1.01);
+            border-color: rgba(168, 85, 247, 0.2);
+            background: rgba(10, 5, 20, 0.8);
+        }
+        .crate-card.foundation { border-left-color: var(--secondary); }
+        
+        .crate-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .crate-desc {
+            color: #a1a1aa;
+            font-size: 0.95rem;
+        }
+
+        .flag-box {
+            background: rgba(168, 85, 247, 0.05);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+        .flag-box h3 { color: #d8b4fe; margin-top: 0; }
+        
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Core Architecture & Workspace | May 2026</span>
+            <h1>Node Architecture: Modular Crate Layout</h1>
+            <p>Membedah struktur kernel Rust Lumina yang super-modular guna menjamin skalabilitas tinggi dan kompilasi biner yang ramping.</p>
+        </header>
+
+        <div class="content">
+            <p>Seiring berkembangnya kompleksitas sistem blockchain, arsitektur monolitik yang menggabungkan seluruh logika dalam satu folder besar akan menjadi bumerang. Kode menjadi sulit dipelihara, unit testing berjalan sangat lambat, dan penggantian satu database memerlukan perombakan jutaan baris kode.</p>
+
+            <p>Lumina dibangun dengan **Arsitektur Modular** berbasis multi-crate di dalam workspace Cargo Rust (<code>Cargo.toml</code>). Hal ini memberikan batas isolasi yang tegas (*separation of concerns*), mempermudah pengujian terpisah, serta memungkinkan penggantian satu modul tanpa memengaruhi modul lainnya.</p>
+
+            <h2>1. Peta Ketergantungan Antar Crate (Crate Dependency Flow)</h2>
+            <p>Di bawah ini adalah visualisasi tingkat tinggi mengenai alur ketergantungan modul di dalam node Lumina:</p>
+
+            <div class="diagram-box">
+┌────────────────────────────────────────────────────────┐
+│               lumina-node (Main Binary)                 │
+└────────────────────────────────────────────────────────┘
+                           │
+      ┌────────────────────┼────────────────────┐
+      ▼                    ▼                    ▼
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  lumina-api  │     │  consensus   │     │  network     │
+└──────────────┘     └──────────────┘     └──────────────┘
+      │                    │                    │
+      └──────────┬─────────┴──────────┬─────────┘
+                 ▼                    ▼
+          ┌──────────────┐     ┌──────────────┐
+          │ lumina-state │     │   executor   │
+          └──────────────┘     └──────────────┘
+                 │                    │
+                 └──────────┬─────────┘
+                            ▼
+                     ┌──────────────┐
+                     │   storage    │
+                     └──────────────┘
+                            │
+                            ▼
+                     ┌──────────────┐
+                     │  primitives  │
+                     └──────────────┘
+            </div>
+
+            <h2>2. Penjelasan Detail Fungsi Crate</h2>
+            <div class="crate-grid">
+                <div class="crate-card">
+                    <div class="crate-title">📦 lumina-primitives</div>
+                    <div class="crate-desc">Fondasi tipe data global. Berisi definisi objek utama blockchain seperti <code>Address</code> (Bech32m), <code>Hash</code> (Blake3), <code>Transaction</code>, dan <code>Block</code>. Semua crate lain bergantung pada primitives ini.</div>
+                </div>
+
+                <div class="crate-card">
+                    <div class="crate-title">📦 lumina-crypto</div>
+                    <div class="crate-desc">Modul kriptografi inti. Menyediakan BLS12-381 signature aggregation, pairing-friendly cryptography, SLIP-0010 HD wallet derivation, dan Blake3 hash utility.</div>
+                </div>
+
+                <div class="crate-card foundation">
+                    <div class="crate-title">📦 lumina-storage</div>
+                    <div class="crate-desc">Manajer database permanen. Mengimplementasikan antarmuka data persistence menggunakan **RocksDB** untuk menyimpan riwayat block, state accounts, dan metadata dengan throughput I/O sangat tinggi.</div>
+                </div>
+
+                <div class="crate-card foundation">
+                    <div class="crate-title">📦 lumina-network</div>
+                    <div class="crate-desc">Modul P2P Networking. Dibangun di atas <code>libp2p</code> dengan protokol Gossipsub untuk penyiaran block & transaksi cepat, serta Kademlia DHT untuk pencarian peer otonom di internet.</div>
+                </div>
+
+                <div class="crate-card">
+                    <div class="crate-title">📦 lumina-executor</div>
+                    <div class="crate-desc">Mesin virtual WebAssembly. Menggunakan runtime <strong>Wasmtime</strong> untuk mengeksekusi bytecode smart contract Rust dengan performa hardware-native.</div>
+                </div>
+
+                <div class="crate-card">
+                    <div class="crate-title">📦 lumina-state</div>
+                    <div class="crate-desc">The State Engine. Mengatur saldo, mengeksekusi state transition, mendistribusikan reward staking pool, dan melakukan validasi transaksi sebelum ditandatangani oleh validator.</div>
+                </div>
+
+                <div class="crate-card">
+                    <div class="crate-title">📦 lumina-consensus</div>
+                    <div class="crate-desc">Mekanisme Konsensus. Menyediakan antrean <strong>Mempool</strong> (dengan prioritasi gas fee) serta HotStuff-BFT consensus engine yang melakukan rotasi Leader otonom setiap 15 detik.</div>
+                </div>
+
+                <div class="crate-card">
+                    <div class="crate-title">📦 lumina-api</div>
+                    <div class="crate-desc">Lapisan Server HTTP RPC & WebSocket. Dibangun di atas framework **Axum** untuk melayani query data Explorer, submit transaksi dApps, dan broadcast event WebSocket real-time.</div>
+                </div>
+
+                <div class="crate-card">
+                    <div class="crate-title">📦 lumina-node</div>
+                    <div class="crate-desc">Biner eksekusi utama (Main Entry Point). Merakit semua crate di atas menjadi satu kesatuan executable binary yang dapat dijalankan melalui baris perintah CLI.</div>
+                </div>
+            </div>
+
+            <h2>3. Optimasi Kompilasi Rilis Terpadu</h2>
+            <p>Untuk memastikan performa bare-metal terbaik sekaligus mengecilkan ukuran biner WASM dan biner node, Lumina menyuntikkan optimasi profil kompilator tingkat lanjut di <code>Cargo.toml</code>:</p>
+
+            <div class="flag-box">
+                <h3>⚙️ Flag Profil Rilis Workspace</h3>
+                <div class="diagram-box" style="margin: 0; background: #08060b;">
+[profile.release]
+opt-level = 'z'     # Fokus mengecilkan ukuran binari (z = size)
+lto = true          # Aktifkan Link-Time Optimization global
+codegen-units = 1   # Bikin kompilasi lebih lambat tapi hasil biner optimal
+panic = 'abort'     # Buang mesin penanganan error stack yang berat
+strip = true        # Hapus simbol debug yang tidak diperlukan dari biner
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Architecture Series.
+        </div>
+    </div>
+</body>
+</html>

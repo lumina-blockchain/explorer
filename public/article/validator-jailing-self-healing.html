@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validator Jailing & Dynamic Quorum Self-Healing | Lumina Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #05070c;
+            --card-bg: rgba(10, 15, 28, 0.85);
+            --primary: #f43f5e; /* Rose Red for Jailing theme */
+            --secondary: #3b82f6; /* Electric Blue */
+            --accent: #eab308; /* Yellow Warning Glow */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(244, 63, 94, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(59, 130, 246, 0.07) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--primary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 60px;
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 2rem; 
+            margin: 50px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+        }
+        h3 { font-size: 1.4rem; margin: 35px 0 15px; color: #fde047; }
+        p { margin-bottom: 26px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .analogy-box {
+            background: rgba(244, 63, 94, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 30px;
+            border-radius: 0 20px 20px 0;
+            margin: 40px 0;
+        }
+        .analogy-title {
+            color: #fca5a5;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .highlight-box {
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 4px solid var(--secondary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #93c5fd; font-size: 1rem; }
+
+        .code-block {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        .visual-flow {
+            background: rgba(244, 63, 94, 0.02);
+            border: 1px dashed rgba(244, 63, 94, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 35px 0;
+            text-align: center;
+        }
+
+        .flow-step {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--primary);
+            margin: 10px;
+        }
+        .flow-arrow {
+            display: inline-block;
+            color: var(--text-dim);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .info-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .info-card h3 { margin-top: 0; margin-bottom: 12px; }
+
+        .warning-card {
+            background: rgba(234, 179, 8, 0.05);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+        .warning-card h3 { color: #fef08a; margin-bottom: 10px; }
+        .warning-card p { margin-bottom: 0; color: #fef9c3; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Core Protocol & Consensus Series | May 2026</span>
+            <h1>Validator Jailing & Dynamic Quorum Self-Healing: Resiliency in Byzantine Downtimes</h1>
+            <p>Mendalami mekanisme pertahanan dinamis Lumina L1 dalam mendeteksi node offline, mengisolasi validator bermasalah tanpa merusak consensus liveness, dan alur pemulihan deterministik (self-healing).</p>
+        </header>
+
+        <div class="content">
+            <p>Di dalam sistem blockchain terdesentralisasi, stabilitas jaringan sangat bergantung pada kehadiran fisik komputer-komputer validator. Pada blockchain berbasis **Byzantine Fault Tolerance (BFT)** seperti Lumina L1, setiap blok baru harus memperoleh tanda tangan persetujuan minimal dari **lebih dari 2/3 total voting power** yang terdaftar di jaringan.</p>
+
+            <p>Namun, skenario terburuk selalu mungkin terjadi: penyedia VPS down massal, bencana alam memutus kabel internet bawah laut, atau operator lupa memperpanjang sewa VPS mereka. Bayangkan jika terdapat **100 validator terdaftar**, lalu tiba-tiba **50 di antaranya mendadak offline** secara permanen. Tanpa mekanisme khusus, quorum 2/3 ($>66.7\%$) tidak akan pernah bisa tercapai karena validator yang online hanya tersisa 50%. Blockchain akan mengalami macet total (*deadlock*). </p>
+            
+            <p>Untuk mengatasi masalah fatal ini secara elegan, Lumina mengadopsi mekanisme **Dynamic Validator Jailing & Quorum Self-Healing**.</p>
+
+            <!-- ANALOGI GAUL DAN PRESTISIUS -->
+            <div class="analogy-box">
+                <div class="analogy-title">
+                    <span>🏛️</span>
+                    <span>Analogi Dunia Nyata: Pembersihan Anggota Parlemen yang Bolos Rapat</span>
+                </div>
+                <p>Bayangkan sebuah **Gedung DPR** yang memiliki **100 anggota dewan terdaftar**. Berdasarkan aturan undang-undang dasar (Ledger Consensus), rapat paripurna pengesahan undang-undang baru (pembuatan blok baru) hanya sah jika dihadiri dan disetujui minimal oleh **67 anggota dewan (Quorum 2/3)**.</p>
+                
+                <p><strong>Pola Konvensional (Deadlock Parlemen) 🤦‍♂️:</strong><br>
+                Suatu hari, **50 anggota dewan bolos rapat** karena berlibur ke luar negeri. Rapat paripurna diadakan, tetapi hanya 50 anggota yang hadir di ruangan. Karena aturan kaku mewajibkan tanda tangan 67 orang dari total anggota terdaftar, rapat terpaksa ditunda tanpa kejelasan. Negara macet total, tidak ada undang-undang baru yang bisa disahkan!</p>
+
+                <p><strong>Pola Lumina L1 (Dynamic Jailing & Self-Healing) 🦾:</strong><br>
+                Di Lumina, aturan dibuat lebih taktis dan adil. Sistem memiliki "Dewan Kehormatan Blockchain" (State Daemon). Jika seorang anggota dewan **absen berturut-turut dalam 100 agenda sidang** (offline selama 100 blok berturut-turut), dewan kehormatan langsung mencabut sementara hak suara anggota tersebut dan melabelinya sebagai **Inactive (Jailed)**.</p>
+                
+                <p>Dengan dinonaktifkannya 50 anggota yang bolos tersebut, total anggota parlemen yang diakui secara resmi sekarang **menyusut dinamis dari 100 menjadi 50 orang**! Quorum pengesahan undang-undang otomatis dihitung ulang berdasarkan jumlah anggota aktif ini: $\frac{2}{3} \times 50 \approx 34$ suara sah.</p>
+                
+                <p>Karena di dalam ruangan masih ada 50 anggota yang rajin (online), sidang paripurna bisa langsung berjalan lancar dan undang-undang sah diproduksi dalam hitungan detik! Sistem tetap bekerja lincah tanpa terganggu oleh anggota yang malas.</p>
+            </div>
+
+            <h2>1. Bagaimana Sistem Mendeteksi Node Offline Secara Otomatis?</h2>
+            <p>Setiap kali sebuah blok berhasil diproduksi, data penandatangan (*signers*) yang ada di dalam **Quorum Certificate (QC)** blok tersebut akan dicocokkan dengan daftar validator resmi. State Manager memelihara counter absen untuk setiap validator:</p>
+            
+            <div class="code-block">
+<span class="comment">// Cuplikan logika pelacakan offline di crates/state/src/lib.rs:</span>
+<span class="keyword">for</span> val <span class="keyword">in</span> &amp;active_validators {
+    <span class="keyword">if</span> !signers.contains(&amp;val.address) {
+        <span class="keyword">let</span> missed = self.increment_missed_blocks(&amp;val.address);
+        <span class="keyword">if</span> missed &gt;= <span class="keyword">100</span> {
+            self.jail_validator(&amp;val.address);
+            <span class="macro">tracing::warn!</span>(<span class="string">"🛡️ Validator {} has been flagged as INACTIVE!"</span>, val.address);
+        }
+    } <span class="keyword">else</span> {
+        self.reset_missed_blocks(&amp;val.address);
+    }
+}
+            </div>
+
+            <p>Jika validator melewatkan **100 blok berturut-turut**, statusnya akan berubah menjadi `Inactive`. Keuntungannya:
+            <ul>
+                <li><strong>Koin Taruhan Tetap Aman</strong>: Akun validator dan saldo staked-nya **tidak dihapus** dari database, hanya ditangguhkan hak suaranya demi alasan keamanan finansial staker.</li>
+                <li><strong>Deteksi Instan P2P</strong>: Pada saat yang sama, layer P2P (Libp2p) akan mendeteksi putusnya koneksi fisik VPS tersebut, dan secara otomatis membersihkannya dari list `/network/peers` untuk menghemat bandwidth jaringan.</li>
+            </ul>
+            </p>
+
+            <h2>2. Mekanisme Self-Healing: Proses Re-Aktivasi (Resume)</h2>
+            <p>Lalu bagaimana jika validator yang bersangkutan sudah memperbaiki masalah teknis VPS-nya dan ingin bergabung kembali ke barisan validator aktif? Lumina menyajikan alur **Self-Healing Otonom** yang sangat mudah:</p>
+
+            <div class="visual-flow">
+                <div class="flow-step">VPS Validator Online Kembali</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">P2P Network Menghubungkan Peer</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Daemon Mendeteksi Status Inactive</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Kirim Transaksi RESUME ke Blockchain</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Validator Aktif Kembali & Ikut Quorum</div>
+            </div>
+
+            <p>Validator cukup memicu sebuah transaksi bertipe khusus yaitu `RESUME_VALIDATOR` yang ditandatangani oleh validator key mereka sendiri. Begitu transaksi ini masuk ke dalam blok baru, State Manager langsung me-reset counter absen validator tersebut menjadi 0 dan mengubah statusnya kembali menjadi **Active**. Quorum akan otomatis melar kembali untuk menyertakan hak suara validator tersebut.</p>
+
+            <h2>3. Sinkronisasi Real-Time Visual di Explorer UI</h2>
+            <p>Keindahan sistem BFT Lumina L1 tidak hanya terjadi di balik layar. Dengan pembaruan arsitektur terbaru, halaman **Explorer Dashboard** kini terintegrasi secara real-time melalui WebSocket:</p>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>💡 Auto-updating Quorum Badge</h3>
+                    <p>Ketika sebuah node terdeteksi offline dan dipenjara (*jailed*), badge persetujuan di Explorer UI akan langsung berganti dari **`3/4 Validators`** menjadi **`3/3 Validators`** secara instan tanpa perlu memuat ulang halaman (*refresh*).</p>
+                </div>
+                <div class="info-card">
+                    <h3>🛡️ Dynamic Voting Power Meter</h3>
+                    <p>Persentase quorum BFT selalu dihitung berdasarkan *voting power* milik validator yang benar-benar aktif saja, memastikan data visual di layar selalu memancarkan kejujuran sistem konsensus.</p>
+                </div>
+            </div>
+
+            <div class="warning-card">
+                <h3>💡 Catatan Penting untuk Operator Node:</h3>
+                <p>Mekanisme jailing dinamis menjamin jaringan Lumina tetap menyala sekencang kilat bahkan jika ada validator yang mati. Namun, sebagai operator, pastikan kamu menyalakan alarm alert sistem agar ketika nodemu masuk ke status <em>Inactive</em>, kamu bisa segera menyalakan kembali VPS-mu dan memicu transaksi <em>Resume</em> secara instan!</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Core Consensus Series.
+        </div>
+    </div>
+</body>
+</html>

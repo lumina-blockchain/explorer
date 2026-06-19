@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pertahanan Berlapis: Rate Limiting & Authentication Middleware Berkinerja Tinggi | Dokumentasi Teknis Lumina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #05070b;
+            --card-bg: rgba(10, 15, 25, 0.85);
+            --primary: #10b981; /* Emerald Green */
+            --secondary: #fbbf24; /* Amber Gold */
+            --accent: #ef4444; /* Flame Red */
+            --info: #3b82f6; /* Cyber Blue */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(239, 68, 68, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--info);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 2.8rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--accent), var(--info), var(--primary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--info); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .analogy-box {
+            background: rgba(239, 68, 68, 0.03);
+            border-left: 4px solid var(--accent);
+            padding: 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 35px 0;
+        }
+        .analogy-box p { margin-bottom: 15px; color: #cbd5e1; font-size: 1rem; }
+        .analogy-box p:last-child { margin-bottom: 0; }
+        .analogy-title { font-weight: 800; color: var(--accent) !important; margin-bottom: 10px !important; text-transform: uppercase; letter-spacing: 0.05em; font-size: 1.05rem; }
+
+        .code-block {
+            background: #030508;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.6;
+        }
+
+        .highlight-badge {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        @media(max-width: 768px) {
+            .features-grid { grid-template-columns: 1fr; }
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 20px;
+            border-radius: 16px;
+        }
+        .feature-card h4 {
+            color: var(--info);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        .feature-card p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link" id="btn-back-to-hub">← Kembali ke Hub Dokumentasi</a>
+        
+        <header>
+            <span class="meta" id="article-meta-info">APIS & DEVELOPER TOOLS | MEI 2026</span>
+            <h1 id="article-main-title">Pertahanan Berlapis: Rate Limiting & Authentication Middleware Berkinerja Tinggi</h1>
+            <p>Bagaimana Lumina L1 memproteksi API publik dan premium menggunakan algoritma Token Bucket in-memory yang cepat dan sistem autentikasi multi-format.</p>
+        </header>
+
+        <div class="content">
+            <span class="highlight-badge" id="badge-sec-status">STATUS KEAMANAN: MIDDLEWARE AKTIF</span>
+            
+            <p>Node blockchain publik sering kali menjadi target empuk serangan penyalahgunaan jaringan. Dari bot dApp yang mengirimkan permintaan secara tidak efisien hingga penyerang jahat yang mencoba melakukan spamming transaksi mempool dan pemanggilan smart contract berat, ketiadaan mekanisme kontrol akses dapat menyebabkan kelumpuhan server.</p>
+            
+            <p>Lumina L1 mengatasi masalah krusial ini dengan memperkenalkan <strong>Rate Limiting & Authentication Middleware kustom</strong> yang dirancang menggunakan framework Axum asinkronus dalam Rust. Implementasi ini menjamin node tetap stabil di bawah beban puncak, serta membatasi konsumsi sumber daya CPU dan I/O disk secara efisien.</p>
+
+            <div class="analogy-box" id="sec-analogy-section">
+                <p class="analogy-title" id="title-sec-analogy">💡 ANALOGI NYATA: Pesta Terbuka vs Pintu Masuk VIP dengan Pembatas Kecepatan</p>
+                
+                <p><strong>1. API Tanpa Proteksi (Pesta Terbuka):</strong> Siapa saja boleh masuk, dan satu tamu serakah dapat mengambil semua piring makanan di meja prasmanan sekaligus. Server Anda akan mogok karena kewalahan melayani tamu yang tamak ini.</p>
+                
+                <p><strong>2. Autentikasi (Penjaga Pintu VIP):</strong> Hanya tamu dengan undangan resmi (API Key) yang boleh melangkah masuk. Tamu tak diundang langsung diusir di pintu masuk dengan respon HTTP <code>401 Unauthorized</code>.</p>
+                
+                <p><strong>3. Rate Limiting (Ember Pengatur Kecepatan - Token Bucket):</strong> Setiap tamu diberikan kuota maksimum kelereng (koin token) saat masuk. Setiap kali mereka meminta makanan (request API), mereka harus menyerahkan satu kelereng. Jika kelereng habis, mereka harus mengantre dan menunggu kelereng tersebut terisi kembali secara berkala (Refill Rate). Jika memaksa meminta saat kelereng kosong, mereka ditolak dengan kode error HTTP <code>429 Too Many Requests</code>.</p>
+            </div>
+
+            <h2>Sistem Autentikasi Fleksibel (API Key)</h2>
+            <p>Untuk menyederhanakan integrasi client SDK, middleware autentikasi Lumina dirancang untuk mendeteksi kunci keamanan API Key melalui tiga metode secara paralel:</p>
+
+            <div class="features-grid" id="auth-methods">
+                <div class="feature-card" id="card-bearer">
+                    <h4>1. Header Authorization Bearer</h4>
+                    <p>Format standar HTTP global. Dideteksi dari header <code>Authorization: Bearer <API_KEY></code> atau langsung <code>Authorization: <API_KEY></code>.</p>
+                </div>
+                <div class="feature-card" id="card-custom-header">
+                    <h4>2. Header Kustom X-API-Key</h4>
+                    <p>Header khusus yang sangat populer bagi kalangan developer dApp. Cukup sertakan header <code>X-API-Key: <API_KEY></code> pada request.</p>
+                </div>
+                <div class="feature-card" id="card-query-param">
+                    <h4>3. URL Query Parameter</h4>
+                    <p>Sangat berguna untuk akses cepat melalui browser atau curl sederhana. Mendukung parameter <code>?apikey=</code>, <code>?api_key=</code>, maupun <code>?key=</code>.</p>
+                </div>
+                <div class="feature-card" id="card-bypass">
+                    <h4>4. Deteksi Otonom & Bypass</h4>
+                    <p>Jika parameter CLI <code>--api-key</code> tidak diaktifkan pada node, middleware akan menonaktifkan pengecekan kunci secara otomatis demi kenyamanan pengembangan lokal.</p>
+                </div>
+            </div>
+
+            <h2>Algoritma Pembatasan Trafik: Token Bucket</h2>
+            <p>Rate limiter Lumina didesain secara internal (in-memory) tanpa dependensi Redis eksternal yang lambat. Keadaan ember (*state bucket*) disimpan dalam format aman konkurensi (thread-safe hash map) di memori RAM, yang menghitung masa berlaku token secara asinkronus:</p>
+            <ul>
+                <li><strong>Max Tokens (Kapasitas Ember):</strong> Jumlah burst maksimal yang diperbolehkan untuk satu IP (misal: 100 request sekaligus).</li>
+                <li><strong>Refill Rate (Kecepatan Refill):</strong> Jumlah token baru yang ditambahkan kembali ke ember per detik (misal: 2.0 token per detik).</li>
+                <li><strong>Deteksi IP Proxy Cerdas:</strong> Mendeteksi alamat IP asli client di belakang Cloudflare/Nginx proxy melalui header <code>X-Forwarded-For</code> dan <code>X-Real-IP</code>, sebelum melakukan fallback ke <code>ConnectInfo</code> dari TCP socket.</li>
+            </ul>
+
+            <h3>Contoh Respon Error Autentikasi Gagal (HTTP 401):</h3>
+            <div class="code-block" id="code-res-unauthorized">
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32001,
+    "message": "Unauthorized: invalid or missing API key"
+  },
+  "id": null
+}
+            </div>
+
+            <h3>Contoh Respon Error Batas Limit Tercapai (HTTP 429):</h3>
+            <div class="code-block" id="code-res-rate-limited">
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32005,
+    "message": "Too Many Requests: rate limit exceeded"
+  },
+  "id": null
+}
+            </div>
+
+            <h2>Konfigurasi CLI untuk Operator Node</h2>
+            <p>Operator node Lumina dapat dengan mudah mengaktifkan pengamanan ini melalui CLI arguments saat menyalakan node:</p>
+            <div class="code-block" id="code-cli-example">
+lumina-node --api-key lumina_secret_key_123 --rate-limit-max 150 --rate-limit-refill 5.0
+            </div>
+            <p>Dengan perintah di atas, node akan mengharuskan client menyertakan key <code>lumina_secret_key_123</code> dan membatasi setiap IP unik maksimal 150 request burst dengan kecepatan isi ulang token 5 request per detik.</p>
+        </div>
+
+        <div class="footer" id="article-footer-copyright">
+            &copy; 2026 Lumina Developer Network. Seluruh hak cipta dilindungi undang-undang.
+        </div>
+    </div>
+</body>
+</html>

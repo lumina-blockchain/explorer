@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Guide: JS SDK Integration | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #040806;
+            --card-bg: rgba(10, 20, 15, 0.85);
+            --primary: #10b981; /* Neon Green */
+            --secondary: #5eead4; /* Mint Teal */
+            --accent: #fde047; /* Bright Yellow */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --code-bg: #000000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(16, 185, 129, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(94, 234, 212, 0.08) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+        
+        .badge {
+            background: var(--primary);
+            color: #022c22;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            vertical-align: middle;
+            margin-left: 15px;
+            letter-spacing: 0.05em;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #a5f3fc; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.55;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .method { color: #5eead4; }
+
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .param-table th, .param-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem;
+        }
+        .param-table th {
+            background: rgba(16, 185, 129, 0.08);
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+        }
+        .param-table tr:hover td {
+            background: rgba(255,255,255,0.01);
+        }
+
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #a7f3d0; font-size: 1rem; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">SDK Integration & Client Library | May 2026</span>
+            <h1>Lumina JS SDK <span class="badge">NPM v1.2.0</span></h1>
+            <p>Toolkit integrasi JavaScript/TypeScript terlengkap untuk memanggil RPC node, menyusun transaksi binary Bincode, dan berinteraksi dengan smart contract WASM.</p>
+        </header>
+
+        <div class="content">
+            <p>Untuk mempermudah interaksi aplikasi frontend, dompet dApps, maupun backend bot staking dengan blockchain Lumina, kami menyediakan SDK resmi yang ringan dan andal. SDK ini menangani serialisasi biner varint Rust, tanda tangan Ed25519 tweetnacl, penanganan string presisi, dan koneksi WebSocket otonom.</p>
+
+            <div class="code-block" style="border-color: rgba(255,255,255,0.1);">
+                npm install lumina-blockchain-sdk
+            </div>
+
+            <h2>1. Manajemen Dompet & HD Wallet Derivasi</h2>
+            <p>Lumina menggunakan standard **Coin Type 616** untuk identitas dompet jaringannya. SDK mendukung pembentukan dompet dari seed phrase bip39 dengan index derivasi bip44 secara aman:</p>
+
+            <div class="code-block">
+<span class="keyword">import</span> { LuminaWallet } <span class="keyword">from</span> <span class="string">'lumina-blockchain-sdk'</span>;
+
+<span class="comment">// 1. Buat Dompet Acak Baru</span>
+<span class="keyword">const</span> wallet = LuminaWallet.<span class="method">createRandom</span>();
+console.<span class="method">log</span>(<span class="string">"Address:"</span>, wallet.<span class="method">getAddress</span>());
+console.<span class="method">log</span>(<span class="string">"Public Key Array:"</span>, wallet.<span class="method">getPublicKey</span>());
+
+<span class="comment">// 2. Pulihkan Dompet dari Mnemonic & HD Derivasi (Coin Type 616)</span>
+<span class="comment">// Path standard: m/44'/616'/0'/0/index</span>
+<span class="keyword">const</span> mnemonic = <span class="string">"alpha bravo charlie ... word12"</span>;
+<span class="keyword">const</span> hdWallet = LuminaWallet.<span class="method">fromMnemonic</span>(mnemonic, <span class="number">0</span>); <span class="comment">// Index = 0</span>
+console.<span class="method">log</span>(<span class="string">"HD Address:"</span>, hdWallet.<span class="method">getAddress</span>());
+            </div>
+
+            <h2>2. Presisi Aritmatika Tinggi (High-Precision Units)</h2>
+            <div class="highlight-box">
+                <p><strong>💡 floating-point anti-loss:</strong> Lumina melarang pembulatan angka pecahan mengambang. Gunakan utility <code>LuminaUtils</code> untuk konversi angka String LUM ke satuan Lumlets (BigInt desimal 18):</p>
+            </div>
+
+            <div class="code-block">
+<span class="keyword">import</span> { LuminaUtils } <span class="keyword">from</span> <span class="string">'lumina-blockchain-sdk'</span>;
+
+<span class="comment">// Konversi 10.5 LUM ke Lumlets (BigInt)</span>
+<span class="keyword">const</span> Lumlets = LuminaUtils.<span class="method">toUnits</span>(<span class="string">"10.5"</span>); 
+console.<span class="method">log</span>(Lumlets); <span class="comment">// 10500000000000000000n (BigInt)</span>
+
+<span class="comment">// Konversi Lumlets ke String desimal LUM</span>
+<span class="keyword">const</span> LUM = LuminaUtils.<span class="method">toLumina</span>(Lumlets);
+console.<span class="method">log</span>(LUM); <span class="comment">// "10.5" (String)</span>
+            </div>
+
+            <h2>3. Fitur Unggulan: Sponsored Transaction</h2>
+            <p>Lumina menyokong transaksi gasless (bebas gas) bagi pengguna akhir melalui skema **Fee Payer (Sponsor)**. Transaksi dikirim oleh pengguna, gas-nya dibayar oleh akun sponsor sekunder:</p>
+
+            <div class="code-block">
+<span class="comment">// 1. User menandatangani transaksi dengan mendaftarkan alamat Sponsor</span>
+<span class="keyword">const</span> userTx = userWallet.<span class="method">signTransaction</span>(
+  receiverAddress,       <span class="comment">// Alamat penerima</span>
+  <span class="string">"1000000000000000000"</span>, <span class="comment">// 1 LUM dalam Lumlets</span>
+  nonce,                 <span class="comment">// Nonce pengguna</span>
+  [],                    <span class="comment">// Data/payload kosong</span>
+  sponsorAddress,        <span class="comment">// Alamat pembayar gas</span>
+  <span class="string">"10000000000000"</span>       <span class="comment">// Gas Fee</span>
+);
+
+<span class="comment">// 2. Sponsor menandatangani payload userTx sebagai pembayar gas</span>
+<span class="keyword">const</span> fullySignedTx = sponsorWallet.<span class="method">signAsFeePayer</span>(userTx);
+
+<span class="comment">// 3. Broadcast ke RPC</span>
+<span class="keyword">await</span> client.<span class="method">sendTransaction</span>(fullySignedTx);
+            </div>
+
+            <h2>4. Manajemen RPC & WebSocket Live Connection</h2>
+            <p>Gunakan kelas <code>LuminaClient</code> untuk berinteraksi dengan API node, melacak estimasi gas fee berdasarkan byte transaksi, serta mengaktifkan pemantauan real-time via WebSocket:</p>
+
+            <div class="code-block">
+<span class="keyword">import</span> { LuminaClient } <span class="keyword">from</span> <span class="string">'lumina-blockchain-sdk'</span>;
+
+<span class="keyword">const</span> client = <span class="keyword">new</span> LuminaClient(<span class="string">"http://127.0.0.1:9095"</span>);
+
+<span class="comment">// A. Ambil Saldo</span>
+<span class="keyword">const</span> state = <span class="keyword">await</span> client.<span class="method">getBalance</span>(wallet.<span class="method">getAddress</span>());
+console.<span class="method">log</span>(<span class="string">"Nonce:"</span>, state.nonce);
+
+<span class="comment">// B. Estimasi Gas Fee dinamis berdasarkan ukuran payload</span>
+<span class="keyword">const</span> fee = <span class="keyword">await</span> client.<span class="method">estimateFee</span>([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
+console.<span class="method">log</span>(<span class="string">"Estimated Fee (Lumlets):"</span>, fee);
+
+<span class="comment">// C. Tunggu konfirmasi transaksi secara instan lewat WebSocket /explorer/ws</span>
+<span class="keyword">try</span> {
+  <span class="keyword">await</span> client.<span class="method">waitForConfirmationWS</span>(txHash);
+  console.<span class="method">log</span>(<span class="string">"Transaction Confirmed! 🎉"</span>);
+} <span class="keyword">catch</span> (err) {
+  console.<span class="method">error</span>(err);
+}
+            </div>
+
+            <h2>Spesifikasi Kelas & Metode Utama</h2>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Kelas & Metode</th>
+                        <th>Penjelasan Fungsi & Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>LuminaUtils.isValidAddress(addr)</code></td>
+                        <td>Memeriksa validitas format Bech32m prefix <code>lumina</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><code>LuminaWallet.createRandom()</code></td>
+                        <td>Membuat dompet acak baru menggunakan dalek-ed25519 secure entropy.</td>
+                    </tr>
+                    <tr>
+                        <td><code>wallet.createStakeTransaction(...)</code></td>
+                        <td>Menyusun transaksi staking biner dengan format prefix <code>STAKE</code> dan data Peer ID.</td>
+                    </tr>
+                    <tr>
+                        <td><code>client.getTransaction(hash)</code></td>
+                        <td>Melacak data detail transaksi terproses.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. SDK Series.
+        </div>
+    </div>
+</body>
+</html>

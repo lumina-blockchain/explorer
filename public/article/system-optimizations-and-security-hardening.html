@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimasi Sistem, Keamanan Lapis Baja & Stabilitas Konsensus | Lumina Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080c12;
+            --card-bg: rgba(13, 20, 30, 0.85);
+            --primary: #3b82f6; /* Blue */
+            --secondary: #8b5cf6; /* Purple */
+            --accent: #10b981; /* Emerald */
+            --warning: #f59e0b; /* Amber */
+            --danger: #ef4444; /* Red */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(59, 130, 246, 0.05) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(16, 185, 129, 0.05) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(59, 130, 246, 0.04);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #93c5fd; font-size: 1rem; }
+
+        .success-box {
+            background: rgba(16, 185, 129, 0.04);
+            border-left: 4px solid var(--accent);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .success-box p { margin-bottom: 0; color: #a7f3d0; font-size: 1rem; }
+
+        .code-block {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.6;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+        .code-block .number { color: #f43f5e; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .info-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .info-card h3 { margin-top: 0; margin-bottom: 12px; }
+
+        ul, ol { margin-left: 25px; margin-bottom: 25px; color: #cbd5e1; }
+        li { margin-bottom: 10px; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 2.2rem; }
+            .content { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav aria-label="Breadcrumb">
+            <a href="index.html" class="back-link">← Kembali ke Docs Hub</a>
+        </nav>
+        
+        <article>
+            <header>
+                <span class="meta">System Hardening | 31 Mei 2026</span>
+                <h1>Optimasi Sistem, Keamanan Lapis Baja & Stabilitas Konsensus</h1>
+                <p>Ringkasan komprehensif mengenai serangkaian perbaikan krusial pada Lumina L1 hari ini, mulai dari stabilitas sinkronisasi blok hingga penguatan pertahanan terhadap serangan Sybil.</p>
+            </header>
+
+            <div class="content">
+                <p>Hari ini menandai pencapaian penting dalam pengembangan Lumina L1. Tim pengembang telah berhasil mengidentifikasi dan menyelesaikan berbagai isu kompleks yang mencakup integritas data, performa eksekusi, hingga keamanan jaringan tingkat tinggi.</p>
+
+                <div class="success-box">
+                    <p><strong>🎯 Hasil Akhir:</strong> Seluruh unit dan integration tests kini berstatus <strong>PASS</strong> dengan performa eksekusi transaksi di bawah 50ms!</p>
+                </div>
+
+                <h2>1. Stabilitas Sinkronisasi & Genesis Recovery</h2>
+                <p>Masalah utama pada kegagalan sinkronisasi blok #1 telah berhasil diatasi. Sebelumnya, pengecekan <em>Quorum Certificate</em> (QC) yang terlalu ketat menghalangi node untuk menerima blok pertama setelah Genesis karena belum adanya referensi QC induk.</p>
+                
+                <div class="highlight-box">
+                    <p><strong>Solusi:</strong> Implementasi logika bypass cerdas pada fungsi <code>verify_block_integrity</code> yang mengizinkan blok #1 dan fase <em>Liveness Fallback</em> tetap berjalan tanpa mengorbankan keamanan jangka panjang.</p>
+                </div>
+
+                <h2>2. Konsistensi Eksekusi Paralel (Block-STM)</h2>
+                <p>Kami menemukan adanya potensi <em>race condition</em> pada sistem eksekusi paralel Block-STM. Penggunaan akses database langsung menyebabkan inkonsistensi state saat beberapa transaksi dalam satu blok mencoba mengakses data yang sama secara bersamaan.</p>
+
+                <div class="code-block">
+<span class="comment">// Perbaikan akses database spekulatif di crates/state/src/lib.rs</span>
+<span class="keyword">let</span> res = <span class="keyword">self</span>.db_get(<span class="string">"validator_keys"</span>, key.as_bytes())?; <span class="comment">// Menggunakan wrapper spekulatif</span>
+                </div>
+                <p>Dengan mengganti seluruh pemanggilan <code>db.get</code> dan <code>db.put</code> menjadi <code>db_get</code> dan <code>db_put</code>, sistem kini menjamin integritas data melalui <em>write-set</em> spekulatif yang sinkron antar thread.</p>
+
+                <h2>3. Penguatan Keamanan & Pertahanan Sybil</h2>
+                <p>Dua jenis pelanggaran risiko tinggi telah diperkuat mekanismenya:</p>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>🛡️ Sybil Staking Protection</h3>
+                        <p>Pencegahan registrasi kunci BLS ganda. Jika terdeteksi, sistem otomatis memenjarakan (<em>Jail</em>) pemilik asli dan pendaftar baru serta membekukan seluruh dana mereka.</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>⚖️ BFT Slashing Engine</h3>
+                        <p>Denda 2% untuk <em>Double-Voting</em> kini diproses secara instan dengan emisi event terstruktur untuk monitoring real-time.</p>
+                    </div>
+                </div>
+
+                <h2>4. Mekanisme Banding & Ambang Batas 75%</h2>
+                <p>Sistem tata kelola (<em>governance</em>) kini lebih demokratis namun tetap sangat aman. Mekanisme <code>VOTE_APPEAL</code> memerlukan dukungan minimal <strong>75% dari total stake aktif</strong> untuk memulihkan validator yang telah dipenjara.</p>
+                <ul>
+                    <li><strong>Transparansi:</strong> Setiap suara dicatat dalam database dan dapat diverifikasi secara publik.</li>
+                    <li><strong>Otomatisasi:</strong> Pemulihan status menjadi <code>Active</code> dan pembukaan blokir dana terjadi secara atomik saat ambang batas tercapai.</li>
+                </ul>
+
+                <h2>5. Performa & Monitoring</h2>
+                <p>Target ambisius proses blok < 50ms telah tercapai melalui optimasi <em>Parallel Account Pre-fetching</em> dan <em>Atomic Batch Write</em>. Selain itu, sistem logging telah dirapikan:</p>
+                <ol>
+                    <li>Kejadian keamanan kini menggunakan tag <code>🛡️ [Security]</code> dengan level log yang tepat.</li>
+                    <li>Emisi event terstruktur (<code>EVENT:XXX</code>) mempermudah integrasi dengan Explorer dan Dashboard monitoring.</li>
+                </ol>
+
+                <div class="highlight-box" style="border-left-color: var(--secondary); background: rgba(139, 92, 246, 0.04);">
+                    <p style="color: #c4b5fd;"><strong>Kesimpulan:</strong> Lumina L1 kini jauh lebih tangguh terhadap serangan, lebih cepat dalam eksekusi, dan lebih stabil dalam operasional harian.</p>
+                </div>
+            </div>
+
+            <footer class="footer">
+                <p>&copy; 2026 Lumina Foundation. Dokumentasi Teknis Internal - Rahasia.</p>
+            </footer>
+        </article>
+    </div>
+</body>
+</html>

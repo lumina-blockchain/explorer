@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split-Brain Prevention & Undersea Cable Cuts: Proof of BFT Safety | Lumina Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #05070c;
+            --card-bg: rgba(10, 15, 28, 0.85);
+            --primary: #3b82f6; /* Electric Blue */
+            --secondary: #a855f7; /* Purple Glow */
+            --accent: #10b981; /* Emerald Green */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(59, 130, 246, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(168, 85, 247, 0.07) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 60px;
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 2rem; 
+            margin: 50px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+        }
+        h3 { font-size: 1.4rem; margin: 35px 0 15px; color: #fde047; }
+        p { margin-bottom: 26px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .analogy-box {
+            background: rgba(168, 85, 247, 0.05);
+            border-left: 4px solid var(--secondary);
+            padding: 30px;
+            border-radius: 0 20px 20px 0;
+            margin: 40px 0;
+        }
+        .analogy-title {
+            color: #d8b4fe;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.05);
+            border-left: 4px solid var(--accent);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #6ee7b7; font-size: 1rem; }
+
+        .code-block {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        .visual-flow {
+            background: rgba(59, 130, 246, 0.02);
+            border: 1px dashed rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 35px 0;
+            text-align: center;
+        }
+
+        .flow-step {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--primary);
+            margin: 10px;
+        }
+        .flow-arrow {
+            display: inline-block;
+            color: var(--text-dim);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .info-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .info-card h3 { margin-top: 0; margin-bottom: 12px; }
+
+        .warning-card {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+        .warning-card h3 { color: #f87171; margin-bottom: 10px; }
+        .warning-card p { margin-bottom: 0; color: #fca5a5; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Network Resilience Series | May 2026</span>
+            <h1>Split-Brain Prevention & Undersea Cable Cuts: Proof of BFT Safety</h1>
+            <p>Bedah tuntas ketahanan ekstrem Lumina L1 menghadapi pemutusan jaringan global (Network Partition): Mengapa BFT menjamin nol risiko garpu blockchain (zero-fork), dan interaksi cerdas antara hukum quorum dinamis dengan jailing.</p>
+        </header>
+
+        <div class="content">
+            <p>Dalam dunia sistem terdistribusi, skenario terburuk yang paling ditakuti oleh arsitek jaringan adalah **Network Partition** (partisi jaringan global). Keadaan ini terjadi ketika sebuah jaringan terbelah menjadi dua atau lebih pulau terisolasi yang tidak dapat saling berkomunikasi, namun node-node di masing-masing pulau tetap hidup dan berjalan normal.</p>
+
+            <p>Pertanyaan epik yang sering muncul: **"Bagaimana jika kabel serat optik bawah laut yang menghubungkan benua Asia dan Amerika terputus akibat jangkar kapal atau perang? Ada 50 node di Asia dan 50 node di Amerika. Apa yang terjadi?"**</p>
+            
+            <p>Apakah blockchain akan terbelah menjadi dua versi sejarah saldo yang berbeda (Split-Brain Fork)? Atau apakah jaringan akan mati total? Dan bagaimana sistem jailing otomatis Lumina merespons skenario ekstrem ini?</p>
+
+            <!-- ANALOGI GAUL DAN PRESTISIUS -->
+            <div class="analogy-box">
+                <div class="analogy-title">
+                    <span>🌉</span>
+                    <span>Analogi Dunia Nyata: Terbelahnya Kerajaan Cermin</span>
+                </div>
+                <p>Bayangkan sebuah **kerajaan besar dengan 100 anggota ksatria** meja bundar. Setiap keputusan hukum kerajaan (pembuatan blok baru) hanya sah jika disetujui dan ditandatangani minimal oleh **67 ksatria (Quorum 2/3)**.</p>
+                
+                <p>Suatu hari, gempa bumi dahsyat membelah pulau kerajaan tepat di tengah, memisahkan wilayah menjadi dua kubu terisolasi: **Kubu Timur (50 ksatria)** dan **Kubu Barat (50 ksatria)**. Jembatan penghubung runtuh total (kabel bawah laut terputus).</p>
+
+                <p><strong>Jika Kubu Timur Memaksakan Hukum Baru:</strong><br>
+                Raja di Kubu Timur mengusulkan undang-undang baru. Ksatria di Kubu Timur bersorak setuju, namun suara mereka hanya maksimal **50 orang**. Karena aturan mutlak istana mewajibkan stempel 67 ksatria, usulan tersebut **gagal disahkan**. Keputusan dibekukan sementara demi menjaga keadilan kerajaan.</p>
+
+                <p><strong>Apakah Kubu Timur Bisa Menghukum Kubu Barat yang Dianggap "Bolos"?</strong><br>
+                Prajurit Kubu Timur marah: <em>"Ayo kita coret 50 ksatria di Kubu Barat dari daftar karena mereka tidak pernah hadir di sidang paripurna!"</em> (percobaan Jailing).<br>
+                Namun, untuk mencoret nama anggota dewan, **harus ada ketukan palu sidang paripurna yang sah**. Dan untuk mengetok palu sidang paripurna sah, sidang tersebut **harus dihadiri minimal 67 ksatria**! Karena ksatria di Kubu Timur hanya ada 50 orang, sidang pemecatan **tidak pernah sah secara konstitusi**. </p>
+                
+                <p><strong>Hasil Akhir 👑:</strong><br>
+                Kedua kubu terdiam membeku dalam kedamaian. Tidak ada sejarah kerajaan baru yang ditulis di Timur maupun di Barat. Begitu jembatan dibangun kembali, seluruh ksatria bersatu kembali di meja bundar tanpa ada perbedaan hukum di antara mereka!</p>
+            </div>
+
+            <h2>1. Pembuktian Matematis Konsensus HotStuff BFT Lumina</h2>
+            <p>Konsensus Lumina L1 didesain dengan memprioritaskan **Safety (Keamanan)** mutlak di atas *Liveness* (Ketersediaan) saat terjadi partisi jaringan ekstrem. Hal ini didasarkan pada rumus dasar quorum Byzantine Fault Tolerance (BFT):</p>
+            
+            <div class="code-block" style="text-align: center; font-size: 1.25rem; font-weight: bold; color: #3b82f6;">
+                Quorum Threshold &gt; 2/3 &times; N_active
+            </div>
+
+            <p>Mari kita bedah dua skenario pembagian validator di bawah ini:</p>
+
+            <h3>Skenario A: Partisi Simetris Sempurna (50% di Asia / 50% di Amerika)</h3>
+            <p>Dalam kondisi ini, kabel Pasifik putus total. 50% validator di Asia dan 50% validator di Amerika hidup secara lokal:</p>
+            <ul>
+                <li><strong>Wilayah Asia</strong>: Jumlah suara maksimal = 50. Syarat quorum = 67. **Blok terhenti di tinggi H.**</li>
+                <li><strong>Wilayah Amerika</strong>: Jumlah suara maksimal = 50. Syarat quorum = 67. **Blok terhenti di tinggi H.**</li>
+            </ul>
+            <p>Kedua benua secara disiplin **menghentikan produksi blok (Halt)** secara sukarela. Mengapa ini aman? Karena **tidak ada block fork** yang tercipta. Saldo seluruh pengguna di dunia membeku dengan aman di tinggi $H$. Tidak ada celah bagi peretas untuk melakukan transaksi ganda (*double-spending*).</p>
+
+            <h3>Skenario B: Partisi Asimetris (70% di Asia / 30% di Amerika)</h3>
+            <p>Bagaimana jika pembagiannya tidak merata? Misalkan 70 validator berada di Asia dan 30 validator berada di Amerika:</p>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3 style="color: #f43f5e;">🇺🇸 Wilayah Amerika (Minoritas - 30%)</h3>
+                    <p>Karena total suara maksimal hanya 30% (kurang dari syarat 67%), Amerika **menghentikan seluruh aktivitas pembuatan blok**. Sistem terkunci di tinggi $H$ menunggu instruksi luar.</p>
+                </div>
+                <div class="info-card" style="border-color: rgba(16, 185, 129, 0.3);">
+                    <h3 style="color: #10b981;">🇨🇳 Wilayah Asia (Mayoritas - 70%)</h3>
+                    <p>Karena 70% suara berhasil dikumpulkan, Asia **berhasil menembus syarat quorum (>66.7%)**. Asia terus memproses transaksi dan melangkah ke Blok $H+1$, $H+2$, dst.</p>
+                </div>
+            </div>
+
+            <h2>2. Mengapa Jailing Otomatis Tetap Aman?</h2>
+            <p>Mengapa dalam Skenario B (70/30), mayoritas di Asia diperbolehkan melanjutkan hidup sedangkan Amerika dipenjara? Dan bagaimana jailing dinamis menjaga kelangsungan sistem?</p>
+            
+            <ol>
+                <li><strong>Pencatatan Absen di Asia</strong>: Karena validator Amerika (30 node) tidak mengirimkan tanda tangan mereka ke Asia, State Manager di Asia akan mencatat absen berturut-turut untuk 30 validator tersebut.</li>
+                <li><strong>Eksekusi Jailing Dinamis</strong>: Tepat setelah 100 blok berturut-turut dilewatkan (pada Blok $H+100$), konsensus di Asia secara resmi menandai 30 validator Amerika sebagai **`Inactive`**.</li>
+                <li><strong>Penyusutan Penyebut Quorum</strong>: Total validator aktif di database Asia menyusut secara deterministik dari **100 menjadi 70**. Syarat quorum dihitung ulang berdasarkan 70 validator aktif saja: $\frac{2}{3} \times 70 \approx 47$ suara sah. </li>
+                <li><strong>Konsensus Lancar</strong>: Dengan penyusutan quorum ini, blockchain di Asia berjalan semakin efisien dan ringan.</li>
+            </ol>
+
+            <div class="highlight-box">
+                <p>💡 **Keajaiban Matematika BFT**: Karena Amerika (30 node) benar-benar mati dan tidak bisa membuat blok tunggal pun, tidak akan pernah ada garpu blockchain (*fork*) di Amerika. Hanya ada satu versi sejarah dunia blockchain yang sah, yaitu yang diproduksi oleh wilayah mayoritas Asia.</p>
+            </div>
+
+            <h2>3. Alur Rekonsiliasi Otomatis (Self-Healing)</h2>
+            <p>Begitu kabel bawah laut selesai diperbaiki dan tersambung kembali, sistem secara otonom memulihkan dirinya sendiri tanpa perlu campur tangan administrator manusia:</p>
+
+            <div class="visual-flow">
+                <div class="flow-step">Koneksi P2P Pulih</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Amerika Mengunduh Blok Asia</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Amerika Sadar Telah Di-Jail</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Daemon Kirim Transaksi RESUME</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Status Aktif & Quorum Normal</div>
+            </div>
+
+            <p>Sistem ini membuktikan bahwa arsitektur blockchain Lumina L1 v1.4 tidak hanya tangguh secara matematis dari ancaman partisi fisik dunia nyata, tetapi juga memiliki inteligensi bawaan untuk menyembuhkan dirinya sendiri secara dinamis dan otonom. Jaminan nol garpu, perlindungan saldo maksimal, dan ketahanan liveness tanpa batas!</p>
+
+            <div class="warning-card">
+                <h3>⚠️ Aturan Emas Keamanan Sistem Terdistribusi:</h3>
+                <p>Dalam kondisi partisi simetris (50/50), berhentinya produksi blok adalah <strong>sebuah keberhasilan desain pertahanan</strong>, bukan kegagalan. Jaringan yang memilih berhenti memproses transaksi jauh lebih berharga dan aman daripada jaringan yang membiarkan data penggunanya terpecah belah dan kacau!</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Core Consensus Series.
+        </div>
+    </div>
+</body>
+</html>

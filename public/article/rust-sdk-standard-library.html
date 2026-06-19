@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Guide: Rust SDK Client Library | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030712;
+            --card-bg: rgba(17, 24, 39, 0.85);
+            --primary: #10b981; /* Neon Emerald */
+            --secondary: #3b82f6; /* Cyber Blue */
+            --accent: #a855f7; /* Purple Power */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --code-bg: #090d16;
+            --border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.06) 0%, transparent 40%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+        
+        .badge {
+            background: var(--secondary);
+            color: #ffffff;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            vertical-align: middle;
+            margin-left: 15px;
+            letter-spacing: 0.05em;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #a5f3fc; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.55;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .method { color: #5eead4; }
+        .code-block .number { color: #f59e0b; }
+
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .param-table th, .param-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem;
+        }
+        .param-table th {
+            background: rgba(59, 130, 246, 0.08);
+            color: var(--secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+        }
+        .param-table tr:hover td {
+            background: rgba(255,255,255,0.01);
+        }
+
+        .highlight-box {
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 4px solid var(--secondary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #93c5fd; font-size: 1rem; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Kembali ke Search Portal</a>
+        
+        <header>
+            <span class="meta">SDK & Client Library | Mei 2026</span>
+            <h1>Lumina Rust SDK <span class="badge">client-v0.1.0</span></h1>
+            <p>Panduan integrasi Rust SDK (lumina-std) untuk manajemen kunci (Keypair), penyusunan transaksi lokal, dan interaksi JSON-RPC asinkronus ke Lumina L1 Node.</p>
+        </header>
+
+        <div class="content">
+            <p>Untuk mempercepat pengembangan integrasi backend, validator tools, bursa (exchanges), maupun scheduler otomatis, blockchain Lumina L1 menyediakan Rust SDK resmi berkinerja tinggi. Crate <code>lumina-std</code> dikompilasi ganda (dual target): mendukung eksekusi bare-metal tanpa pustaka standar <code>#![no_std]</code> untuk target smart contract WASM, serta mode standard library penuh <code>client</code> untuk native platform.</p>
+
+            <div class="code-block" style="border-color: rgba(255,255,255,0.1);">
+                <span class="comment"># Tambahkan dependensi ke Cargo.toml proyek Rust Anda</span>
+                [dependencies]
+                lumina-std = { path = "path/to/sdk", features = ["client"] }
+            </div>
+
+            <h2>1. Fitur Utama Rust SDK</h2>
+            <p>Target fitur <code>client</code> menyediakan tiga pilar utama bagi pengembang:</p>
+            <ul>
+                <li><strong>Modul Wallet:</strong> Manajemen kunci berbasis Ed25519. Mendukung entropy generator OS (acak), pemulihan kata sandi mnemonic 12/24 kata (BIP-39 & SLIP-0010), pemulihan kunci privat mentah (raw secret bytes), serta penandatanganan transaksi secara offline.</li>
+                <li><strong>Modul Transaction:</strong> Pembangun transaksi berbasis fluent builder pattern (<code>TxBuilder</code>) untuk penyusunan data biner transfer, data payload smart contract, nonce, dan tanda tangan sponsor biaya (Sponsored Transaction).</li>
+                <li><strong>Modul Client:</strong> Wrapper asinkronus HTTP JSON-RPC 2.0 (<code>LuminaClient</code>) untuk query saldo akun, tinggi blok terbaru, pelacakan detail blok, pengecekan nonce aktif, dan penyerahan transaksi ke mempool.</li>
+            </ul>
+
+            <h2>2. Arsitektur Integrasi Server-Client</h2>
+            <p>SDK Rust mengisolasi seluruh operasi penandatanganan kriptografis di sisi client secara lokal (Zero-Knowledge Private Key Leakage). Node hanya menerima objek tanda tangan (<code>SignedTransaction</code>) yang valid secara matematis:</p>
+            
+            <div class="highlight-box">
+                <p><strong>💡 Presisi Nilai:</strong> Untuk menghindari ketidakakuratan atau <em>floating-point precision loss</em> pada bahasa pemrograman dinamis (misalnya Javascript), API Node menerima saldo dan biaya gas dalam representasi String khusus (<code>valueString</code> dan <code>feeString</code>) yang otomatis dipetakan secara mulus oleh <code>LuminaClient</code>.</p>
+            </div>
+
+            <h2>3. Contoh Implementasi Lengkap (Demo Test)</h2>
+            <p>Berikut adalah kode utuh yang melakukan sinkronisasi dengan blockchain node lokal, memulihkan dompet, dan mengirimkan transaksi transfer koin:</p>
+
+            <div class="code-block">
+<span class="keyword">use</span> lumina_std::client::LuminaClient;
+<span class="keyword">use</span> lumina_std::wallet::Wallet;
+<span class="keyword">use</span> lumina_std::transaction::TxBuilder;
+<span class="keyword">use</span> lumina_primitives::Address;
+
+<span class="type">#[tokio::main]</span>
+<span class="keyword">async fn</span> <span class="method">main</span>() -> Result&lt;(), Box&lt;<span class="keyword">dyn</span> std::error::Error&gt;&gt; {
+    <span class="comment">// 1. Hubungkan ke HTTP JSON-RPC Port di Node (default: 9098)</span>
+    <span class="keyword">let</span> rpc_url = <span class="string">"http://127.0.0.1:9098"</span>;
+    <span class="keyword">let</span> client = LuminaClient::<span class="method">new</span>(rpc_url, <span class="type">None</span>)?;
+
+    <span class="comment">// 2. Ambil tinggi blok saat ini</span>
+    <span class="keyword">let</span> height = client.<span class="method">get_latest_block_height</span>().<span class="keyword">await</span>?;
+    println!(<span class="string">"📦 Tinggi Blok: #{}"</span>, height);
+
+    <span class="comment">// 3. Pulihkan Wallet Genesis Sultan menggunakan Private Key Hex</span>
+    <span class="keyword">let</span> secret_hex = <span class="string">"fdc94d54460e2b7e548f294bb58e4d525b5a67cd95ed7de2be477a9379db2630"</span>;
+    <span class="keyword">let</span> secret_bytes = hex::<span class="method">decode</span>(secret_hex)?;
+    <span class="keyword">let</span> wallet = Wallet::<span class="method">from_secret_bytes</span>(&amp;secret_bytes)?;
+    println!(<span class="string">"🔑 Alamat Wallet: {}"</span>, wallet.<span class="method">address</span>());
+
+    <span class="comment">// 4. Periksa saldo on-chain dalam satuan Lumlets (BigInt desimal 18)</span>
+    <span class="keyword">let</span> balance = client.<span class="method">get_balance</span>(&amp;wallet.<span class="method">address</span>()).<span class="keyword">await</span>?;
+    println!(<span class="string">"💰 Saldo Wallet: {} Lumlets"</span>, balance);
+
+    <span class="comment">// 5. Dapatkan Nonce akun terbaru dari mempool state</span>
+    <span class="keyword">let</span> nonce = client.<span class="method">get_nonce</span>(&amp;wallet.<span class="method">address</span>()).<span class="keyword">await</span>?;
+    println!(<span class="string">"🔢 Nonce Aktif: {}"</span>, nonce);
+
+    <span class="comment">// 6. Bangun transaksi transfer 500 Lumlets ke alamat tujuan</span>
+    <span class="keyword">let</span> receiver = Address::<span class="method">from_bytes</span>([<span class="number">9u8</span>; <span class="number">20</span>]);
+    <span class="keyword">let</span> tx = TxBuilder::<span class="method">new</span>(wallet.<span class="method">address</span>(), receiver, <span class="number">500</span>)
+        .nonce(nonce)
+        .fee(<span class="number">20_000_000_000_000</span>) <span class="comment">// Biaya gas minimum</span>
+        .build();
+
+    <span class="comment">// 7. Tandatangani transaksi secara lokal di sisi client</span>
+    <span class="keyword">let</span> signed_tx = wallet.<span class="method">sign_transaction</span>(tx);
+    println!(<span class="string">"✍️  Transaksi berhasil ditandatangani lokal. Hash: {}"</span>, signed_tx.transaction.hash());
+
+    <span class="comment">// 8. Siarkan (Broadcast) ke node</span>
+    <span class="keyword">let</span> tx_hash = client.<span class="method">send_transaction</span>(signed_tx).<span class="keyword">await</span>?;
+    println!(<span class="string">"📡 Sukses diserahkan! Hash Respon: {}"</span>, tx_hash);
+
+    Ok(())
+}
+            </div>
+
+            <h2>4. Hasil Eksekusi & Validasi Keamanan Mempool</h2>
+            <p>Saat transaksi diserahkan ke mempool node, ada dua skenario penting yang divalidasi oleh RPC server:</p>
+            
+            <h3>Skenario A: Sukses Masuk Mempool</h3>
+            <p>Jika nonce sesuai dan saldo pengirim mencukupi untuk menutupi biaya transfer + gas fee, transaksi akan diterima oleh mempool untuk ditambang:</p>
+            <div class="code-block" style="border-color: rgba(16, 185, 129, 0.25);">
+=== LUMINA RUST SDK DEMO ===
+🔌 Menghubungkan ke Lumina Node di: http://127.0.0.1:9098
+📦 Tinggi Blok Terbaru: #4
+🔑 Wallet Alamat: lumina1rlnjrlke3uff992eexch6zyvphld4d4puv9za8
+💰 Saldo saat ini: 1000000000000000000000000 Lumlets
+🔢 Nonce akun saat ini: 0
+📤 Membuat transaksi transfer ke: lumina1pyysjzgfpyysjzgfpyysjzgfpyysjzgfm3eumm
+✍️  Transaksi berhasil ditandatangani secara lokal!
+🔍 Hash Transaksi: 0xb742d7ac67eb3d0528d34527abcd95aa2e06c9dc22a74f2d7455aff5796c18a6
+📡 Mengirim transaksi ke mempool node...
+✅ Transaksi Berhasil Dikirim!
+   Tx Hash: 0xb742d7ac67eb3d0528d34527abcd95aa2e06c9dc22a74f2d7455aff5796c18a6
+            </div>
+
+            <h3>Skenario B: Proteksi Nonce Duplikat</h3>
+            <p>Jika Anda mencoba mengeksekusi kembali transaksi dengan nonce yang sama saat transaksi pertama masih mengantre di mempool, server node secara otomatis akan melarangnya dengan respon error:</p>
+            <div class="code-block" style="border-color: rgba(244, 63, 94, 0.25);">
+📡 Mengirim transaksi ke mempool node...
+❌ Transaksi gagal dikirim: JsonRpcError { code: -32602, message: "Nonce already in mempool" }
+            </div>
+            <p>Hal ini mencegah serangan <em>replay-attack</em> atau pembelanjaan ganda (double-spend) sebelum block di-mint (ditambang) oleh sistem konsensus leader.</p>
+
+            <h2>5. Spesifikasi API Metrik</h2>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Metode & Parameter</th>
+                        <th>Penjelasan Fungsi & Respon</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>LuminaClient::new(url, api_key)</code></td>
+                        <td>Membuat instance client baru. Mendukung token autentikasi <code>X-API-Key</code> jika dikonfigurasi.</td>
+                    </tr>
+                    <tr>
+                        <td><code>client.get_balance(&addr)</code></td>
+                        <td>Mendapatkan saldo aktif akun pengirim (u128) dari on-chain state trie database.</td>
+                    </tr>
+                    <tr>
+                        <td><code>client.get_nonce(&addr)</code></td>
+                        <td>Mendapatkan nilai counter nonce (u64) terbaru milik pengirim.</td>
+                    </tr>
+                    <tr>
+                        <td><code>client.send_transaction(signed_tx)</code></td>
+                        <td>Mengirimkan transaksi biner yang ditandatangani ke node. Mengembalikan hash transaksi (String).</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Rust SDK Series.
+        </div>
+    </div>
+</body>
+</html>

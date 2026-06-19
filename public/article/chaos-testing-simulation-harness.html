@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaos Testing & E2E Consensus Resilience | Lumina Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #06090e;
+            --card-bg: rgba(10, 17, 26, 0.85);
+            --primary: #fbbf24; /* Amber Gold */
+            --secondary: #ef4444; /* Severe Red */
+            --accent: #10b981; /* Emerald Green */
+            --blue: #06b6d4; /* Electric Cyan */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(6, 182, 212, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(251, 191, 36, 0.04) 0%, transparent 40%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--blue);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--primary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--blue), var(--primary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--blue); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .analogy-box {
+            background: rgba(6, 182, 212, 0.03);
+            border-left: 4px solid var(--blue);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .analogy-box p { margin-bottom: 12px; color: #cbd5e1; font-size: 1rem; }
+        .analogy-box p:last-child { margin-bottom: 0; }
+        .analogy-title { font-weight: 800; color: var(--blue) !important; margin-bottom: 6px !important; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .code-block {
+            background: #030508;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.6;
+        }
+
+        .test-flow {
+            margin: 35px 0;
+            padding-left: 20px;
+            border-left: 2px dashed rgba(255, 255, 255, 0.15);
+        }
+        .flow-step {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        .flow-step::before {
+            content: '';
+            position: absolute;
+            left: -27px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--blue);
+            border: 3px solid var(--bg);
+        }
+        .flow-step.red::before { background: var(--secondary); }
+        .flow-step.green::before { background: var(--accent); }
+        .flow-step h4 { font-size: 1.15rem; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Consensus & Hardening | May 2026</span>
+            <h1>Chaos Testing & E2E Consensus Resilience</h1>
+            <p>Laporan rekayasa pengujian asinkronus multi-node (Chaos Testing) untuk menguji kekebalan jaringan Lumina L1 terhadap kegagalan validator, skenario jailing otomatis, slashing bounty, dan pemulihan tata kelola secara dinamis.</p>
+        </header>
+
+        <div class="content">
+            <p>Sebuah blockchain desentralisasi tidak hanya dituntut untuk beroperasi cepat dalam kondisi ideal, melainkan harus tetap kokoh, aman, dan tahan banting ketika dihadapkan pada gangguan terburuk di lapangan (*Chaos Scenarios*). Keadaan mati lampu massal, koneksi internet validator terputus berhari-hari, atau bahkan serangan validator nakal yang mencoba memalsukan kesepakatan tidak boleh melumpuhkan sistem utama.</p>
+
+            <p>Untuk membuktikan ketahanan sistem tersebut secara matematis dan operasional, tim pengembang Lumina L1 merancang **Asynchronous Chaos Testing Harness** yang dijalankan secara <em>in-process</em> untuk mematikan, merusak, merestart, dan menuntut pemulihan konsensus validator secara dinamis.</p>
+
+            <div class="analogy-box">
+                <p class="analogy-title">💡 Analogi Nyata: Satpam Ronda Malam di Bank</p>
+                <p><strong>1. Validator Jailing (Satpam Ketiduran):</strong> Bayangkan 4 satpam ditugaskan berpatroli menjaga bank secara bergantian. Jika salah satu satpam ketiduran (offline) selama 100 putaran ronda beruntun, bank (jaringan) akan melabeli satpam tersebut sebagai <em>tidak aktif</em> demi mencegah pencuri masuk secara diam-diam. Statusnya dinonaktifkan (Jailed/Inactive), gajinya ditahan, dan ia tidak boleh ikut memilih keputusan ronda lagi.</p>
+                <p><strong>2. Auto-Resume (Bangun & Catch-up):</strong> Begitu satpam tersebut terbangun, ia tidak bisa langsung ikut ronda malam. Ia harus membaca catatan laporan ronda dari satpam aktif yang berjaga selama ia tertidur (Sync Catch-up). Setelah catatan rondanya selaras sepenuhnya dengan satpam lain, satpam tersebut mengirimkan surat pemberitahuan kehadiran (RESUME) ke sistem agar statusnya diaktifkan kembali menjadi <em>aktif</em>.</p>
+                <p><strong>3. Severe Slashing (Satpam Berkhianat):</strong> Jika ada satpam yang tertangkap basah menandatangani dua surat izin brankas yang berbeda dengan nomor kunci ganda pada malam yang sama (Double-Voting), satpam pelapor yang menangkap basah (Sentinel) akan mendapat bonus hadiah 2% dari isi brankas sebagai Bounty penemu bukti. Sisa 98% uang jaminan satpam pengkhianat langsung disita selamanya oleh kas bank dan satpam tersebut dipecat secara tidak terhormat tanpa toleransi banding.</p>
+            </div>
+
+            <h2>1. Skenario Uji 1: Validator Jailing & Auto-Resume</h2>
+            <p>Pengujian ini memastikan bahwa jika salah satu validator dalam kluster aktif padam secara mendadak, jaringan tetap memiliki <em>liveness</em> untuk melanjutkan rantai, mendepak validator yang bermasalah, dan secara dinamis memulihkannya ketika kembali online.</p>
+
+            <div class="test-flow">
+                <div class="flow-step">
+                    <h4>Step 1: Meluncurkan Kluster 4 Node Aktif</h4>
+                    <p>Kluster 4 validator (Node 0, 1, 2, dan 3) diluncurkan secara paralel menggunakan <code>tokio::spawn</code>. Total kekuatan voting (stake) jaringan adalah 40,000 unit (masing-masing 10,000 stake).</p>
+                </div>
+                <div class="flow-step red">
+                    <h4>Step 2: Menyetel Node 2 Menjadi Offline</h4>
+                    <p>Fungsi komunikasi Node 2 dipadamkan secara asinkronus. Konsensus tetap berjalan lancar karena 3 node yang aktif menyisakan 30,000 stake (memenuhi syarat quorum &gt; 2/3).</p>
+                </div>
+                <div class="flow-step">
+                    <h4>Step 3: Melewati Batas Batas Jailing (100 Blok)</h4>
+                    <p>Node online memproses blok 6 hingga 110. Selama 105 blok ini, Node 2 absen memilih. Di blok 106, StateManager mendeteksi missed block Node 2 menyentuh angka 100 dan mendepak statusnya menjadi <code>Inactive</code>.</p>
+                </div>
+                <div class="flow-step green">
+                    <h4>Step 4: Menyalakan Kembali Node 2 & Auto-Resume</h4>
+                    <p>Node 2 dihidupkan kembali. Pertama, Node 2 melakukan <strong>Block Sync Catch-up</strong> dengan mengunduh dan menerapkan blok 6 hingga 110 dari Node 0. Begitu Node 2 mendeteksi status lokalnya adalah <code>Inactive</code>, ia memancarkan transaksi <code>RESUME</code> bertanda tangan resmi untuk memulihkan statusnya menjadi <code>Active</code>.</p>
+                </div>
+            </div>
+
+            <h3>Input Uji Coba (Test Input)</h3>
+            <div class="code-block" style="background: #020407; color: #fbbf24;">
+// Input Inisialisasi Mock Cluster 4 Node Validator
+let nodes = setup_mock_cluster(4, &mut temp_dirs); // Node 0, 1, 2, 3 dengan stake seimbang @10,000 LMN
+nodes[2].is_online.store(false, Ordering::Relaxed); // Simulasi pemadaman total Node 2
+
+// Jalankan putaran konsensus sampai tinggi blok 110
+for h in current_height..(current_height + 105) {
+    let qc = tick_consensus_round(&nodes, h, last_qc);
+    ...
+}
+            </div>
+
+            <h3>Output Uji Coba (Test Output Log)</h3>
+            <div class="code-block" style="background: #020407; color: #a7f3d0;">
+🔌 Menyetel Node 2 (lumina1kt447l9aq376d5r7a60ea9f4l02jrwp6lustt3) menjadi OFFLINE...
+Block #6: Node 2 missed count = 0, status = Active
+Block #7: Node 2 missed count = 1, status = Active
+Block #8: Node 2 missed count = 2, status = Active
+...
+Block #104: Node 2 missed count = 98, status = Active
+Block #105: Node 2 missed count = 99, status = Active
+Block #106: Node 2 missed count = 0, status = Inactive  <-- [JAILING TRIGGERED]
+Block #107: Node 2 missed count = 0, status = Inactive
+Block #108: Node 2 missed count = 0, status = Inactive
+Block #109: Node 2 missed count = 0, status = Inactive
+Block #110: Node 2 missed count = 0, status = Inactive
+
+🔌 Menyalakan kembali Node 2 (Auto-Resume)...
+📥 Node 2 melakukan catch-up block sync dari #6 sampai #110...
+✅ Catch-up sync sukses! Status lokal Node 2 sinkron menjadi: Inactive
+🗳️ Node 2 menyusun dan memancarkan transaksi RESUME...
+⚡ Konsensus memproses transaksi RESUME di blok #111...
+✅ STATUS KELUARAN: Node 2 kembali ACTIVE di seluruh validator!
+            </div>
+
+            <h2>2. Skenario Uji 2: Sentinel Double-Voting Slashing & Appeal</h2>
+            <p>Pengujian ini mensimulasikan penyerangan berat berupa pemalsuan sejarah transaksi menggunakan tanda tangan ganda pada tinggi blok yang sama.</p>
+
+            <div class="test-flow">
+                <div class="flow-step red">
+                    <h4>Step 1: Melakukan Double-Voting Ilegal</h4>
+                    <p>Node 2 dipaksa menandatangani dua proposal blok berbeda pada tinggi blok #5. Sentinel Agent mendeteksi konflik tanda tangan BLS ini dan merakit <code>SlashProof</code>.</p>
+                </div>
+                <div class="flow-step">
+                    <h4>Step 2: Pemrosesan SLASH & Pembekuan Dana 98%</h4>
+                    <p>Node 0 memancarkan transaksi <code>SLASH</code>. Execution Engine memotong stake Node 2 sebesar 10,000 LUM: 98% dibekukan selamanya, dan 2% (200 LUM) ditransfer secara instan ke rekening Sultan (Node 0) sebagai Bounty penemu bukti.</p>
+                </div>
+                <div class="flow-step green">
+                    <h4>Step 3: Mengirim Banding (APPEAL) & Tata Kelola Demokratis</h4>
+                    <p>Validator terhukum mengirim transaksi <code>APPEAL</code>. Tiga validator aktif tersisa (Node 0, 1, dan 3) mengumpulkan total 30,000 hak suara aktif untuk mengirimkan <code>VOTE_APPEAL:APPROVE</code>. Batas 75% quorum terlampaui sempurna, memulihkan statusnya menjadi <code>Active</code>.</p>
+                </div>
+            </div>
+
+            <h3>Input Uji Coba (Test Input)</h3>
+            <div class="code-block" style="background: #020407; color: #fbbf24;">
+// Memaksa Node 2 menandatangani dua blok berbeda
+let sig_5a = nodes[2].bls_priv.sign(&block_5a_hash);
+let sig_5b = nodes[2].bls_priv.sign(&block_5b_hash);
+
+let proof = SlashProof {
+    vote_a: Vote { height: 5, block_hash: block_5a_hash, validator: Node2, signature: sig_5a },
+    vote_b: Vote { height: 5, block_hash: block_5b_hash, validator: Node2, signature: sig_5b }
+};
+            </div>
+
+            <h3>Output Uji Coba (Test Output Log)</h3>
+            <div class="code-block" style="background: #020407; color: #a7f3d0;">
+🚨 [Sentinel Detection] Double-voting terdeteksi untuk validator Node 2!
+📥 Transaksi SLASH disiarkan ke jaringan...
+⚖️  Mengeksekusi pemotongan stake ekonomi Node 2...
+📊 Status Node 2 berubah menjadi: Jailed (Staked frozen!)
+📊 Reporter Node 0 menerima hadiah Bounty: 200 LUM (2%)
+⚖️  Node 2 terhukum mengajukan permohonan banding (APPEAL)...
+🗳️  Validator aktif Node 0, Node 1, dan Node 3 memancarkan suara APPROVE...
+📊 Total Suara Terkumpul: 30,000 / 30,000 Stake Aktif (100% >= 75%)
+🎉 KEPUTUSAN BANDING: Banding Diterima! Node 2 dipulihkan menjadi ACTIVE!
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Chaos Engineering Series.
+        </div>
+    </div>
+</body>
+</html>

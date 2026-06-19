@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validator Guide: Running Lumina Node CLI | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #09060b;
+            --card-bg: rgba(20, 10, 20, 0.85);
+            --primary: #ec4899; /* Electric Coral */
+            --secondary: #fbbf24; /* Amber Gold */
+            --accent: #10b981; /* Emerald Green */
+            --text: #f3f4f6;
+            --text-dim: #a1a1aa;
+            --code-bg: #000000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(236, 72, 153, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(251, 191, 36, 0.07) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .cli-box {
+            background: var(--code-bg);
+            border: 1px solid rgba(236, 72, 153, 0.2);
+            padding: 25px;
+            border-radius: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            color: #f3f4f6;
+            margin: 35px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        .cli-box::before {
+            content: 'Terminal';
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .cli-arg { color: var(--primary); font-weight: 600; }
+        .cli-val { color: var(--secondary); }
+
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .param-table th, .param-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem;
+        }
+        .param-table th {
+            background: rgba(236, 72, 153, 0.08);
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+        }
+        .param-table tr:hover td {
+            background: rgba(255,255,255,0.01);
+        }
+
+        .flow-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.08);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 35px 0;
+        }
+        .flow-step {
+            margin-bottom: 20px;
+            border-left: 3px solid var(--secondary);
+            padding-left: 20px;
+        }
+        .flow-step:last-child { margin-bottom: 0; }
+        .flow-step h4 { color: #fde047; font-size: 1.1rem; margin-bottom: 5px; }
+
+        .tip-box {
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+        .tip-box h3 { color: var(--accent); margin-top: 0; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Validator Guide & Run Node | May 2026</span>
+            <h1>Running Lumina Node</h1>
+            <p>Panduan menjalankan validator node Lumina melalui baris perintah CLI dan rincian pemuatan identitas kunci otonom.</p>
+        </header>
+
+        <div class="content">
+            <p>Node Lumina diproduksi sebagai satu kesatuan executable binary mandiri yang dapat dikustomisasi secara penuh melalui argumen baris perintah CLI. Node ini menangani sinkronisasi transaksi, Gossipsub block broadcast, rotasi Leader HotStuff BFT, dan eksekusi smart contract WASM secara real-time.</p>
+
+            <h2>1. Perintah Dasar Eksekusi CLI</h2>
+            <p>Gunakan perintah di bawah ini dari root direktori proyek untuk mengompilasi dan mengeksekusi node Lumina dengan parameter khusus:</p>
+
+            <div class="cli-box">
+                cargo run -p lumina-node --bin lumina-node -- <br>
+                &nbsp;&nbsp;<span class="cli-arg">--port</span> <span class="cli-val">61688</span> <br>
+                &nbsp;&nbsp;<span class="cli-arg">--secret</span> <span class="cli-val">fdc94d54460e2b7e548f2942435b80a905a5a228b30d8c005f2de5f32b8ec802</span> <br>
+                &nbsp;&nbsp;<span class="cli-arg">--bootnode</span> <span class="cli-val">/ip4/127.0.0.1/tcp/61688/p2p/12D3KooWN...</span>
+            </div>
+
+            <p>Untuk operator yang ingin menekan pertumbuhan storage validator, Lumina juga mendukung mode pruned yang tetap mempertahankan perilaku archive sebagai default saat flag pruning tidak diberikan.</p>
+
+            <div class="cli-box">
+                cargo run -p lumina-node --bin lumina-node -- <br>
+                &nbsp;&nbsp;<span class="cli-arg">--port</span> <span class="cli-val">61688</span> <br>
+                &nbsp;&nbsp;<span class="cli-arg">--db-path</span> <span class="cli-val">data/node-pruned</span> <br>
+                &nbsp;&nbsp;<span class="cli-arg">--retain-last-blocks</span> <span class="cli-val">5000000</span>
+            </div>
+
+            <h2>2. Penjelasan Grid Parameter CLI</h2>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Argumen (Short)</th>
+                        <th>Format Tipe</th>
+                        <th>Penjelasan Fungsi & Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong><code>--port</code> (<code>-p</code>)</strong></td>
+                        <td><code>u16</code> (default: 61688)</td>
+                        <td>Port TCP komunikasi P2P libp2p. Port server RPC HTTP Axum akan dihitung otomatis: <code>9090 + (p2p_port % 10)</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--secret</code> (<code>-s</code>)</strong></td>
+                        <td><code>String</code> (Hex seed)</td>
+                        <td>Kunci rahasia Ed25519 (64 karakter hex) yang menjadi basis identitas tanda tangan validator konsensus.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--bootnode</code> (<code>-b</code>)</strong></td>
+                        <td><code>Multiaddr</code> (libp2p format)</td>
+                        <td>Alamat multi-address peer pertama yang dikontak untuk bisa masuk ke dalam jaringan validator global.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--retain-last-blocks</code></strong></td>
+                        <td><code>u64</code> (opsional)</td>
+                        <td>Mengaktifkan mode pruned node dengan hanya menyimpan <code>N</code> block terakhir di disk. Jika flag ini tidak diisi, node tetap berperilaku sebagai archive node dan menyimpan seluruh histori block.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>3. Mode Archive vs Pruned</h2>
+            <p>Flag <code>--retain-last-blocks</code> ditujukan untuk operator validator yang ingin mengontrol pertumbuhan storage jangka panjang. Implementasinya dijalankan sebagai background worker, bukan di hot path validasi block, sehingga pruning histori lama tidak menambah beban sinkron pada jalur konsensus utama.</p>
+            <p>Secara operasional, node akan tetap menunggu ketersediaan snapshot penuh yang aman, lalu menghapus block historis lama secara bertahap di background. Nilai retention yang terlalu kecil juga akan dinaikkan ke batas aman minimum agar proses restore state dari snapshot dan delta replay tetap berjalan stabil.</p>
+
+            <h2>4. Alur Prioritas Inisialisasi Identitas Node</h2>
+            <p>Salah satu fitur andalan Lumina adalah penanganan identitas validator otonom. Saat dijalankan, node kernel (<code>node/src/main.rs</code>) memindai identitas menggunakan alur prioritas berikut:</p>
+
+            <div class="flow-card">
+                <div class="flow-step">
+                    <h4>Tahap 1: Argumen CLI --secret</h4>
+                    <p>Node memeriksa apakah parameter <code>--secret</code> diisikan pada CLI. Jika ada, node membersihkan prefiks <code>0x</code>, men-decode hex menjadi byte seed, dan memuat kunci validator dari sana.</p>
+                </div>
+                <div class="flow-step">
+                    <h4>Tahap 2: File Kunci Lokal node.key</h4>
+                    <p>Jika argumen CLI kosong, node mencari file persistent <code>node.key</code> di direktori eksekusi. Jika file tersebut ada, node memuat seed byte (32 byte pertama) dari sana untuk memulihkan identitas lama.</p>
+                </div>
+                <div class="flow-step">
+                    <h4>Tahap 3: Pembuatan Otonom (Auto-Generation)</h4>
+                    <p>Jika keduanya tidak ditemukan, node secara otomatis memicu generator Ed25519 otonom, menulis biner seed tersebut ke dalam file <code>node.key</code> baru di disk untuk penyimpanan permanen, lalu mencetak Alamat Lumina (Bech32m) yang diturunkan dari public key.</p>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <h3>💡 Pro-Tip Pengujian Lokal Multi-Node</h3>
+                <p style="margin-top: 10px; margin-bottom: 0; color: #a7f3d0;">Anda dapat menggunakan naskah otomatisasi Python <code>launcher.py</code> di root proyek untuk meluncurkan beberapa node dengan port P2P/RPC berbeda di komputer lokal secara instan guna mensimulasikan jaringan devnet validator konsensus dengan mudah!</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Validator Series.
+        </div>
+    </div>
+</body>
+</html>

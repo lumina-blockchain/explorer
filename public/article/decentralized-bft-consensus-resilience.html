@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decentralized BFT Consensus: Resilient Gossip Vote & Local QC Aggregation | Lumina Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #05070c;
+            --card-bg: rgba(10, 15, 28, 0.85);
+            --primary: #10b981; /* Emerald Green */
+            --secondary: #3b82f6; /* Electric Blue */
+            --accent: #a855f7; /* Purple Glow */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(16, 185, 129, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(59, 130, 246, 0.07) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--primary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 60px;
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 2rem; 
+            margin: 50px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+        }
+        h3 { font-size: 1.4rem; margin: 35px 0 15px; color: #fde047; }
+        p { margin-bottom: 26px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .analogy-box {
+            background: rgba(168, 85, 247, 0.06);
+            border-left: 4px solid var(--accent);
+            padding: 30px;
+            border-radius: 0 20px 20px 0;
+            margin: 40px 0;
+        }
+        .analogy-title {
+            color: #d8b4fe;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #6ee7b7; font-size: 1rem; }
+
+        .code-block {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        .visual-flow {
+            background: rgba(59, 130, 246, 0.03);
+            border: 1px dashed rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 35px 0;
+            text-align: center;
+        }
+
+        .flow-step {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--secondary);
+            margin: 10px;
+        }
+        .flow-arrow {
+            display: inline-block;
+            color: var(--text-dim);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .info-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .info-card h3 { margin-top: 0; margin-bottom: 12px; }
+
+        .warning-card {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+        .warning-card h3 { color: #f87171; margin-bottom: 10px; }
+        .warning-card p { margin-bottom: 0; color: #fca5a5; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">BFT Consensus Series | May 2026</span>
+            <h1>Decentralized BFT Consensus: Resilient Gossip Vote & Local QC Aggregation</h1>
+            <p>Bedah tuntas arsitektur ketangguhan konsensus HotStuff BFT Lumina L1: mengatasi mati lampu/downtime validator secara otonom, menghilangkan bug kalkulasi quorum, dan menyajikan visualisasi UI yang presisi.</p>
+        </header>
+
+        <div class="content">
+            <p>Dalam jaringan blockchain Proof-of-Stake (PoS) berbasis **Byzantine Fault Tolerance (BFT)**, proses pencapaian mufakat di antara puluhan komputer validator online adalah jantung pertahanan sistem. Setiap kali sebuah blok baru diusulkan oleh seorang **Leader**, blok tersebut tidak bisa langsung masuk ke database sebagai kebenaran mutlak. Ia harus dikirimkan ke seluruh validator aktif untuk diperiksa datanya dan ditandatangani suaranya.</p>
+
+            <p>Bukti matematis bahwa sebuah proposal blok telah disetujui secara sah oleh lebih dari 2/3 total kekuatan taruhan (*voting power*) validator disebut **Quorum Certificate (QC)**. Namun, metode pengumpulan suara tradisional sering kali memiliki cacat desain bawaan yang rapuh: **ketergantungan absolut pada keaktifan Next Leader**. Jika Next Leader mati lampu atau koneksinya terputus tepat saat validator memberikan suara, sistem akan macet dan liveness jaringan terganggu.</p>
+            
+            <p>Untuk mengatasi keterbatasan ini secara radikal, Lumina merancang ulang konsensusnya menjadi **Decentralized Local QC Aggregation** di rilis v1.4, didukung oleh tanda tangan kriptografi **BLS12-381 teragregasi** dan transmisi **Gossipsub Mesh Network**.</p>
+
+            <!-- ANALOGI GAUL DAN PRESTISIUS -->
+            <div class="analogy-box">
+                <div class="analogy-title">
+                    <span>☕</span>
+                    <span>Analogi Dunia Nyata: Tugas Kelompok di Warkop</span>
+                </div>
+                <p>Bayangkan kamu sedang mengerjakan tugas kelompok kuliah yang beranggotakan **4 mahasiswa** (Sultan, Founder 2, Founder 3, dan si Staker Baru). Untuk mengesahkan tugas tersebut agar mendapat nilai dari Dosen (masuk ke State Explorer), tugas harus ditandatangani minimal oleh **3 dari 4 orang** kelompok tersebut (Quorum BFT $> 2/3$).</p>
+                
+                <p><strong>Pola Lama (Leader-Centric) 🤦‍♂️:</strong><br>
+                Hanya ketua kelompok (Next Leader) yang ditugaskan membawa satu-satunya lembar dokumen tugas asli ke warkop. Anggota lain harus datang bergantian untuk tanda tangan di atas kertas yang sama. Sialnya, malam itu si ketua kelompok mendadak **HP-nya mati dan dia ketiduran di rumah (Offline)**! Meskipun 3 anggota kelompok lainnya sudah siap tanda tangan di warkop, mereka tidak memiliki kertasnya. Tugas tersebut akhirnya **gagal dikumpulkan tepat waktu** (blok menjadi <em>Unverified / parent_qc: null</em>), padahal mayoritas anggota sebenarnya hadir!</p>
+
+                <p><strong>Pola Baru Lumina L1 (Decentralized Gossip & Local QC) 🦾:</strong><br>
+                Sekarena, sistem diubah. Dokumen tugas difotokopi menjadi 4 rangkap, sehingga **masing-masing anggota memegang satu kertas**. Mereka tidak perlu berkumpul fisik di satu meja; mereka cukup saling mengirimkan stiker tanda tangan digital melalui **Grup WhatsApp kelompok (Topik Gossip `lumina-votes`)**.</p>
+                
+                <p>Setiap kali ada stiker tanda tangan masuk dari anggota lain, masing-masing anggota langsung mencetak dan menempelkannya di lembar fotokopi milik mereka sendiri secara **lokal dan mandiri (Local QC Aggregation)**. Begitu kertas di tangan Sultan sudah berisi 3 tanda tangan sah (dirinya sendiri + Founder 2 + Staker Baru), Sultan **seketika memiliki dokumen tugas yang SAH secara hukum**! Sultan bisa langsung menyebarkannya ke dosen tanpa perlu menunggu si ketua kelompok yang ketiduran bangun. Konsensus berjalan lancar tanpa hambatan!</p>
+            </div>
+
+            <h2>1. Matematika Byzantine Fault Tolerance: Mengapa Quorum Harus $> 2/3$?</h2>
+            <p>Mengapa dalam rumus BFT, ambang batas persetujuan suara harus lebih besar dari dua pertiga? Hal ini didasarkan pada rumus klasik keamanan Byzantine:</p>
+            <div class="code-block" style="text-align: center; font-size: 1.2rem; font-weight: bold; color: #fbbf24;">
+                N &ge; 3f + 1
+            </div>
+            <p>Di mana <strong>N</strong> adalah total validator aktif, dan <strong>f</strong> adalah jumlah maksimal validator jahat (*Byzantine*) atau mati (*offline*) yang dapat ditoleransi oleh sistem secara bersamaan:</p>
+            <ul>
+                <li>Jika kita memiliki <strong>N = 3</strong> validator (Genesis awal), maka kita dapat menoleransi maksimal <strong>f = 0</strong> kesalahan. Mengapa? Karena jika ada 1 node mati, sisa 2 node online hanya mewakili $\approx 66.6\%$ stake, yang tidak memenuhi syarat $> 2/3$ ($>66.7\%$). Oleh karena itu, semua node harus hidup 100% untuk memproduksi blok yang verified.</li>
+                <li>Begitu ada **1 staker baru masuk** (seperti yang didelegasikan lewat SDK JavaScript), total validator kita melesat menjadi <strong>N = 4</strong>. Berdasarkan rumus di atas, dengan $N=4$ kita secara ajaib dapat menoleransi **f = 1 validator mati**!</li>
+                <li>Sebab, jika 1 validator mati, sisa **3 validator yang online** memiliki kekuatan suara sebesar $3/4 \times 100\% = \mathbf{75\%}$. Nilai 75% ini berada di atas syarat quorum $> 66.7\%$, sehingga pembentukan sertifikat (QC) tetap berjalan mulus!</li>
+            </ul>
+
+            <h2>2. Bedah Teknis Bug "133.3%" Quorum</h2>
+            <p>Ketika validator ke-4 (Staker Baru) aktif di jaringan, para developer dikejutkan dengan kemunculan data aneh di halaman detail blok Explorer:</p>
+            <div class="code-block" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">
+"parent_qc": {
+  "signers_count": 4,
+  "total_validators": 3,
+  "quorum_percentage": "133.3%"
+}
+            </div>
+            <p><strong>Kenapa Hal Tersebut Bisa Terjadi?</strong><br>
+            Akar masalahnya terletak pada **hardcoding** pembagian data di sisi Axum RPC Server. Ketika data dikirimkan secara live melalui WebSocket, data tersebut sudah dihitung dinamis menggunakan panjang array validator sesungguhnya. Namun, pada handler RPC HTTP `/block/:height` dan `/blocks`, kode API internal masih melakukan konversi persentase dengan nilai pembagi statis `3.0` dari era genesis lama:</p>
+            <div class="code-block" style="background: #1c0f16; border-color: rgba(239, 68, 68, 0.2);">
+<span class="comment">// ❌ KODE LAMA YANG MENGANDUNG BUG HARDCODED 3 VALIDATOR:</span>
+"quorum_percentage": format!("{:.1}%", (qc.signers.len() as f64 / 3.0) * 100.0)
+            </div>
+            <p>Karena total penandatangan (`signers.len()`) bernilai 4, maka pembagiannya menghasilkan $\frac{4}{3} \times 100\% = 133.3\%$. Ini adalah pelanggaran logika matematika blockchain!</p>
+
+            <p><strong>Bagaimana Kita Memperbaikinya?</strong><br>
+            Kita memperbaikinya dengan menghubungkan `StakingState` ke dalam status RPC dan mendefinisikan method penghitung dinamis:</p>
+            <div class="code-block" style="background: #0f1712; border-color: rgba(16, 185, 129, 0.2);">
+<span class="comment">// ✅ KODE BARU YANG DINAMIS DAN VALID:</span>
+impl RpcState {
+    pub fn get_total_validators(&self) -> usize {
+        let mut total = self.staking.get_validators().len();
+        for entry in self.state.active_validators.iter() {
+            let addr = entry.value();
+            if !self.staking.get_validators().iter().any(|v| v.address.to_string() == addr.to_string()) {
+                total += 1;
+            }
+        }
+        total.max(3) // Batas bawah minimal 3 validator genesis
+    }
+}
+            </div>
+            <p>Dengan kode di atas, pembagi persentase kini selalu sejalan dengan total validator aktif riil, menjaga kredibilitas kalkulasi konsensus di seluruh endpoint publik!</p>
+
+            <h2>3. Alur Kerja Komunikasi P2P Gossipsub `lumina-votes`</h2>
+            <p>Setiap kali validator online menerima dan memverifikasi sebuah proposal blok baru, validator tersebut akan menandatangani hash dari proposal tersebut menggunakan BLS Private Key miliknya. Suara yang dihasilkan kemudian dikemas ke dalam sebuah struct `Vote` dan disebarkan ke jaringan mesh network P2P:</p>
+
+            <div class="visual-flow">
+                <div class="flow-step">Vote Terbentuk di Validator</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Siaran Gossipsub (lumina-votes)</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Gossip Mesh Delivery ke Semua Peer</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Tiap Node Kumpul & Cetak QC Sendiri</div>
+            </div>
+
+            <p>Proses transmisi ini menjamin desentralisasi mutlak: **tidak ada satu titik kegagalan (Single Point of Failure)**. Data vote menyebar secara eksponensial dalam hitungan milidetik ke seluruh belahan dunia!</p>
+
+            <h2>4. UI Pembaruan Explorer: Menghilangkan Persen Demi Tampilan Premium</h2>
+            <p>Terkadang, angka persentase murni tidak cukup informatif di mata operator node dan pengguna awam. Oleh karena itu, UI Explorer Lumina L1 kini diperbarui ke gaya premium yang digunakan oleh blockchain papan atas dunia:</p>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>📊 Format Pecahan Dinamis</h3>
+                    <p>Badge konsensus tidak lagi menampilkan `100%` atau `75%` yang membosankan. Kini ia menampilkan format bernilai tinggi seperti **`3/4 Validators`** atau **`4/4 Validators`**.</p>
+                </div>
+                <div class="info-card">
+                    <h3>🏆 Status BFT Verified Instan</h3>
+                    <p>Mata pengguna langsung dimanjakan dengan visualisasi detail fraksi validator yang ikut serta menyumbangkan suaranya di dalam Quorum Certificate secara transparan dan akurat.</p>
+                </div>
+            </div>
+            
+            <p>Ini adalah bukti nyata komitmen Lumina dalam menyajikan mahakarya teknologi yang tidak hanya andal di balik layar, tetapi juga memukau di permukaan estetika visual!</p>
+
+            <div class="warning-card">
+                <h3>⚠️ Aturan Operasional Terakhir:</h3>
+                <p>Meskipun sistem kini sangat toleran terhadap downtime satu validator, menjaga nodemu tetap online 24/7 adalah kewajiban moral dan finansial bagi setiap staker untuk memastikan pembagian gas fee dan reputasi optimal!</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Core Consensus Series.
+        </div>
+    </div>
+</body>
+</html>

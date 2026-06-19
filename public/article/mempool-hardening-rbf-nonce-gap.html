@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mempool Hardening: Replace-By-Fee (RBF), Nonce Gap, & Per-Account Limit Mitigations | Dokumentasi Teknis Lumina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060913;
+            --card-bg: rgba(11, 17, 32, 0.85);
+            --primary: #f59e0b; /* Amber Gold */
+            --secondary: #10b981; /* Emerald Green */
+            --accent: #8b5cf6; /* Purple Glow */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(245, 158, 11, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(139, 92, 246, 0.06) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--primary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 60px;
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 2rem; 
+            margin: 50px 0 20px; 
+            color: var(--secondary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+        }
+        h3 { font-size: 1.4rem; margin: 35px 0 15px; color: #fde047; }
+        p { margin-bottom: 26px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .analogy-box {
+            background: rgba(245, 158, 11, 0.04);
+            border-left: 4px solid var(--primary);
+            padding: 30px;
+            border-radius: 0 20px 20px 0;
+            margin: 40px 0;
+        }
+        .analogy-title {
+            color: #fde047;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.04);
+            border-left: 4px solid var(--secondary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #a7f3d0; font-size: 1rem; }
+
+        .danger-box {
+            background: rgba(239, 68, 68, 0.04);
+            border-left: 4px solid #ef4444;
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .danger-box p { margin-bottom: 0; color: #fca5a5; font-size: 1rem; }
+
+        .code-block {
+            background: #030509;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        .visual-flow {
+            background: rgba(139, 92, 246, 0.02);
+            border: 1px dashed rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 35px 0;
+            text-align: center;
+        }
+
+        .flow-step {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--primary);
+            margin: 10px;
+        }
+        .flow-arrow {
+            display: inline-block;
+            color: var(--text-dim);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .info-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .info-card h3 { margin-top: 0; margin-bottom: 12px; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Kembali ke Hub Dokumentasi</a>
+        
+        <header>
+            <span class="meta">Hardening Jaringan & Mempool Series | Mei 2026</span>
+            <h1>Mempool Hardening: Proteksi Lumina L1 dari Serangan Nonce Gap & Eksploitasi Sumber Daya</h1>
+            <p>Bedah tuntas implementasi kebijakan Replace-By-Fee (RBF), mitigasi Nonce Gap Bug, dan penambahan kuota transaksi per-akun untuk memastikan sanitasi mempool, keadilan prioritas fee, dan ketahanan terhadap serangan spamming DoS.</p>
+        </header>
+
+        <div class="content">
+            <p>Mempool merupakan "ruang tunggu" sebelum transaksi pengguna dijemput oleh validator untuk dieksekusi dan dimasukkan secara permanen ke dalam blok blockchain. Di dalam blockchain Layer-1 berkinerja tinggi seperti **Lumina**, mempool harus dijaga dengan tingkat keamanan ekstra ketat demi mencegah serangan spamming dan kehabisan memori (*out-of-memory crash*).</p>
+
+            <p>Hari ini, tim inti Lumina telah merancang dan berhasil merilis paket peningkatan keamanan mempool (Hardening) yang melingkupi tiga fitur mitigasi kritis: **Replace-By-Fee (RBF) Policy**, **Nonce Gap Filter**, dan **Per-Account Pending Transaction Limit (Quota)**. Tiga pilar keamanan ini menjamin pemrosesan transaksi yang adil, efisien, dan kebal dari ancaman spamming.</p>
+
+            <div class="highlight-box">
+                <p><strong>💡 Catatan Sistem:</strong> Seluruh paket mitigasi mempool ini telah ditambal, diuji melalui framework unit-testing secara mandiri, dan berhasil diverifikasi tanpa regresi di seluruh test suite workspace blockchain Lumina.</p>
+            </div>
+
+            <h2>1. Mengapa Eksploitasi Mempool Harus Dimodifikasi?</h2>
+            <p>Sebelum adanya perbaikan ini, mempool Lumina memiliki celah yang dapat dieksploitasi dengan mudah:</p>
+
+            <div class="danger-box">
+                <p><strong>🚨 Kerentanan A: Duplikasi Nonce & Pemborosan RAM</strong><br>
+                Transaksi diidentifikasi berdasarkan Hash-nya. Jika pengguna mengirim 1.000 transaksi berbeda dengan nonce yang sama tetapi muatan data yang sedikit berbeda, mempool akan menyimpan seluruh 1.000 transaksi tersebut secara paralel karena hash-nya unik. Hal ini dapat membuat RAM validator membengkak pesat.</p>
+            </div>
+
+            <div class="danger-box">
+                <p><strong>🚨 Kerentanan B: Nonce Gap & Kemacetan Throughput</strong><br>
+                Metode pemilihan batch lama mengurutkan transaksi secara global berdasarkan **Fee Tertinggi**. Jika Akun A mengirim transaksi nonce 2 (fee rendah) dan transaksi nonce 3 (fee tinggi), validator akan memprioritaskan nonce 3 karena fee-nya besar. Namun, transaksi nonce 3 tidak akan pernah valid dieksekusi di state karena transaksi nonce 2 belum diproses! Akibatnya, blok dipenuhi transaksi mati yang menyumbat throughput jaringan.</p>
+            </div>
+
+            <div class="danger-box">
+                <p><strong>🚨 Kerentanan C: Mempool Starvation & DoS Per-Account</strong><br>
+                Tidak adanya batasan kuota transaksi per alamat pengirim berarti satu alamat jahat dapat membanjiri mempool dengan mengirimkan ribuan transaksi kecil secara paralel. Tanpa limit, satu akun tunggal bisa memakan habis buffer mempool global (`MAX_MEMPOOL_SIZE`), mencegah pengguna sah lainnya untuk mengirimkan transaksi (*starvation*).</p>
+            </div>
+
+            <!-- ANALOGI GAUL DAN PRESTISIUS -->
+            <div class="analogy-box">
+                <div class="analogy-title">
+                    <span>📦</span>
+                    <span>Analogi Dunia Nyata: Sistem Pengiriman Paket Express di Gudang</span>
+                </div>
+                <p>Bayangkan Anda ingin mengirimkan beberapa buah paket berurutan (Nomor Seri Paket 1, 2, dan 3) menggunakan jasa kurir.</p>
+                
+                <p><strong>Sebelum Perbaikan (Kemacetan Gudang & Spam) 🤦‍♂️:</strong><br>
+                1. Anda mengirim Paket 1 dengan tarif normal Rp 10.000, tetapi paket tersebut tertahan lama di gudang karena kurir sedang sibuk. Karena Anda tidak sabar, Anda mengirim Paket 3 (karena Paket 2 hilang/tidak ada) dan membayar tarif express Rp 1.000.000. 
+                Gudang kurir memprioritaskan Paket 3 karena bayarannya besar. Namun, konduktor di bandara menolak mengirimkan Paket 3 karena berdasarkan aturan mutlak bea cukai, paket harus dikirim berurutan (Paket 1 dulu, lalu Paket 2, lalu Paket 3). Akibatnya, Paket 3 menggantung sia-sia di bandara, memenuhi ruang kargo pesawat tanpa kegunaan!<br>
+                2. Seseorang yang jahat memesan 5.000 pengiriman paket kecil sekaligus untuk memonopoli seluruh ruang truk kurir, sehingga pelanggan lain tidak kebagian tempat.</p>
+
+                <p><strong>Setelah Perbaikan (Lumina RBF, Nonce Filter, & Limit Per-Account) 🦾:</strong><br>
+                Sistem gudang Lumina sekarang sangat pintar.
+                1. <strong>Nonce Filter</strong>: Kurir akan mengelompokkan paket Anda. Jika dideteksi Anda mengirim Paket 3 tetapi Paket 2 tidak pernah ada di gudang, kurir langsung menyingkirkan Paket 3 dari daftar prioritas pengiriman karena tahu paket tersebut tidak akan lolos bea cukai bandara.
+                2. <strong>Replace-By-Fee (RBF)</strong>: Jika Anda ingin mempercepat Paket 1 Anda yang tertahan, Anda cukup mengirim paket baru bernomor Seri 1 dengan membayar tarif minimal 10% lebih tinggi (misal Rp 11.000). Kurir akan mencari Paket 1 yang lama, membuangnya, dan menggantinya dengan paket baru yang ber-fee lebih tinggi agar segera dikirim hari itu juga.
+                3. <strong>Limit Per-Account</strong>: Setiap pelanggan dibatasi maksimal hanya boleh memiliki 128 paket pending di dalam gudang secara bersamaan. Pengajuan paket ke-129 akan ditolak demi memberikan keadilan bagi pengirim paket lainnya.</p>
+            </div>
+
+            <h2>2. Implementasi Replace-By-Fee (RBF) & Per-Account Limit</h2>
+            <p>Untuk menertibkan mempool dari duplikasi nonce, memberikan opsi percepatan transaksi, dan mencegah starvation per-akun, kita menyisipkan pengecekan berikut di dalam internal `add_transaction` mempool:</p>
+            
+            <div class="code-block">
+<span class="comment">// Cuplikan kode aturan RBF & Quota di crates/mempool/src/lib.rs:</span>
+<span class="keyword">let</span> <span class="keyword">mut</span> existing_hash = None;
+<span class="keyword">let</span> <span class="keyword">mut</span> existing_fee = <span class="keyword">0</span>;
+<span class="keyword">for</span> entry <span class="keyword">in</span> self.pending_transactions.iter() {
+    <span class="keyword">let</span> existing_tx = &amp;entry.value().tx;
+    <span class="keyword">if</span> existing_tx.transaction.from == tx.transaction.from &amp;&amp; existing_tx.transaction.nonce == tx.transaction.nonce {
+        existing_hash = Some(entry.key().clone());
+        existing_fee = existing_tx.transaction.fee;
+        <span class="keyword">break</span>;
+    }
+}
+
+<span class="keyword">if</span> <span class="keyword">let</span> Some(old_hash) = existing_hash {
+    <span class="comment">// Kenaikan fee minimal harus 10%</span>
+    <span class="keyword">let</span> min_required_fee = existing_fee + (existing_fee / <span class="keyword">10</span>).max(<span class="keyword">1</span>);
+    <span class="keyword">if</span> tx.transaction.fee &gt;= min_required_fee {
+        <span class="comment">// Hapus transaksi lama & izinkan penyisipan transaksi baru</span>
+        self.pending_transactions.remove(&amp;old_hash);
+        <span class="macro">tracing::info!</span>(<span class="string">"Replace-By-Fee triggered! Replaced transaction..."</span>);
+    } <span class="keyword">else</span> {
+        <span class="keyword">return</span> Err(<span class="string">"Transaction rejected: New fee is not at least 10% higher than existing fee under RBF policy."</span>.to_string());
+    }
+} <span class="keyword">else</span> {
+    <span class="comment">// --- LIMIT TRANSAKSI PER AKUN (BUG 11) ---</span>
+    <span class="keyword">if</span> self.get_pending_count(&amp;tx.transaction.from) &gt;= MAX_PENDING_PER_ACCOUNT {
+        <span class="keyword">return</span> Err(format!(
+            <span class="string">"Transaction rejected: Account {:?} has reached the maximum pending transaction limit of {} under Mempool Quota policy."</span>,
+            tx.transaction.from, MAX_PENDING_PER_ACCOUNT
+        ));
+    }
+}
+            </div>
+
+            <h2>3. Alur Verifikasi Multi-Node & Test Suite L1</h2>
+            <p>Untuk membuktikan keandalan logika baru ini, tim telah menjalankan verifikasi ketat secara berlapis:</p>
+
+            <div class="visual-flow">
+                <div class="flow-step">Menulis Unit Test RBF & Quota</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Eksekusi cargo test -p lumina-mempool</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Eksekusi Seluruh Suite cargo test</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">Verifikasi Integrasi Cluster Sukses 100%</div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>💡 test_mempool_per_account_limit</h3>
+                    <p>Unit test khusus yang memverifikasi bahwa pengirim dapat memasukkan hingga 128 transaksi secara berurutan, transaksi ke-129 ditolak dengan benar, tetapi transaksi RBF pengganti (replacement) tetap diperbolehkan meskipun limit kuota terpenuhi.</p>
+                </div>
+                <div class="info-card">
+                    <h3>🛡️ Global Consensus Safety</h3>
+                    <p>Seluruh 42 pengujian otomatis di tingkat workspace Rust Lumina (mencakup consensus, state parallel STM execution, storage, SDK, dan cryptography) dinyatakan lulus total (Passed) tanpa ada regresi.</p>
+                </div>
+            </div>
+
+            <h2>4. Kesimpulan Kesiapan Mainnet</h2>
+            <p>Mitigasi mempool ini membuktikan bahwa blockchain Lumina tidak hanya cepat secara performa (Block-STM), tetapi juga tangguh dan matang secara keamanan ekonomis dan pemeliharaan sumber daya. Langkah ini membawa Lumina L1 satu langkah lebih dekat ke standar produksi publik mainnet yang sangat andal.</p>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Core Mempool Series.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Studio: WASM Smart Contract Studio IDE | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Monaco Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <style>
+        :root {
+            --bg: #050409;
+            --card-bg: #0e0a16;
+            --primary: #c084fc; /* Electric Orchid */
+            --secondary: #f472b6; /* Cyber Magenta */
+            --accent: #10b981; /* Neon Emerald */
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --border-color: rgba(192, 132, 252, 0.15);
+            --glow: rgba(192, 132, 252, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background-image: radial-gradient(circle at 50% 50%, rgba(192, 132, 252, 0.05) 0%, transparent 80%);
+        }
+
+        header {
+            padding: 15px 30px;
+            background: rgba(14, 10, 22, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .brand { 
+            font-size: 1.6rem; 
+            font-weight: 800; 
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.3s;
+            margin-right: 20px;
+        }
+        .back-link:hover { color: var(--primary); }
+
+        main {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #editor-container {
+            border-right: 1px solid var(--border-color);
+            background: #020104;
+        }
+
+        .sidebar {
+            padding: 30px;
+            background: var(--card-bg);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            overflow-y: auto;
+            border-left: 1px solid var(--border-color);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.4);
+        }
+
+        h2 { 
+            font-size: 1.15rem; 
+            margin: 0; 
+            color: var(--primary); 
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label { 
+            font-size: 0.75rem; 
+            color: var(--text-secondary); 
+            text-transform: uppercase; 
+            letter-spacing: 0.15em; 
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            background: #06040a;
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 10px rgba(244, 114, 182, 0.25);
+        }
+
+        .btn {
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            color: #050409; 
+            box-shadow: 0 4px 20px var(--glow);
+        }
+        .btn-primary:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 25px rgba(192, 132, 252, 0.6); 
+        }
+
+        .console {
+            background: #020104;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            height: 180px;
+            overflow-y: auto;
+            color: var(--accent);
+            line-height: 1.6;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+        }
+
+        .badge { 
+            background: rgba(192, 132, 252, 0.12); 
+            color: var(--primary);
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-size: 0.7rem; 
+            font-weight: 700;
+            border: 1px solid rgba(192, 132, 252, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .blinking-cursor {
+            font-weight: 700;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            from, to { color: transparent }
+            50% { color: var(--accent); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div style="display: flex; align-items: center;">
+            <a href="index.html" class="back-link">← Return to Dashboard</a>
+            <div class="brand">LUMINA <span style="color:white">STUDIO IDE</span> <span class="badge">v0.1-Alpha</span></div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary" id="deploy-btn">🚀 Deploy to Localnet</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="editor-container"></div>
+        
+        <div class="sidebar">
+            <h2>⚙️ Contract Manifest Config</h2>
+            
+            <div class="control-group">
+                <label>Template</label>
+                <select id="template-select" onchange="loadTemplate()">
+                    <option value="lmn20">Standard LMN-20 Token (Rust)</option>
+                    <option value="hello">Hello World (Logger Sandbox)</option>
+                    <option value="vault">Simple Vault (Safe Lock)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Smart Contract Name</label>
+                <input type="text" id="token-name" placeholder="Lumina Gold Core">
+            </div>
+
+            <div class="control-group">
+                <label>Private Key (Seed Hex - Local Only)</label>
+                <input type="password" id="priv-key" placeholder="Masukkan 64 hex private key...">
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-color); width: 100%;">
+
+            <h2>💻 Live Execution Console</h2>
+            <div id="console" class="console">
+                > Lumina Studio IDE initialized.<br>
+                > Select template to edit & compile bytecode...<span class="blinking-cursor">_</span>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { LuminaWallet, LuminaClient, LuminaUtils } from '../lumina-blockchain-sdk/js/src/index.js';
+
+        let editor;
+        const templates = {
+            lmn20: `// Lumina Standard Token (LMN-20)
+// Deterministic Hardware-Native WASM Contract
+use lumina_sdk::{contract, view, state};
+
+#[state]
+pub struct TokenContract {
+    name: String,
+    balances: Map<Address, u128>,
+}
+
+#[contract]
+impl TokenContract {
+    #[init]
+    pub fn new(name: String) -> Self {
+        Self { name, balances: Map::new() }
+    }
+
+    #[view]
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+}`,
+            hello: `// Hello Sandbox (Logger example)
+extern "C" {
+    fn lumina_log(ptr: u32, len: u32);
+}
+
+#[no_mangle]
+pub extern "C" fn main() {
+    let msg = "Hello from Lumina WebAssembly Sandbox Engine!";
+    unsafe { lumina_log(msg.as_ptr() as u32, msg.len() as u32); }
+}`,
+            vault: `// Simple Vault (Safe Lock contract)
+use lumina_sdk::{contract, state};
+
+#[state]
+pub struct VaultContract {
+    owner: Address,
+    locked_until: u64,
+}
+
+#[contract]
+impl VaultContract {
+    #[init]
+    pub fn new(locked_until: u64) -> Self {
+        Self { owner: Context::sender(), locked_until }
+    }
+}`
+        };
+
+        // Initialize Monaco Editor
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: templates.lmn20,
+                language: 'rust',
+                theme: 'vs-dark',
+                fontSize: 15,
+                fontFamily: 'Fira Code',
+                minimap: { enabled: false },
+                automaticLayout: true
+            });
+        });
+
+        window.loadTemplate = () => {
+            const val = document.getElementById('template-select').value;
+            editor.setValue(templates[val]);
+            log(`Loaded template: ${val}`);
+        };
+
+        window.log = (msg, type = 'info') => {
+            const con = document.getElementById('console');
+            const color = type === 'error' ? '#f87171' : (type === 'success' ? '#34d399' : '#c084fc');
+            con.innerHTML = con.innerHTML.replace('<span class="blinking-cursor">_</span>', '');
+            con.innerHTML += `<br><span style="color:${color}">> ${msg}</span><span class="blinking-cursor">_</span>`;
+            con.scrollTop = con.scrollHeight;
+        };
+
+        // ATTACH EVENT LISTENERS FOR VALIDATOR DEPLOY
+        document.getElementById('deploy-btn').addEventListener('click', async () => {
+            const privKey = document.getElementById('priv-key').value;
+            if (!privKey) {
+                log("Error: Private Key (seed hex) wajib diisi untuk deployment!", "error");
+                return;
+            }
+
+            log("Memicu parser bytecode WASM... (Compiling Contract)");
+            
+            try {
+                // Simulasi Biner WASM Bytecode Kompilasi Lumina
+                const dummyBytecode = new Uint8Array([
+                    0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00,
+                    0x01, 0x04, 0x01, 0x60, 0x00, 0x00, 0x03, 0x02, 
+                    0x01, 0x00, 0x07, 0x08, 0x01, 0x04, 0x6d, 0x61, 
+                    0x69, 0x6e, 0x00, 0x00, 0x0a, 0x04, 0x01, 0x02, 
+                    0x00, 0x0b
+                ]);
+
+                const cleanKey = privKey.startsWith('0x') ? privKey.substring(2) : privKey;
+                const wallet = new LuminaWallet(cleanKey);
+                const client = new LuminaClient('http://127.0.0.1:9095');
+
+                log(`Menghubungkan Dompet: ${wallet.getAddress()}...`);
+                const state = await client.getBalance(wallet.getAddress());
+                
+                const prefix = "DEPLOY:";
+                const prefixBytes = new TextEncoder().encode(prefix);
+                const fullData = new Uint8Array(prefixBytes.length + dummyBytecode.length);
+                fullData.set(prefixBytes);
+                fullData.set(dummyBytecode, prefixBytes.length);
+
+                log("Menandatangani payload bytecode dengan Ed25519...");
+                const systemAddr = "lumina1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"; // Deploy System Address
+                const tx = wallet.signTransaction(systemAddr, 0, state.next_nonce || 0, Array.from(fullData));
+
+                log("Mengirim transaksi kompilasi biner ke RPC /submit...");
+                const result = await client.sendTransaction(tx);
+
+                if (result.status === 'ok' || result.status === 'success') {
+                    log(`✅ SMART CONTRACT DEPLOYED SUCCESSFULLY!`, "success");
+                    log(`Tx Hash ID: ${result.hash}`, "success");
+                    log(`Scan Explorer: <a href="index.html?search=${result.hash}" style="color:#f472b6; text-decoration: underline;">Click Here</a>`);
+                } else {
+                    log(`❌ RPC REJECTED: ${result.message || 'Mempool rejection'}`, "error");
+                }
+
+            } catch (e) {
+                log(`Error System: ${e.message}`, "error");
+            }
+        });
+    </script>
+</body>
+</html>

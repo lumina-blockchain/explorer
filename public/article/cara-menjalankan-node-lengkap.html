@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Lengkap: Cara Menjalankan Node Lumina & Rincian Flag Fitur | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0712;
+            --card-bg: rgba(22, 13, 35, 0.8);
+            --primary: #ec4899; /* Neon Pink */
+            --secondary: #fbbf24; /* Amber Gold */
+            --accent: #10b981; /* Emerald Green */
+            --blue-accent: #3b82f6; /* Electric Blue */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --code-bg: #05020a;
+            --border: rgba(236, 72, 153, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(236, 72, 153, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        .meta { 
+            color: var(--secondary); 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 0.15em; 
+            display: block; 
+            margin-bottom: 12px; 
+        }
+        h1 { 
+            font-size: 3.5rem; 
+            font-weight: 800; 
+            line-height: 1.2;
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--blue-accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            font-weight: 400;
+            max-width: 800px;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 32px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 { 
+            font-size: 2rem; 
+            margin: 50px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h3 { font-size: 1.4rem; margin: 35px 0 15px; color: var(--secondary); }
+        p { margin-bottom: 24px; color: #d1d5db; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(236, 72, 153, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #f3f4f6; }
+
+        /* CLI Syntax Box */
+        .cli-box {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 25px;
+            border-radius: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            color: #e5e7eb;
+            margin: 35px 0;
+            overflow-x: auto;
+            position: relative;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+        }
+        .cli-box::before {
+            content: 'Terminal CLI';
+            position: absolute;
+            top: 6px;
+            right: 15px;
+            font-size: 0.7rem;
+            color: var(--primary);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .cli-comment { color: #6b7280; font-style: italic; }
+        .cli-cmd { color: var(--secondary); font-weight: bold; }
+        .cli-arg { color: var(--primary); font-weight: 600; }
+        .cli-val { color: var(--blue-accent); }
+
+        /* Tables */
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 35px 0;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .param-table th, .param-table td {
+            padding: 18px 24px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem;
+        }
+        .param-table th {
+            background: rgba(236, 72, 153, 0.08);
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+        }
+        .param-table tr:hover td {
+            background: rgba(255, 255, 255, 0.015);
+        }
+        .badge {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--blue-accent);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        .badge-opt {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--secondary);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        /* Grid */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        .mode-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 24px;
+            transition: all 0.3s ease;
+        }
+        .mode-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            background: rgba(236, 72, 153, 0.02);
+        }
+        .mode-card h4 {
+            color: var(--secondary);
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mode-card p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+            color: var(--text-dim);
+        }
+
+        .step-list {
+            list-style: none;
+            margin: 30px 0;
+        }
+        .step-item {
+            position: relative;
+            padding-left: 45px;
+            margin-bottom: 25px;
+        }
+        .step-item::before {
+            content: attr(data-step);
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .step-item h4 { color: #ffffff; margin-bottom: 5px; font-size: 1.1rem; }
+        .step-item p { font-size: 0.98rem; color: var(--text-dim); }
+
+        .tip-box {
+            background: rgba(16, 185, 129, 0.04);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+        .tip-box h3 { color: var(--accent); margin-top: 0; }
+        .tip-box p { margin-bottom: 0; color: #a7f3d0; font-size: 0.98rem; }
+
+        .footer {
+            margin-top: 80px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Kembali ke Hub Dokumentasi</a>
+        
+        <header>
+            <span class="meta">Panduan Lengkap & Rujukan Parameter CLI | Juni 2026</span>
+            <h1>Panduan Menjalankan Node Lumina</h1>
+            <p class="subtitle">Eksplorasi mendalam berbagai arsitektur eksekusi node, skenario pengoperasian jaringan, serta panduan lengkap rujukan parameter CLI otonom.</p>
+        </header>
+
+        <div class="content">
+            <p>Node Lumina didesain sebagai sebuah *executable binary* mandiri (berbasis Rust) yang menggabungkan seluruh komponen jaringan *Layer 1*: konsensus BFT HotStuff, VM Smart Contract WASM, database transaksional Sled DB, API Server gRPC/Axum, serta mesin sinkronisasi MPT (*Merkle Patricia Trie*). Fleksibilitas tinggi ini memungkinkan Anda untuk menjalankan node dalam berbagai mode operasional secara dinamis hanya dengan mengubah argumen saat eksekusi.</p>
+
+            <div class="highlight-box">
+                <p><strong>💡 Catatan Pemulihan Otomatis (Self-Healing MPT):</strong> Kode terbaru kami dilengkapi dengan fitur *self-healing* MPT trie. Jika node mendeteksi adanya <em>State Root Mismatch</em> akibat kegagalan database lokal saat runtime, node akan secara otomatis memicu pembangunan ulang state penuh dari genesis menggunakan histori blok DB tanpa memerlukan intervensi manual atau penghapusan data.</p>
+            </div>
+
+            <h2>1. Berbagai Tipe Node Lumina</h2>
+            <p>Lumina membedakan peran operasional node berdasarkan beban komputasi dan kebutuhan akses data. Terdapat tiga mode operasional utama:</p>
+
+            <div class="mode-grid">
+                <div class="mode-card">
+                    <h4>🗳️ Validator Node</h4>
+                    <p>Fokus penuh pada validasi transaksi, penciptaan blok baru, serta partisipasi aktif dalam penandatanganan konsensus BFT BLS. Memerlukan kunci rahasia aktif.</p>
+                </div>
+                <div class="mode-card">
+                    <h4>🌐 Full Node (Non-Validator)</h4>
+                    <p>Bertindak sebagai gerbang API publik. Menyediakan antarmuka RPC Axum, WebSocket PubSub, gRPC Tonic, dan melayani sinkronisasi data explorer tanpa ikut melakukan voting blok.</p>
+                </div>
+                <div class="mode-card">
+                    <h4>🔒 Validator-Only Node</h4>
+                    <p>Mode yang sangat terisolasi dan aman untuk validator produksi. Menonaktifkan server RPC Axum dan integrasi publik lainnya guna mereduksi celah serangan siber secara maksimal.</p>
+                </div>
+            </div>
+
+            <h2>2. Berbagai Cara Menjalankan Node Lumina</h2>
+
+            <h3>Cara A: Menggunakan Executable Binary Langsung (Skenario Produksi)</h3>
+            <p>Untuk lingkungan produksi, gunakan binary hasil kompilasi optimal release guna meminimalkan latensi eksekusi transaksi (block-STM) dan memaksimalkan throughput konsensus:</p>
+
+            <div class="cli-box">
+                <span class="cli-comment"># Kompilasi khusus package lumina-node ke mode release</span><br>
+                <span class="cli-cmd">cargo build --release -p lumina-node</span><br><br>
+                <span class="cli-comment"># Eksekusi binary optimal dengan flag spesifik</span><br>
+                <span class="cli-cmd">./target/release/lumina-node</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--port</span> <span class="cli-val">61693</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--secret</span> <span class="cli-val">2bb949cc9433ebb2ebe64414de3facbfa825ae98ee95ffd4ae1641abff2e3890</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--db-path</span> <span class="cli-val">data/node5</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--grpc-port</span> <span class="cli-val">40063</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--telemetry-url</span> <span class="cli-val">http://127.0.0.1:3009/telemetry</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--telemetry-show-wallet</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--genesis-path</span> <span class="cli-val">genesis.json</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--bootnode</span> <span class="cli-val">/ip4/127.0.0.1/tcp/61688/p2p/12D3KooWSC9k5sK1oXzDUjmm4q3rXk4Qok3D9nHsfM3actXRvj3N</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--fast-sync</span>
+            </div>
+
+            <p>Jika tujuan operator adalah menjaga pertumbuhan storage validator tetap terkendali, gunakan mode pruned node. Secara default, tanpa flag pruning, node Lumina tetap berjalan sebagai archive node dan menyimpan seluruh histori block.</p>
+
+            <div class="cli-box">
+                <span class="cli-comment"># Contoh node pruned yang hanya menyimpan 5 juta block terakhir di disk</span><br>
+                <span class="cli-cmd">cargo run --release -p lumina-node --bin lumina-node --</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--port</span> <span class="cli-val">61696</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--db-path</span> <span class="cli-val">data/pruned-node1</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--retain-last-blocks</span> <span class="cli-val">5000000</span>
+            </div>
+
+            <h3>Cara B: Menggunakan Cargo Run (Skenario Pengembangan)</h3>
+            <p>Sangat ideal untuk proses debugging, penambahan fitur, atau pengujian jangka pendek. Cargo akan menangani kompilasi dan eksekusi secara otomatis:</p>
+
+            <div class="cli-box">
+                <span class="cli-cmd">cargo run --release -p lumina-node --bin lumina-node --</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--port</span> <span class="cli-val">61695</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--full-node</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--db-path</span> <span class="cli-val">data/fullnode1</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--grpc-port</span> <span class="cli-val">40055</span> \<br>
+                &nbsp;&nbsp;<span class="cli-arg">--bootnode</span> <span class="cli-val">/ip4/127.0.0.1/tcp/61688/p2p/12D3KooWSC9k5sK1oXzDUjmm4q3rXk4Qok3D9nHsfM3actXRvj3N</span>
+            </div>
+
+            <h3>Cara C: Menggunakan Python Multi-Node Launcher (Devnet Lokal)</h3>
+            <p>Untuk mensimulasikan cluster jaringan devnet penuh dengan 4 validator independen dan layanan pendukung di komputer lokal Anda:</p>
+
+            <div class="cli-box">
+                <span class="cli-comment"># Jalankan manajer orchestrator terintegrasi</span><br>
+                <span class="cli-cmd">python .\launcher.py --release --nodes 4</span>
+            </div>
+            <p>Pilih Menu <strong>`[1] 🚀 Jalankan SEMUA Node & Layanan`</strong> untuk memulai seluruh cluster secara otomatis, lengkap dengan server telemetri dan bot spammer transaksi.</p>
+
+            <h2>3. Kamus & Panduan Lengkap Parameter CLI</h2>
+            <p>Berikut adalah rincian lengkap argumen CLI yang didukung oleh kernel utama Lumina Node:</p>
+
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Flag Parameter</th>
+                        <th>Tipe Data</th>
+                        <th>Mode Default</th>
+                        <th>Deskripsi Fungsional & Aturan Operasional</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong><code>--port</code> / <code>-p</code></strong></td>
+                        <td><span class="badge">u16</span></td>
+                        <td><code>61688</code></td>
+                        <td>Port TCP untuk komunikasi P2P libp2p. Server RPC Axum akan berjalan pada port dinamis: <code>9090 + (port % 10)</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--secret</code> / <code>-s</code></strong></td>
+                        <td><span class="badge badge-opt">String (Hex)</span></td>
+                        <td><code>None</code></td>
+                        <td>Seed kunci privat Ed25519 sepanjang 64 karakter hex untuk menurunkan kunci BFT BLS validator.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--bootnode</code> / <code>-b</code></strong></td>
+                        <td><span class="badge badge-opt">Multiaddr</span></td>
+                        <td><code>None</code></td>
+                        <td>Multi-address peer pertama yang akan dihubungi untuk terhubung ke mesh network (misal: <code>/ip4/127.0.0.1/tcp/61688/p2p/...</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--db-path</code></strong></td>
+                        <td><span class="badge">String</span></td>
+                        <td><code>"data/db"</code></td>
+                        <td>Jalur folder penyimpanan persistent database engine Sled DB lokal.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--retain-last-blocks</code></strong></td>
+                        <td><span class="badge badge-opt">u64</span></td>
+                        <td><code>None</code></td>
+                        <td>Mengaktifkan mode pruned node dengan menyimpan hanya <code>N</code> block terakhir di disk. Jika tidak diisi, node tetap menjadi archive node dan menyimpan histori block penuh.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--genesis-path</code></strong></td>
+                        <td><span class="badge">String</span></td>
+                        <td><code>"genesis.json"</code></td>
+                        <td>Jalur file genesis pemetaan alokasi saldo awal dan validator set. Diperkuat dengan pencarian jalur alternatif.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--fast-sync</code></strong></td>
+                        <td><span class="badge badge-opt">Flag</span></td>
+                        <td><code>false</code></td>
+                        <td>Mengaktifkan pemulihan cepat melalui trie snapshot saldo MPT terkini daripada memproses replay transaksi satu per satu.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--full-node</code></strong></td>
+                        <td><span class="badge badge-opt">Flag</span></td>
+                        <td><code>false</code></td>
+                        <td>Memaksa node berjalan sebagai node pengamat (observer/gerbang RPC publik) dengan memproses API Axum dan mematikan fungsi voting blok.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--validator-only</code></strong></td>
+                        <td><span class="badge badge-opt">Flag</span></td>
+                        <td><code>false</code></td>
+                        <td>Menonaktifkan server API eksternal demi keamanan maksimal, mengisolasi validator hanya pada komunikasi P2P internal konsensus.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--grpc-port</code></strong></td>
+                        <td><span class="badge">u16</span></td>
+                        <td><code>50051</code></td>
+                        <td>Port komunikasi server internal berkinerja tinggi berbasis gRPC Tonic.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--api-key</code></strong></td>
+                        <td><span class="badge badge-opt">String</span></td>
+                        <td><code>None</code></td>
+                        <td>API Key khusus untuk mengamankan HTTP REST dan WebSocket JSON-RPC dari akses eksternal tanpa izin.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--rate-limit-max</code></strong></td>
+                        <td><span class="badge">f64</span></td>
+                        <td><code>100.0</code></td>
+                        <td>Kapasitas maksimum ember token (Token Bucket) per alamat IP untuk mencegah serangan spam DoS RPC.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--rate-limit-refill</code></strong></td>
+                        <td><span class="badge">f64</span></td>
+                        <td><code>2.0</code></td>
+                        <td>Laju regenerasi token baru per detik pada sistem rate limiter.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--telemetry-url</code></strong></td>
+                        <td><span class="badge">String</span></td>
+                        <td><code>"http://..."</code></td>
+                        <td>Target pengiriman data status real-time, statistik TPS, latency, dan histori voting ke server monitoring telemetri.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--telemetry-show-wallet</code></strong></td>
+                        <td><span class="badge badge-opt">Flag</span></td>
+                        <td><code>false</code></td>
+                        <td>Menampilkan alamat wallet riil validator di dasbor telemetri publik (secara default disamarkan).</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--telegram-token</code></strong></td>
+                        <td><span class="badge badge-opt">String</span></td>
+                        <td><code>None</code></td>
+                        <td>Token Bot Telegram untuk integrasi pengiriman log alert kritis langsung ke Telegram pengelola node.</td>
+                    </tr>
+                    <tr>
+                        <td><strong><code>--telegram-chat-id</code></strong></td>
+                        <td><span class="badge badge-opt">String</span></td>
+                        <td><code>None</code></td>
+                        <td>Chat ID tujuan pengiriman notifikasi/alert dari Bot Telegram.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box">
+                <p><strong>🧹 Catatan Pruning Histori Block:</strong> Saat <code>--retain-last-blocks</code> aktif, pembersihan block lama tidak dijalankan di jalur panas validasi blok. Sistem akan menunggu snapshot penuh tersedia lebih dulu, lalu melakukan pruning secara bertahap melalui background worker agar beban I/O disk tetap terkendali. Nilai retention yang terlalu kecil juga akan dinaikkan ke batas aman minimum.</p>
+            </div>
+
+            <h2>4. Alur Otonom Deteksi Identitas & Kunci Rahasia</h2>
+            <p>Lumina memiliki desain zero-configuration untuk kemudahan deployer. Sistem mengelola pemuatan identitas kunci berdasarkan alur prioritas berikut:</p>
+
+            <ul class="step-list">
+                <li class="step-item" data-step="1">
+                    <h4>Pencarian Argumen CLI</h4>
+                    <p>Sistem memprioritaskan pemuatan kunci dari flag <code>--secret</code>. Node akan membaca string hex tersebut sebagai seed Ed25519 aktif.</p>
+                </li>
+                <li class="step-item" data-step="2">
+                    <h4>Pencarian Kunci Lokal Disk</h4>
+                    <p>Jika argumen CLI kosong, node memindai file <code>node.key</code> di dalam folder database lokal (sesuai flag <code>--db-path</code>). Jika ditemukan, seed byte dimuat untuk memulihkan identitas lama.</p>
+                </li>
+                <li class="step-item" data-step="3">
+                    <h4>Auto-Generation & Persistensi</h4>
+                    <p>Jika kunci tidak ditemukan di manapun, node memicu generator kriptografi otonom untuk membuat pasangan kunci Ed25519 baru, menyimpannya ke disk sebagai <code>node.key</code>, serta mendaftarkan node ke World State.</p>
+                </li>
+            </ul>
+
+            <div class="tip-box">
+                <h3>🛡️ Rekomendasi Pengoperasian Validator Produksi</h3>
+                <p>Dalam lingkungan produksi sesungguhnya, sangat disarankan untuk menjalankan node dengan kombinasi flag <code>--validator-only</code>, menyembunyikan wallet melalui penonaktifan flag <code>--telemetry-show-wallet</code>, serta mengisolasi port gRPC dan RPC di belakang firewall ketat atau VPN korporat guna mengeliminasi vektor serangan DDoS.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Network Foundation. Seri Panduan Infrastruktur & Keamanan Node.
+        </div>
+    </div>
+</body>
+</html>

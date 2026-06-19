@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Engine: The WASM Revolution & Autonomous Discovery | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070a13;
+            --card-bg: rgba(15, 23, 42, 0.85);
+            --primary: #2dd4bf; /* Neon Mint */
+            --secondary: #818cf8; /* Indigo Teal */
+            --accent: #f472b6; /* Cyber Pink */
+            --text: #f3f4f6;
+            --text-dim: #94a3b8;
+            --code-bg: #000000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(45, 212, 191, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(129, 140, 248, 0.08) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #a5f3fc; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(45, 212, 191, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #99f6e4; font-size: 1rem; }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid rgba(45, 212, 191, 0.15);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.55;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #2dd4bf; }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem;
+        }
+        .comparison-table th {
+            background: rgba(45, 212, 191, 0.08);
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.19em;
+        }
+        .comparison-table tr:hover td {
+            background: rgba(255,255,255,0.01);
+        }
+
+        .step-list {
+            margin: 30px 0 30px 20px;
+        }
+        .step-list li {
+            margin-bottom: 15px;
+            color: #cbd5e1;
+            font-size: 1.05rem;
+        }
+        .step-list li strong {
+            color: var(--primary);
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Virtual Machine & Smart Contracts | May 2026</span>
+            <h1>The WASM Evolution: Code-as-Truth & Autonomous Discovery</h1>
+            <p>Bagaimana Lumina mengadopsi standar WebAssembly global untuk melompati batasan EVM, menghadirkan eksekusi kontrak berkecepatan hardware native.</p>
+        </header>
+
+        <div class="content">
+            <p>Revolusi smart contract yang dipelopori oleh EVM (Ethereum Virtual Machine) mengubah dunia untuk selamanya. Namun, arsitektur EVM yang berbasis stack 256-bit dinilai sangat lambat untuk eksekusi skala global modern karena tidak memiliki keselarasan langsung dengan instruksi biner CPU komputer.</p>
+
+            <p>Lumina menjawab tantangan ini dengan mengadopsi **WebAssembly (WASM)** sebagai format instruksi biner untuk engine eksekusi pintar (<code>crates/executor</code>). Dibangun menggunakan runtime multi-ulir terkemuka seperti <strong>Wasmtime</strong> dan <strong>Wasmi</strong>, Lumina mengeksekusi kontrak pintar secara *hardware-native* dengan kecepatan yang mendekati aplikasi desktop tradisional.</p>
+
+            <h2>1. Analisis Perbandingan: EVM vs WASM</h2>
+            <p>Adopsi WebAssembly memberikan performa yang jauh lebih tinggi dan fleksibilitas bahasa pemrograman yang luar biasa dibandingkan mesin virtual lama:</p>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Dimensi Analisis</th>
+                        <th>EVM (Tradisional)</th>
+                        <th>WASM (Lumina Core)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Arsitektur Dasar</strong></td>
+                        <td>Stack-based 256-bit (Abstraksi tinggi, berat)</td>
+                        <td>Register/Registerless 32/64-bit (Native CPU)</td>
+                        <td>Hardware-Native 32/64-bit</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pilihan Bahasa</strong></td>
+                        <td>Terbatas pada Solidity & Vyper saja</td>
+                        <td>Rust, C, C++, Go, AssemblyScript</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Kecepatan Eksekusi</strong></td>
+                        <td>Sangat lambat (Interpretasi Bytecode berat)</td>
+                        <td>Dekat dengan Bare-Metal Speed (JIT/AOT Compiler)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Keamanan Memori</strong></td>
+                        <td>Sanitasi terbatas pada tingkat Smart Contract</td>
+                        <td>Isolasi Sandbox tingkat Kernel (Wasmtime Memory-Bound)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>2. Filosofi "Code-as-Truth"</h2>
+            <div class="highlight-box">
+                <p><strong>💡 Kedaulatan Biner Mandiri:</strong> Lumina percaya bahwa metadata dasar kontrak (nama, simbol, deskripsi) tidak boleh bergantung pada file manifest luar atau API terpusat. Identitas kontrak harus terukir secara permanen di dalam biner WASM itu sendiri. Node berkewajiban membacanya secara langsung dari biner yang terdeploy.</p>
+            </div>
+
+            <h2>3. Autonomous Metadata Discovery</h2>
+            <p>Untuk menghemat gas fee dan beban eksekusi jaringan, Lumina merancang sistem **Autonomous Metadata Discovery**. Alih-alih meluncurkan container sandbox WASM berulang kali hanya untuk membaca nama atau simbol kontrak, node menjalankan siklus berikut:</p>
+            
+            <ol class="step-list">
+                <li><strong>Macro Markings:</strong> Pengembang menandai fungsi informasi di dalam kontrak Rust dengan macro <code>#[view]</code>.</li>
+                <li><strong>Smart Post-Deploy Scan:</strong> Segera setelah transaksi `DEPLOY` tuntas, node secara otomatis memindai dan mengekstrak bytecode biner kontrak tersebut satu kali saja.</li>
+                <li><strong>Index Cache:</strong> Hasil pembacaan fungsi view disimpan di database RocksDB lokal. dApps di kemudian hari dapat mengakses metadata secara instan lewat HTTP RPC tanpa memicu overhead running sandboxed VM!</li>
+            </ol>
+
+            <h2>4. Contoh Kontrak Pintar Rust di Lumina</h2>
+            <p>Di bawah ini adalah standar penulisan smart contract Rust yang memanfaatkan macro Lumina untuk mendaftarkan fungsi metadata agar dapat diindeks secara otonom oleh node:</p>
+
+            <div class="code-block">
+<span class="keyword">use</span> lumina_sdk::{contract, view, state};
+
+<span class="macro">#[state]</span>
+<span class="keyword">pub struct</span> <span class="type">TokenContract</span> {
+    name: <span class="type">String</span>,
+    symbol: <span class="type">String</span>,
+    balances: <span class="type">Map</span>&lt;<span class="type">Address</span>, <span class="type">u128</span>&gt;,
+}
+
+<span class="macro">#[contract]</span>
+<span class="keyword">impl</span> <span class="type">TokenContract</span> {
+    <span class="macro">#[init]</span>
+    <span class="keyword">pub fn</span> <span class="macro">new</span>(name: <span class="type">String</span>, symbol: <span class="type">String</span>) -&gt; <span class="keyword">Self</span> {
+        <span class="keyword">Self</span> { name, symbol, balances: <span class="type">Map</span>::new() }
+    }
+
+    <span class="comment">// Diindeks secara otomatis oleh Autonomous Discovery setelah dideploy!</span>
+    <span class="macro">#[view]</span>
+    <span class="keyword">pub fn</span> <span class="macro">name</span>(&amp;<span class="keyword">self</span>) -&gt; <span class="type">String</span> {
+        <span class="keyword">self</span>.name.clone()
+    }
+
+    <span class="macro">#[view]</span>
+    <span class="keyword">pub fn</span> <span class="macro">symbol</span>(&amp;<span class="keyword">self</span>) -&gt; <span class="type">String</span> {
+        <span class="keyword">self</span>.symbol.clone()
+    }
+
+    <span class="keyword">pub fn</span> <span class="macro">transfer</span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, to: <span class="type">Address</span>, amount: <span class="type">u128</span>) {
+        <span class="keyword">let</span> sender = <span class="type">Context</span>::sender();
+        <span class="keyword">self</span>.balances.decrease(&amp;sender, amount);
+        <span class="keyword">self</span>.balances.increase(&amp;to, amount);
+    }
+}
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Core Engine Series.
+        </div>
+    </div>
+</body>
+</html>

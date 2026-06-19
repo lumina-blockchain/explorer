@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economics: Custom Fee Market & Mempool Sorting | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07090e;
+            --card-bg: rgba(13, 20, 30, 0.85);
+            --primary: #f59e0b; /* Amber Gold */
+            --secondary: #3b82f6; /* Cyber Blue */
+            --accent: #ef4444; /* Alert Red */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(245, 158, 11, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(59, 130, 246, 0.06) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--primary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(245, 158, 11, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #fef08a; font-size: 1rem; }
+
+        .code-block {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        .priority-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .priority-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .priority-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .priority-card h3 { margin-top: 0; margin-bottom: 12px; }
+
+        .surge-box {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+        .surge-box h3 { color: #f87171; margin-bottom: 10px; }
+        .surge-box p { margin-bottom: 0; color: #fca5a5; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Economy & Gas Economics | May 2026</span>
+            <h1>Custom Fee Market & Mempool Priority Sorting</h1>
+            <p>Mekanisme prioritas transaksi berbasis ekonomi untuk meningkatkan throughput transaksi sekaligus melindungi jaringan dari ancaman spam.</p>
+        </header>
+
+        <div class="content">
+            <p>Pada jaringan blockchain modern, ledakan lalu lintas transaksi (*surging traffic*) dapat dengan mudah menyebabkan kemacetan jaringan (*network congestion*). Jika transaksi diproses semata-mata berdasarkan urutan waktu masuk (*First-In-First-Out*), penyerang dapat melumpuhkan jaringan dengan membanjiri transaksi bernilai kecil secara massal.</p>
+
+            <p>Lumina memecahkan masalah ini melalui implementasi **Custom Fee Market** (Pasar Gas Fee Khusus). Pengguna dapat membubuhkan **Priority Fee (tips)** opsional ke dalam transaksi mereka. Engine konsensus kemudian mengurutkan antrean mempool secara kompetitif untuk memilih transaksi dengan nilai insentif terbaik demi efisiensi ekonomi validator.</p>
+
+            <div class="highlight-box">
+                <p><strong>💡 Keamanan Transaksi Presisi:</strong> Untuk menghindari pembulatan matematis atau kegagalan parsing nilai u128 astronomis di JSON API, Lumina menggunakan <strong>String-based Submission</strong> (mengirim angka besar sebagai string <code>valueString</code> dan <code>feeString</code>) yang dikonversi langsung di tingkat kernel Rust node.</p>
+            </div>
+
+            <h2>1. Logika Pengurutan Mempool (Priority Sorting Logic)</h2>
+            <p>Di dalam modul mempool Lumina (<code>crates/consensus/src/mempool.rs</code>), transaksi tidak pernah diurutkan berdasarkan urutan waktu semata. Transaksi diurutkan menggunakan kriteria berjenjang:</p>
+            
+            <div class="priority-grid">
+                <div class="priority-card">
+                    <h3>📈 Kriteria Utama: Fee Tertinggi</h3>
+                    <p>Mempool memilah dan menaikkan transaksi yang menawarkan biaya gas/tips paling tinggi ke puncak antrean. Ini memberikan kepastian proses bagi pengguna yang membutuhkan kecepatan eksekusi tinggi.</p>
+                </div>
+                <div class="priority-card">
+                    <h3>🔢 Kriteria Kedua: Nonce Terendah</h3>
+                    <p>Untuk transaksi dari pengirim yang sama (*same sender address*), urutan eksekusi wajib dipertahankan dari Nonce terkecil ke terbesar guna mencegah kegagalan state transition.</p>
+                </div>
+            </div>
+
+            <h2>2. Implementasi Rust: Kode Pengurutan Mempool</h2>
+            <p>Di bawah ini adalah implementasi nyata dari fungsi <code>get_batch</code> di dalam mempool core Rust Lumina:</p>
+
+            <div class="code-block">
+<span class="comment">/// Ambil batch transaksi dari mempool yang sudah terurut berdasarkan prioritas ekonomi.</span>
+<span class="keyword">pub fn</span> <span class="macro">get_batch</span>(&amp;<span class="keyword">self</span>, limit: <span class="type">usize</span>) -&gt; <span class="type">Vec</span>&lt;<span class="type">SignedTransaction</span>&gt; {
+    <span class="keyword">let mut</span> entries: <span class="type">Vec</span>&lt;<span class="type">MempoolEntry</span>&gt; = <span class="keyword">self</span>.pending_transactions
+        .iter()
+        .map(|kv| kv.value().clone())
+        .collect();
+    
+    <span class="comment">// --- LOGIKA PRIORITAS EKONOMI ---</span>
+    <span class="comment">// 1. Urutkan berdasarkan Fee tertinggi (Custom Priority)</span>
+    <span class="comment">// 2. Jika Fee sama, urutkan berdasarkan Nonce terendah (urutan transaksi pengirim)</span>
+    entries.sort_by(|a, b| {
+        b.tx.transaction.fee.cmp(&amp;a.tx.transaction.fee)
+            .then_with(|| a.tx.transaction.nonce.cmp(&amp;b.tx.transaction.nonce))
+    });
+    
+    entries.into_iter()
+        .take(limit)
+        .map(|e| e.tx)
+        .collect()
+}
+            </div>
+
+            <h2>3. Mekanisme Proteksi Lonjakan (Surge Protection)</h2>
+            <p>Selain memprioritaskan biaya transaksi, mempool Lumina dilengkapi dengan **Surge Protection System** untuk membatasi ukuran buffer antrean:</p>
+
+            <div class="surge-box">
+                <h3>🛡️ Kapasitas Maksimal Mempool (MAX_MEMPOOL_SIZE)</h3>
+                <p>Kapasitas maksimum mempool dibatasi secara ketat hingga **50,000 Transaksi**. Jika batas ini terlampaui saat terjadi lonjakan masif, node secara otomatis mengaktifkan mode proteksi dan menolak transaksi baru dengan respons kesalahan: <code>"Mempool is full! Surge protection active."</code>.</p>
+            </div>
+
+            <h2>4. Siklus Hidup Transaksi Basi (TTL & Expiration)</h2>
+            <p>Transaksi yang tertahan terlalu lama di mempool karena menawarkan biaya terlalu rendah tidak akan menyumbat mempool selamanya. Setiap kali blok baru diproduksi, node menjalankan fungsi pembersihan:</p>
+            <ul>
+                <li><strong>Waktu Kedaluwarsa (TTL):</strong> Transaksi akan dianggap basi jika bertahan lebih dari **10 Blok** sejak dimasukkan.</li>
+                <li><strong>Arsip Otomatis:</strong> Transaksi basi tidak dibuang begitu saja. Node secara otomatis mengarsipkan transaksi tersebut ke dalam StateManager melalui method <code>record_dropped_transaction</code> beserta pencatatan estimasi gas fee dinamisnya.</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Core Economics Series.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina Search Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #05070f;
+            --card-bg: rgba(10, 15, 30, 0.7);
+            --primary: #10b981; /* Neon Emerald */
+            --secondary: #3b82f6; /* Cyber Blue */
+            --accent: #f43f5e; /* Cyber Rose */
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --link-color: #60a5fa;
+            --link-hover: #34d399;
+            
+            --font-mono: 'Fira Code', monospace;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.04) 0%, transparent 40%);
+            min-height: 100vh;
+        }
+
+        /* HEADER SEARCH BAR STICKY */
+        header {
+            background: rgba(5, 7, 15, 0.85);
+            backdrop-filter: blur(12px);
+            border-b: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 25px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .header-content {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .logo span {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex-grow: 1;
+            max-width: 650px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            pointer-events: none;
+            font-size: 1.1rem;
+        }
+
+        #search {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 30px;
+            padding: 14px 24px 14px 50px;
+            font-size: 1rem;
+            color: #fff;
+            outline: none;
+            transition: var(--transition);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+        }
+        #search:focus {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--secondary);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2), inset 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        /* TABS FILTERS */
+        .tabs-container {
+            max-width: 1300px;
+            margin: 15px auto 0;
+            display: flex;
+            gap: 15px;
+            padding-left: 205px; /* Aligned with Google Search Results style starting pos */
+        }
+        @media(max-width: 1024px) {
+            .tabs-container { padding-left: 0; justify-content: center; }
+            .header-content { flex-direction: column; gap: 20px; }
+            .search-wrapper { max-width: 100%; }
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+        .tab-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .tab-btn.active {
+            color: var(--primary);
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        /* MAIN CONTENT SPLIT LAYOUT */
+        .main-layout {
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 0 40px;
+            display: grid;
+            grid-template-columns: 8fr 4fr;
+            gap: 60px;
+        }
+        @media(max-width: 968px) {
+            .main-layout { grid-template-columns: 1fr; gap: 40px; padding: 0 20px; }
+        }
+
+        /* METRICS & RESULT INFO */
+        .search-metrics {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+            font-family: var(--font-mono);
+        }
+
+        /* SEARCH RESULTS COLUMN */
+        .results-col {
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+        }
+
+        .serp-card {
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .serp-breadcrumb {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .serp-breadcrumb span.domain { color: var(--primary); font-weight: 500; }
+
+        .serp-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        .serp-title a {
+            color: var(--link-color);
+            text-decoration: none;
+            transition: var(--transition);
+            border-bottom: 1px solid transparent;
+        }
+        .serp-title a:hover {
+            color: var(--link-hover);
+            border-bottom-color: var(--link-hover);
+        }
+
+        .serp-snippet {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .serp-snippet mark {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .serp-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+        .serp-category {
+            background: rgba(59, 130, 246, 0.08);
+            color: #60a5fa;
+            padding: 2px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* SIDEBAR KNOWLEDGE PANEL (GOOGLE-STYLE) */
+        .sidebar-col {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .knowledge-panel {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            position: sticky;
+            top: 150px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px);
+        }
+        .kp-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        .kp-subtitle {
+            font-size: 0.85rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .kp-desc {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 20px;
+        }
+        .kp-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+        .kp-row .label { color: var(--text-dim); font-weight: 500; }
+        .kp-row .value { color: #fff; font-weight: 700; }
+
+        .kp-viz {
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            height: 100px;
+            margin-top: 25px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .kp-node {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            position: absolute;
+            box-shadow: 0 0 8px var(--primary);
+            animation: node-flash 2s infinite alternate;
+        }
+
+        /* LOADING & ERROR STATES */
+        .loading-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+        }
+        .loading-dots::after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        footer {
+            max-width: 1300px;
+            margin: 80px auto 40px;
+            padding: 30px 40px 0;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        footer a { color: var(--text-dim); text-decoration: none; transition: var(--transition); }
+        footer a:hover { color: var(--primary); }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.6; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes node-flash {
+            from { opacity: 0.3; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1.2); }
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- STICKY SEARCH HEADER -->
+    <header>
+        <div class="header-content">
+            <a href="/" class="logo">
+                <span class="logo-dot"></span>
+                LUMINA<span>SEARCH</span>
+            </a>
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search" placeholder="Cari dokumentasi, arsitektur, atau konsensus..." autocomplete="off">
+            </div>
+        </div>
+        
+        <!-- Tab Categories -->
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="filterCategory('all')">Semua Artikel</button>
+            <button class="tab-btn" onclick="filterCategory('Networking')">Networking</button>
+            <button class="tab-btn" onclick="filterCategory('Consensus')">Consensus</button>
+            <button class="tab-btn" onclick="filterCategory('Cryptography')">Kriptografi</button>
+            <button class="tab-btn" onclick="filterCategory('Mempool')">Mempool</button>
+            <button class="tab-btn" onclick="filterCategory('Developer Tools')">Developer Tools</button>
+        </div>
+    </header>
+
+    <!-- MAIN TWO-COLUMN LAYOUT -->
+    <div class="main-layout">
+        
+        <!-- Left: Search Results -->
+        <div>
+            <div class="search-metrics" id="metrics-bar">
+                Menghitung indeks database...
+            </div>
+            
+            <div class="results-col" id="results-list">
+                <div class="loading-state">
+                    <span class="loading-dots">Mengambil data dari node blockchain</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Knowledge Panel -->
+        <div class="sidebar-col">
+            <div class="knowledge-panel">
+                <div class="kp-title">Lumina Blockchain</div>
+                <div class="kp-subtitle">Protokol Layer 1 Terdesentralisasi</div>
+                <div class="kp-desc">
+                    Lumina adalah jaringan blockchain Proof of Stake (PoS) ultra-cepat berbasis WebAssembly (WASM) yang menggabungkan integrasi tanda tangan BLS teragregasi, dynamic fee market, dan sinkronisasi paralel multi-peer tingkat lanjut.
+                </div>
+                
+                <div class="kp-row">
+                    <span class="label">Konsensus</span>
+                    <span class="value">PoS VRF Staking</span>
+                </div>
+                <div class="kp-row">
+                    <span class="label">Virtual Machine</span>
+                    <span class="value">Lumina WASM Engine</span>
+                </div>
+                <div class="kp-row">
+                    <span class="label">Validator Aktif</span>
+                    <span class="value" style="color: var(--primary);">1,048 Nodes (Active)</span>
+                </div>
+                <div class="kp-row">
+                    <span class="label">Token Native</span>
+                    <span class="value">LUM</span>
+                </div>
+                <div class="kp-row">
+                    <span class="label">TPS Maksimal</span>
+                    <span class="value">10,000+ TPS</span>
+                </div>
+
+                <!-- Glow Map Viz -->
+                <div class="kp-viz" id="viz-container">
+                    <div style="color: rgba(255,255,255,0.15); font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;">
+                        ACTIVE P2P MESH MAP
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div>&copy; 2026 Lumina Search Portal. Diperbarui otomatis dari Node Explorer.</div>
+        <div>
+            <a href="/docs" style="margin-right: 20px;">Developer Guides</a>
+            <a href="/whitepaper">Whitepaper</a>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT ENGINE -->
+    <script>
+        const searchInput = document.getElementById('search');
+        const resultsList = document.getElementById('results-list');
+        const metricsBar = document.getElementById('metrics-bar');
+        
+        let allArticles = [];
+        let activeCategory = 'all';
+
+        // DATABASE ARTIKEL DENGAN DETAIL TEKNIS DAN META-DESCRIPTION
+        const ARTICLE_METADATA = {
+            "bft-consensus-log-analysis.html": {
+                title: "Bedah Teknis: Alur Konsensus BFT HotStuff & Eksekusi Paralel Block-STM",
+                desc: "Analisis ilmiah dan mendalam mengenai aliran log konsensus HotStuff BFT staker Lumina L1, pengumpulan vote (QC), verifikasi biner BLS12-381 teragregasi, eksekusi paralel Block-STM, dan finalitas 3-chain.",
+                category: "Consensus",
+                tags: ["Consensus", "HotStuff", "BFT", "BLS", "Block-STM", "Finality", "Leader Rotation"]
+            },
+            "cara-menjalankan-node-lengkap.html": {
+                title: "Panduan Lengkap: Cara Menjalankan Node Lumina & Flag Fitur",
+                desc: "Panduan komprehensif menjalankan validator node Lumina, memahami mode archive vs pruned, dan memakai flag --retain-last-blocks untuk membatasi histori block di disk.",
+                category: "Developer Tools",
+                tags: ["Node", "CLI Guide", "Validator", "Full Node", "Configuration", "Infrastructure", "Pruning", "Archive Node"]
+            },
+            "system-optimizations-and-security-hardening.html": {
+                title: "Optimasi Sistem, Keamanan Lapis Baja & Stabilitas Konsensus",
+                desc: "Ringkasan komprehensif mengenai serangkaian perbaikan krusial pada Lumina L1 hari ini, mulai dari stabilitas sinkronisasi blok hingga penguatan pertahanan terhadap serangan Sybil.",
+                category: "Consensus",
+                tags: ["System Hardening", "Security", "Optimization", "Consensus", "Sybil Protection", "Block-STM"]
+            },
+            "lumina-smart-contract-standards.html": {
+                title: "Smart Contract Standards: Implementasi Keamanan & Standarisasi Token (LTS-20/LTS-721)",
+                desc: "Panduan arsitektur keamanan dan standar pembuatan token pintar menggunakan Lumina Standards Library (LSL) beserta modul keamanan ReentrancyGuard, AccessControl, dan Pausable.",
+                category: "Developer Tools",
+                tags: ["Smart Contract", "Security", "Standards", "LTS-20", "LTS-721", "AccessControl", "ReentrancyGuard"]
+            },
+            "mempool-optimization-binary-heap.html": {
+                title: "Mempool Optimization: Eliminasi Bottleneck O(N log N) dengan BinaryHeap & Metadata-based Selection",
+                desc: "Bagaimana Lumina L1 memotong konsumsi CPU dan alokasi memori pemilihan batch transaksi mempool hingga 1000x dengan antrean prioritas BinaryHeap.",
+                category: "Mempool",
+                tags: ["Mempool", "Optimization", "BinaryHeap", "Scalability", "Bottleneck", "Rust"]
+            },
+            "consensus-leader-predictable-schedule.html": {
+                title: "Consensus Security: Mitigasi Predictable Leader Proposer Schedule dengan Blake3 Hashing",
+                desc: "Bagaimana Lumina L1 menambal kerentanan prediksi jadwal leader proposer (round-robin) menggunakan algoritma pemilihan leader berbasis pseudorandom hashing Blake3(parent_hash || height || round).",
+                category: "Consensus",
+                tags: ["Consensus", "Blake3", "Leader Election", "Security", "VRF"]
+            },
+            "mempool-hardening-rbf-nonce-gap.html": {
+                title: "Mempool Hardening: Replace-By-Fee (RBF) & Nonce Gap Mitigations",
+                desc: "Analisis teknis dan dokumentasi implementasi aturan Replace-By-Fee (RBF) serta mitigasi Nonce Gap Bug di mempool Lumina L1 untuk menolak transaksi spam dan mencegah stalling.",
+                category: "Mempool",
+                tags: ["Mempool", "RBF", "Replace-By-Fee", "Nonce Gap", "Hardening", "Security"]
+            },
+            "bft-double-voting-prevention-postmortem.html": {
+                title: "Post-Mortem: Penyelidikan Byzantine Double-Voting Pasca-Recovery & Perisai Idempotensi BFT",
+                desc: "Analisis teknis kerentanan Double-Voting selama pemulihan reorganisasi split-brain pada node Lumina L1, deteksi Sentinel Agent, dan implementasi perlindungan mutlak state in-memory last_voted.",
+                category: "Consensus",
+                tags: ["Post-Mortem", "Byzantine", "Double-Voting", "BFT Consensus", "HotStuff", "Security"]
+            },
+            "network-destruction-chaos-scenarios.html": {
+                title: "Simulasi Kehancuran Jaringan: 5 Skenario Chaos Menguji Batas Resiliensi Lumina L1",
+                desc: "Analisis teknis simulasi skenario chaos ekstrem (Hard Kill, DB Sabotage, Mempool Spam, P2P Regional Isolation, Split-Brain) untuk mengevaluasi ketangguhan, fault tolerance BFT, dan mekanisme pemulihan mandiri otonom.",
+                category: "Consensus",
+                tags: ["Chaos Testing", "Resilience", "Fault Tolerance", "Split-Brain", "DB Sabotage", "Spam Attack"]
+            },
+            "state-root-mismatch-postmortem.html": {
+                title: "Post-Mortem: Penyelidikan Bug State Root Mismatch di Epoch Transition #3",
+                desc: "Investigasi mendalam mengenai bug ketidaksesuaian State Root (State Root Mismatch) saat transisi epoch #3 pada testnet, melacak akar penyebab pada pengurutan non-deterministik staker di Sled DB, dan solusi hotfix.",
+                category: "Consensus",
+                tags: ["Bug", "Post-Mortem", "State Root", "Epoch Transition", "Sled DB", "Hotfix"]
+            },
+            "lumina-cli-suite.html": {
+                title: "Lumina CLI Suite: Navigasi, Staking & Tata Kelola Banding Validator",
+                desc: "Panduan lengkap menguasai antarmuka baris perintah (CLI) Lumina untuk mengelola aset offline, memantau integritas validator pool, hingga mengajukan serta meninjau banding jailing BFT secara demokratis.",
+                category: "Developer Tools",
+                tags: ["CLI", "Staking", "Governance", "Appeal", "Validator", "Tools"]
+            },
+            "rust-sdk-standard-library.html": {
+                title: "Rust SDK Standard Library: Integrasi Kunci Ed25519 & Client RPC Asinkronus",
+                desc: "Panduan integrasi Rust SDK (lumina-std) untuk mengelola dompet, menandatangani transaksi secara offline, dan bertransaksi langsung via HTTP JSON-RPC ke node Lumina L1.",
+                category: "Developer Tools",
+                tags: ["SDK", "Rust", "Ed25519", "JSON-RPC", "Wallet", "Cryptography"]
+            },
+            "rate-limiting-auth-middleware.html": {
+                title: "Pertahanan Berlapis: Rate Limiting & Authentication Middleware Berkinerja Tinggi",
+                desc: "Bagaimana Lumina L1 memproteksi API publik dan premium menggunakan algoritma Token Bucket in-memory yang cepat dan sistem autentikasi multi-format.",
+                category: "Developer Tools",
+                tags: ["Rate Limiting", "Authentication", "Middleware", "Token Bucket", "Axum", "Security"]
+            },
+            "websocket-jsonrpc-pubsub.html": {
+                title: "Aliran Event Real-Time: JSON-RPC 2.0 WebSockets Pub/Sub Bidirectional",
+                desc: "Bagaimana Lumina L1 memancarkan notifikasi blok baru, transaksi mempool, filter logs, dan aktivitas akun secara real-time menggunakan engine Pub/Sub asinkronus dua arah di atas Axum WebSocket.",
+                category: "Developer Tools",
+                tags: ["WebSockets", "JSON-RPC", "PubSub", "Axum", "API", "Real-Time"]
+            },
+            "grpc-high-performance-api.html": {
+                title: "Kecepatan Cahaya Antar Node: Integrasi gRPC (Tonic + Protobuf) Berkinerja Tinggi",
+                desc: "Bagaimana Lumina L1 memangkas latensi overhead komunikasi validator dan indexer eksternal menggunakan arsitektur pipa data HTTP/2 biner Tonic gRPC asinkronus.",
+                category: "Developer Tools",
+                tags: ["gRPC", "Tonic", "Protobuf", "SDK", "API", "HTTP2"]
+            },
+            "property-based-and-chaos-testing.html": {
+                title: "Keamanan Konsensus Tingkat Militer: Property-Based Testing & Chaos Simulation",
+                desc: "Bagaimana Lumina L1 menggabungkan jutaan simulasi matematika (proptest) dengan skenario kehancuran asinkronus (Chaos Testing) untuk melahirkan L1 Lapis Baja yang anti-crash, deterministik, dan siap tempur di Testnet.",
+                category: "Consensus",
+                tags: ["PBT", "Chaos Testing", "Ed25519", "BLS12-381", "Staking"]
+            },
+            "chaos-testing-simulation-harness.html": {
+                title: "Chaos Testing & E2E Consensus Resilience",
+                desc: "Laporan rekayasa pengujian asinkronus multi-node (Chaos Testing) untuk menguji kekebalan jaringan Lumina L1 terhadap kegagalan validator, skenario jailing otomatis, slashing bounty, dan pemulihan tata kelola secara dinamis.",
+                category: "Consensus",
+                tags: ["Chaos Test", "E2E", "Jailing", "Slashing", "Auto-Resume"]
+            },
+            "fuzz-testing-security-hardening.html": {
+                title: "Transaction & WASM VM Fuzz Testing",
+                desc: "Bagaimana Lumina L1 menerapkan instrumentasi kompiler Nightly (LLVM libFuzzer) guna menyaring pembagian nol, stack overflow, dan crash panic pada validator node akibat serangan transaksi korup atau bytecode WASM VM jahat.",
+                category: "Security",
+                tags: ["Fuzzing", "Cargo-Fuzz", "Security", "WASM VM", "DoS"]
+            },
+            "laporan-audit-analisis-lumina.html": {
+                title: "Laporan Audit & Analisis Sistem Blockchain Lumina L1",
+                desc: "Evaluasi Kesiapan Pre-Testnet & Peta Jalan Pengembangan Lumina Node: Versi 1.0, 19 Mei 2026. Analisis komprehensif sistem blockchain Lumina L1 berbasis Rust, status penyelesaian blueprint, audit keselarasan kode aktual, serta pemetaan langkah strategis berikutnya menuju Testnet/Mainnet.",
+                category: "Consensus",
+                tags: ["Audit", "Analisis", "Lumina Node", "L1", "Pre-Testnet"]
+            },
+            "block-stm-parallel-execution.html": {
+                title: "Block-STM Speculative Parallel Execution",
+                desc: "Arsitektur mesin eksekusi paralel multi-thread spekulatif Lumina L1, sandboxing MVMemory, Rayon concurrency, dan pencegahan race condition berbasis Account Thread Pinning.",
+                category: "Engine Architecture",
+                tags: ["Block-STM", "Rayon", "Speculative", "Concurrency"]
+            },
+            "epoch-transitions-system.html": {
+                title: "Epoch Transitions & Scheduled Payouts",
+                desc: "Arsitektur penundaan payout reward dan biaya gas Lumina L1 ke celengan persistent accumulator, memotong database disk write overhead, serta tutup buku kelipatan 100 blok sekali.",
+                category: "Consensus",
+                tags: ["Epoch Transition", "Tokenomics", "Database", "Accumulator"]
+            },
+            "bft-slashing-sybil-appeal.html": {
+                title: "BFT Slashing, Sybil Key Protection & Governance Appeal",
+                desc: "Analisis teknis sistem keamanan Lumina L1: deteksi double-voting real-time oleh Sentinel, pembekuan stake 98% permanen, proteksi Sybil Key, dan alur banding 75% suara aktif.",
+                category: "Consensus",
+                tags: ["BFT Slashing", "Sybil Protection", "Governance Appeal", "Sentinel"]
+            },
+            "split-brain-prevention.html": {
+                title: "Split-Brain Prevention & Undersea Cable Cuts: Proof of BFT Safety",
+                desc: "Analisis ketahanan ekstrem Lumina L1 menghadapi pemutusan jaringan global (Network Partition): Mengapa BFT menjamin nol risiko garpu blockchain (zero-fork), dan interaksi cerdas antara hukum quorum dinamis dengan jailing.",
+                category: "Consensus",
+                tags: ["Split-Brain", "Partition", "BFT", "Network", "Jailing"]
+            },
+            "validator-jailing-self-healing.html": {
+                title: "Validator Jailing & Dynamic Quorum Self-Healing",
+                desc: "Arsitektur pertahanan dinamis Lumina L1: mendeteksi offline validator berturut-turut, memangkas penyebut quorum secara otonom, dan memulihkan diri dengan self-healing daemon.",
+                category: "Consensus",
+                tags: ["Jailing", "Quorum", "Self-Healing", "Consensus"]
+            },
+            "decentralized-bft-consensus-resilience.html": {
+                title: "Decentralized BFT Consensus Resilience",
+                desc: "Bagaimana Lumina mengamankan konsensus HotStuff BFT secara desentralisasi penuh dengan local vote aggregation, menjaga stabilitas QC verified saat validator mengalami offline.",
+                category: "Consensus",
+                tags: ["BFT", "Consensus", "HotStuff", "Pacemaker"]
+            },
+            "consensus-milestone-log.html": {
+                title: "Consensus Milestone Log",
+                desc: "Log milestone lengkap konsensus Lumina, pelacakan slot leader, dan pencapaian kestabilan jaringan staker.",
+                category: "Consensus",
+                tags: ["Milestone", "PoS", "Leader"]
+            },
+            "bls-signature-aggregation.html": {
+                title: "BLS Signature Aggregation",
+                desc: "Teknologi agregasi tanda tangan BLS12-381 untuk memperkecil ukuran block header dan menghemat bandwidth P2P secara masif.",
+                category: "Cryptography",
+                tags: ["BLS12-381", "Aggregator", "Crypto"]
+            },
+            "state-root-trie.html": {
+                title: "State Root Trie Structure",
+                desc: "Arsitektur penyimpanan Merkle Patricia Trie (MPT) untuk validasi saldo akun staker secara kriptografis instan.",
+                category: "State Storage",
+                tags: ["MPT", "Trie", "World State"]
+            },
+            "rpc-api-reference.html": {
+                title: "RPC API Reference Guide",
+                desc: "Referensi lengkap endpoint JSON-RPC Lumina untuk integrasi wallet, explorer, dan client mobile Flutter.",
+                category: "Developer Tools",
+                tags: ["JSON-RPC", "API", "Endpoint"]
+            },
+            "lumina-wasm-revolution.html": {
+                title: "Lumina WASM VM Revolution",
+                desc: "Eksekusi smart contract berbasis WebAssembly (WASM) berkinerja tinggi, aman sandboxed, dan kompatibel multi-bahasa.",
+                category: "Virtual Machine",
+                tags: ["WASM", "Smart Contract", "Compiler"]
+            },
+            "consensus-leader-election.html": {
+                title: "Consensus Leader Election",
+                desc: "Algoritma pemilihan slot leader validator berbasis Proof of Stake (PoS) VRF secara acak, adil, dan aman dari DoS.",
+                category: "Consensus",
+                tags: ["VRF", "Leader", "Proof of Stake"]
+            },
+            "hybrid-staking-model.html": {
+                title: "Hybrid Staking Model",
+                desc: "Skema staking hibrida Lumina menggabungkan liquid staking delegator dan rigid lockup validator untuk keamanan ekonomi.",
+                category: "Tokenomics",
+                tags: ["Staking", "Yield", "Tokenomics"]
+            },
+            "custom-fee-market.html": {
+                title: "Custom Gas Fee Market",
+                desc: "Mekanisme gas fee adaptif dinamis untuk mencegah spamming transaksi mempool saat lalu lintas jaringan padat.",
+                category: "Mempool",
+                tags: ["Gas Fee", "EIP-1559", "Mempool"]
+            },
+            "sdk-integration.html": {
+                title: "SDK Integration Manual",
+                desc: "Panduan integrasi Software Development Kit (SDK) Lumina Rust & TypeScript untuk pengembang dApp terdesentralisasi.",
+                category: "Developer Tools",
+                tags: ["SDK", "TypeScript", "Rust"]
+            },
+            "running-node.html": {
+                title: "Running a Lumina Node Guide",
+                desc: "Panduan langkah-demi-langkah setup server VPS, menjalankan node validator Lumina, serta memakai flag pruned node --retain-last-blocks untuk membatasi histori block di disk.",
+                category: "Infrastructure",
+                tags: ["Node", "VPS", "Setup Guide", "Pruning", "Archive Node"]
+            },
+            "validator-staking.html": {
+                title: "Validator Staking Guide",
+                desc: "Panduan mendelegasikan koin LUM, mengaktifkan validator node, klaim reward, dan mencegah resiko slashing.",
+                category: "Staking",
+                tags: ["Delegate", "Validator", "Reward"]
+            },
+            "node-architecture.html": {
+                title: "Core Node Architecture",
+                desc: "Gambaran arsitektur sistem modular node Lumina: mempool tracker, consensus engine, p2p router, dan DB.",
+                category: "Architecture",
+                tags: ["Modular", "System", "Rust Engine"]
+            },
+            "contract-studio.html": {
+                title: "WASM Contract Studio IDE",
+                desc: "Editor dan compiler IDE berbasis web untuk menulis, mengetes, dan men-deploy smart contract WASM secara instan.",
+                category: "Developer Tools",
+                tags: ["IDE", "Studio", "Web Compiler"]
+            },
+            "peer-scoring-banlist.html": {
+                title: "P2P Peer Scoring & Banlist",
+                desc: "Sistem penilaian reputasi otomatis (scoring engine) Libp2p untuk memblokir IP node nakal yang terdeteksi melakukan fraud.",
+                category: "Security",
+                tags: ["Libp2p", "Reputation", "Banlist"]
+            },
+            "fast-sync.html": {
+                title: "Snap Sync & Fast Sync Protocol",
+                desc: "Sinkronisasi potret world state saldo terakhir (state snapshot) secara instan menggunakan validasi MPT State Root.",
+                category: "Networking",
+                tags: ["Snap Sync", "Fast Sync", "Snapshot"]
+            },
+            "p2p-gossipsub-mesh-routing.html": {
+                title: "P2P Gossipsub Mesh Routing",
+                desc: "Teknologi routing Gossipsub mesh Libp2p untuk propagasi blok dan transaksi secara kilat ke ribuan node.",
+                category: "Networking",
+                tags: ["Gossipsub", "Mesh", "Routing"]
+            },
+            "header-first-sync.html": {
+                title: "Header-First & Parallel Sync",
+                desc: "Sinkronisasi paralel sekuensial header sekuensial dan pengunduhan body multi-peer dengan out-of-order execution queue.",
+                category: "Networking",
+                tags: ["Header-First", "Parallel", "Out-of-Order"]
+            }
+        };
+
+        async function fetchIndex() {
+            try {
+                const response = await fetch('articles.json');
+                if (!response.ok) throw new Error('Network error');
+                allArticles = await response.json();
+                renderResults();
+            } catch (e) {
+                console.warn("Using fallback static article list.");
+                allArticles = Object.keys(ARTICLE_METADATA);
+                renderResults();
+            }
+        }
+
+        // FUNGSI UTAMA UNTUK MERENDER HASIL PENCARIAN (GOOGLE SEARCH STYLE)
+        function renderResults() {
+            const query = searchInput.value.toLowerCase().trim();
+            const startTime = performance.now();
+
+            // Filter berdasarkan input search & filter kategori tab
+            let filtered = allArticles.filter(file => {
+                const meta = ARTICLE_METADATA[file] || { title: file, desc: "", category: "General" };
+                const matchQuery = !query || 
+                    meta.title.toLowerCase().includes(query) || 
+                    meta.desc.toLowerCase().includes(query) ||
+                    (meta.tags && meta.tags.some(t => t.toLowerCase().includes(query)));
+                
+                const matchTab = activeCategory === 'all' || meta.category === activeCategory;
+                return matchQuery && matchTab;
+            });
+
+            const endTime = performance.now();
+            const searchDuration = ((endTime - startTime) / 1000).toFixed(4);
+
+            // Tampilkan jumlah hasil
+            metricsBar.innerHTML = `About ${filtered.length} results (${searchDuration} seconds) for "${query || 'semua artikel'}"`;
+
+            if (filtered.length === 0) {
+                resultsList.innerHTML = `
+                    <div class="loading-state">
+                        <div style="font-size: 1.5rem; margin-bottom: 10px;">🔍</div>
+                        Tidak ada kecocokan hasil untuk pencarian Anda.<br>
+                        <span style="font-size: 0.8rem; color: var(--text-dim);">Cobalah kata kunci lain seperti "sync", "mpt", atau "consensus".</span>
+                    </div>
+                `;
+                return;
+            }
+
+            // Render hasil pencarian ke layout SERP Google/DuckDuckGo
+            resultsList.innerHTML = filtered.map(file => {
+                const meta = ARTICLE_METADATA[file] || { title: formatTitle(file), desc: "Dokumentasi blockchain Lumina.", category: "General", tags: [] };
+                
+                // Highlight text matching query
+                let titleHTML = meta.title;
+                let descHTML = meta.desc;
+                if (query) {
+                    const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+                    titleHTML = meta.title.replace(regex, '<mark>$1</mark>');
+                    descHTML = meta.desc.replace(regex, '<mark>$1</mark>');
+                }
+
+                const cleanSlug = file.replace('.html', '');
+                const tagsHTML = meta.tags ? meta.tags.map(t => `#${t}`).join(' ') : "";
+
+                return `
+                    <div class="serp-card">
+                        <div class="serp-breadcrumb">
+                            <span>🌐</span>
+                            <span class="domain">https://explorer.bariscode.my.id</span>
+                            <span>&rsaquo;</span>
+                            <span>article</span>
+                            <span>&rsaquo;</span>
+                            <span style="color: var(--text-dim);">${cleanSlug}</span>
+                        </div>
+                        <h3 class="serp-title">
+                            <a href="/article/${file}">${titleHTML}</a>
+                        </h3>
+                        <p class="serp-snippet">${descHTML}</p>
+                        <div class="serp-meta">
+                            <span class="serp-category">${meta.category}</span>
+                            <span>May 2026</span>
+                            <span style="color: var(--primary); font-size: 0.75rem; font-family: var(--font-mono);">${tagsHTML}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatTitle(filename) {
+            return filename
+                .replace('.html', '')
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+
+        function escapeRegex(string) {
+            return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        }
+
+        // FILTER TAB KATEGORI
+        window.filterCategory = function(category) {
+            activeCategory = category;
+            
+            // Ubah class active tombol
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('onclick').includes(category)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            renderResults();
+        };
+
+        // EVENT LISTENER SEARCH
+        searchInput.addEventListener('input', renderResults);
+
+        // RENDER VIZ MAP BULANAN (MINI GRAPH VISUALIZATION)
+        function initVizMap() {
+            const container = document.getElementById('viz-container');
+            for(let i=0; i<15; i++) {
+                const node = document.createElement('div');
+                node.className = 'kp-node';
+                node.style.left = Math.random() * 85 + 5 + '%';
+                node.style.top = Math.random() * 60 + 15 + '%';
+                node.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(node);
+            }
+        }
+
+        // RUN ENGINE
+        fetchIndex();
+        initVizMap();
+    </script>
+</body>
+</html>

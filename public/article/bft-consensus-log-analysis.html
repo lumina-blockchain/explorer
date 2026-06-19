@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bedah Teknis: Alur Konsensus BFT HotStuff & Eksekusi Paralel Block-STM | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07050d;
+            --card-bg: rgba(18, 10, 28, 0.85);
+            --primary: #10b981; /* Emerald Green */
+            --secondary: #3b82f6; /* Cyber Blue */
+            --accent: #f43f5e; /* Cyber Rose */
+            --yellow-accent: #eab308; /* Yellow Gold */
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --code-bg: #020105;
+            --border: rgba(16, 185, 129, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            background-image: 
+                radial-gradient(circle at 10% 15%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 85%, rgba(244, 63, 94, 0.06) 0%, transparent 40%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        .meta { 
+            color: var(--accent); 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 0.15em; 
+            display: block; 
+            margin-bottom: 12px; 
+        }
+        h1 { 
+            font-size: 3.3rem; 
+            font-weight: 800; 
+            line-height: 1.25;
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            font-weight: 400;
+            max-width: 850px;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 32px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 { 
+            font-size: 1.9rem; 
+            margin: 50px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+        }
+        h3 { font-size: 1.45rem; margin: 40px 0 15px; color: var(--secondary); }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        /* Log Analysis Container */
+        .log-section {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            margin: 40px 0;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        }
+        .log-header {
+            background: rgba(16, 185, 129, 0.08);
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .log-title {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .log-body {
+            padding: 25px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.88rem;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.6;
+            color: #e2e8f0;
+        }
+        .log-line {
+            display: block;
+            border-left: 3px solid transparent;
+            padding-left: 15px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+        .log-line:hover {
+            background: rgba(255, 255, 255, 0.02);
+            border-left-color: var(--secondary);
+        }
+        .ts { color: #64748b; }
+        .lvl-info { color: #3b82f6; font-weight: bold; }
+        .tag-node { color: #10b981; font-weight: bold; }
+        .tag-state { color: #8b5cf6; font-weight: bold; }
+        .tag-cons { color: #eab308; font-weight: bold; }
+
+        /* Explanation Blocks */
+        .explain-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: border-color 0.3s ease;
+        }
+        .explain-card:hover {
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+        .explain-card h4 {
+            font-size: 1.15rem;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .explain-card p {
+            font-size: 0.98rem;
+            color: #94a3b8;
+            margin-bottom: 0;
+        }
+
+        /* Flow Diagram */
+        .flow-diagram {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px;
+            margin: 40px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .flow-stage {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        @media(max-width: 768px) {
+            .flow-stage { flex-direction: column; align-items: flex-start; gap: 8px; }
+        }
+        .stage-badge {
+            background: var(--secondary);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            width: 140px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .stage-badge.cons { background: var(--yellow-accent); }
+        .stage-badge.exec { background: var(--primary); }
+        .stage-badge.final { background: var(--accent); }
+        .stage-desc {
+            font-size: 0.98rem;
+            color: #cbd5e1;
+        }
+
+        .footer {
+            margin-top: 80px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Kembali ke Hub Dokumentasi</a>
+        
+        <header>
+            <span class="meta">Bedah Konsensus & Flow Analisis Log | Juni 2026</span>
+            <h1>Analisis Alur Konsensus BFT HotStuff</h1>
+            <p class="subtitle">Eksplorasi langkah demi langkah dari detak Pacemaker Konsensus HotStuff BFT, Agregasi Kunci BLS, Eksekusi Spekulatif Paralel Block-STM, hingga Penentuan Finalitas 3-Chain Rule.</p>
+        </header>
+
+        <div class="content">
+            <p>Jaringan blockchain Lumina L1 beroperasi menggunakan varian mutakhir dari protokol konsensus **Byzantine Fault Tolerant (BFT) HotStuff** yang dipadukan dengan **tanda tangan kriptografi BLS12-381 teragregasi**. Keunggulan arsitektur ini adalah linearitas kompleksitas pesan (<em>linear message complexity</em>) pada ronde normal, keamanan garpu nol (<em>zero-fork safety</em>), serta eksekusi transaksi yang berjalan paralel melalui mesin **Block-STM** berkinerja tinggi.</p>
+            
+            <p>Artikel ini membedah secara ilmiah dan mendalam alur logika, validasi kriptografi, rotasi slot leader, serta penentuan finalitas instan berdasarkan data logs aktual mesin validator Lumina.</p>
+
+            <h2>1. Logs Aliran Aktivitas Konsensus Aktif</h2>
+            <p>Berikut adalah salinan logs konsensus dinamis yang merekam transisi ronde blok `#2108` hingga `#2113` pada kluster staker Lumina L1:</p>
+
+            <div class="log-section">
+                <div class="log-header">
+                    <span class="log-title">Lumina Consensus Log Stream</span>
+                    <span style="color: var(--text-dim); font-size: 0.75rem;">Block #2108 to #2113</span>
+                </div>
+                <div class="log-body">
+<span class="log-line"><span class="ts">2026-06-01T14:09:33.029Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina1u68q... for Block #2108 (Total: 1 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:33.032Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 📥 Received NEXT Block #2108 from network! Hash: Hash(0xb4f12487...) | P2P Latency: 0s</span><span class="log-line"><span class="ts">2026-06-01T14:09:33.038Z</span> <span class="lvl-info">INFO</span> <span class="tag-cons">lumina_consensus</span>: ✅ QC Verification Success: BLS aggregated signature is VALID for hash Hash(0xb28ec719...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:33.040Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Signer casting Vote for network Block #2108 | Hash: Hash(0xb4f12487...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:33.040Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ (Self-Vote) Collected our own Vote for Block #2108 (Total: 2 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:33.050Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina1g794... for Block #2108 (Total: 3 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:33.052Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QUORUM CERTIFICATE FORMED! Height: 2108 | Total Voting Approval: 3/4 validators</span><span class="log-line"><span class="ts">2026-06-01T14:09:33.052Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QC formed from network votes! Applying Block #2108 | Hash: Hash(0xb4f12487...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:33.058Z</span> <span class="lvl-info">INFO</span> <span class="tag-state">lumina_state</span>: ⚡ Block #2108 Executed in Parallel via Block-STM! (Count: 0)</span><span class="log-line"><span class="ts">2026-06-01T14:09:33.058Z</span> <span class="lvl-info">INFO</span> <span class="tag-state">lumina_state</span>: ⏱️ Block #2108 Timing: Validate=1.9µs | Execute=500ns | Commit=325.6µs | Total=328µs</span><span class="log-line"><span class="ts">2026-06-01T14:09:33.059Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: ✅ [FINALITY] Finalized height advanced to #2106 (from QC at #2108 round 0)</span><span class="log-line"><span class="ts">2026-06-01T14:09:33.059Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina14auu... for Block #2108 (Total: 4 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:33.061Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QUORUM CERTIFICATE FORMED! Height: 2108 | Total Voting Approval: 4/4 validators</span><br><span class="log-line"><span class="ts">2026-06-01T14:09:34.452Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ Attaching Quorum Certificate (QC) for parent height 2108 (round 0) to new block proposal!</span><span class="log-line"><span class="ts">2026-06-01T14:09:34.452Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 👑 We are the LEADER! Proposing Block #2109 | Hash: Hash(0x6207b414...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:34.455Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Leader casting Vote for proposed Block #2109 | Hash: Hash(0x6207b414...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:34.455Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ (Self-Vote) Collected our own Vote for Block #2109 (Total: 1 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:34.476Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina1g794... for Block #2109 (Total: 2 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:34.479Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina1u68q... for Block #2109 (Total: 3 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:34.480Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QUORUM CERTIFICATE FORMED! Height: 2109 | Total Voting Approval: 3/4 validators</span><span class="log-line"><span class="ts">2026-06-01T14:09:34.480Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QC formed from network votes! Applying Block #2109 | Hash: Hash(0x6207b414...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:34.485Z</span> <span class="lvl-info">INFO</span> <span class="tag-state">lumina_state</span>: ⚡ Block #2109 Executed in Parallel via Block-STM! (Count: 0)</span><span class="log-line"><span class="ts">2026-06-01T14:09:34.485Z</span> <span class="lvl-info">INFO</span> <span class="tag-state">lumina_state</span>: ⏱️ Block #2109 Timing: Validate=1µs | Execute=300ns | Commit=256.9µs | Total=258.2µs</span><span class="log-line"><span class="ts">2026-06-01T14:09:34.488Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: ✅ [FINALITY] Finalized height advanced to #2107 (from QC at #2109 round 0)</span><span class="log-line"><span class="ts">2026-06-01T14:09:34.488Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina14auu... for Block #2109 (Total: 4 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:34.489Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QUORUM CERTIFICATE FORMED! Height: 2109 | Total Voting Approval: 4/4 validators</span><br><span class="log-line"><span class="ts">2026-06-01T14:09:35.458Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: Block #2110 | Round 0 | Leader: Address(lumina1g794...) | Waiting (0s/5s)...</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.786Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina1g794... for Block #2110 (Total: 1 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.789Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 📥 Received NEXT Block #2110 from network! Hash: Hash(0xbf53740d...) | P2P Latency: 0s</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.795Z</span> <span class="lvl-info">INFO</span> <span class="tag-cons">lumina_consensus</span>: ✅ QC Verification Success: BLS aggregated signature is VALID for hash Hash(0x6207b414...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.797Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Signer casting Vote for network Block #2110 | Hash: Hash(0xbf53740d...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.798Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ (Self-Vote) Collected our own Vote for Block #2110 (Total: 2 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.808Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina1u68q... for Block #2110 (Total: 3 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.809Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QUORUM CERTIFICATE FORMED! Height: 2110 | Total Voting Approval: 3/4 validators</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.809Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QC formed from network votes! Applying Block #2110 | Hash: Hash(0xbf53740d...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.815Z</span> <span class="lvl-info">INFO</span> <span class="tag-state">lumina_state</span>: ⚡ Block #2110 Executed in Parallel via Block-STM! (Count: 0)</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.815Z</span> <span class="lvl-info">INFO</span> <span class="tag-state">lumina_state</span>: ⏱️ Block #2110 Timing: Validate=1.5µs | Execute=300ns | Commit=272.8µs | Total=274.6µs</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.816Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: ✅ [FINALITY] Finalized height advanced to #2108 (from QC at #2110 round 0)</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.816Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina14auu... for Block #2110 (Total: 4 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:35.817Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QUORUM CERTIFICATE FORMED! Height: 2110 | Total Voting Approval: 4/4 validators</span><br><span class="log-line"><span class="ts">2026-06-01T14:09:36.463Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: Block #2111 | Round 0 | Leader: Address(lumina1g794...) | Waiting (0s/5s)...</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.793Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina1g794... for Block #2111 (Total: 1 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.796Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 📥 Received NEXT Block #2111 from network! Hash: Hash(0xfdaf4979...) | P2P Latency: 0s</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.802Z</span> <span class="lvl-info">INFO</span> <span class="tag-cons">lumina_consensus</span>: ✅ QC Verification Success: BLS aggregated signature is VALID for hash Hash(0xbf53740d...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.804Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Signer casting Vote for network Block #2111 | Hash: Hash(0xfdaf4979...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.805Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ (Self-Vote) Collected our own Vote for Block #2111 (Total: 2 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.814Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina14auu... for Block #2111 (Total: 3 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.815Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QUORUM CERTIFICATE FORMED! Height: 2111 | Total Voting Approval: 3/4 validators</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.815Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QC formed from network votes! Applying Block #2111 | Hash: Hash(0xfdaf4979...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.821Z</span> <span class="lvl-info">INFO</span> <span class="tag-state">lumina_state</span>: ⚡ Block #2111 Executed in Parallel via Block-STM! (Count: 0)</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.822Z</span> <span class="lvl-info">INFO</span> <span class="tag-state">lumina_state</span>: ⏱️ Block #2111 Timing: Validate=2.8µs | Execute=1µs | Commit=388.1µs | Total=391.9µs</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.823Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: ✅ [FINALITY] Finalized height advanced to #2109 (from QC at #2111 round 0)</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.823Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina1u68q... for Block #2111 (Total: 4 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:37.824Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QUORUM CERTIFICATE FORMED! Height: 2111 | Total Voting Approval: 4/4 validators</span><br><span class="log-line"><span class="ts">2026-06-01T14:09:38.458Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: Block #2112 | Round 0 | Leader: Address(lumina1u68q...) | Waiting (0s/5s)...</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.036Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina1u68q... for Block #2112 (Total: 1 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.038Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 📥 Received NEXT Block #2112 from network! Hash: Hash(0xc06d19a2...) | P2P Latency: 0s</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.045Z</span> <span class="lvl-info">INFO</span> <span class="tag-cons">lumina_consensus</span>: ✅ QC Verification Success: BLS aggregated signature is VALID for hash Hash(0xfdaf4979...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.047Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Signer casting Vote for network Block #2112 | Hash: Hash(0xc06d19a2...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.047Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ (Self-Vote) Collected our own Vote for Block #2112 (Total: 2 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.054Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina1g794... for Block #2112 (Total: 3 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.055Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QUORUM CERTIFICATE FORMED! Height: 2112 | Total Voting Approval: 3/4 validators</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.055Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QC formed from network votes! Applying Block #2112 | Hash: Hash(0xc06d19a2...)</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.064Z</span> <span class="lvl-info">INFO</span> <span class="tag-state">lumina_state</span>: ⚡ Block #2112 Executed in Parallel via Block-STM! (Count: 0)</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.064Z</span> <span class="lvl-info">INFO</span> <span class="tag-state">lumina_state</span>: ⏱️ Block #2112 Timing: Validate=3.5µs | Execute=800ns | Commit=350.4µs | Total=354.7µs</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.066Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: ✅ [FINALITY] Finalized height advanced to #2110 (from QC at #2112 round 0)</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.066Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🗳️ Collected Vote from lumina14auu... for Block #2112 (Total: 4 votes)</span><span class="log-line"><span class="ts">2026-06-01T14:09:39.067Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: 🛡️ QUORUM CERTIFICATE FORMED! Height: 2112 | Total Voting Approval: 4/4 validators</span><br><span class="log-line"><span class="ts">2026-06-01T14:09:39.458Z</span> <span class="lvl-info">INFO</span> <span class="tag-node">lumina_node</span>: Block #2113 | Round 0 | Leader: Address(lumina1g794...) | Waiting (0s/5s)...</span>
+                </div>
+            </div>
+
+            <h2>2. Visualisasi Pipeline & Urutan Kejadian</h2>
+            <p>Aliran logs di atas mewakili satu siklus konsensus yang sangat harmonis dan ideal di mana seluruh validator merespons dengan cepat. Berikut adalah visualisasi tahapan dari pemrosesan di atas:</p>
+
+            <div class="flow-diagram">
+                <div class="flow-stage">
+                    <span class="stage-badge cons">1. PROPOSAL & VERIFIKASI QC</span>
+                    <span class="stage-desc">Leader mengusulkan blok baru yang ditempeli **QC (Quorum Certificate)** dari blok induknya. Node validator menerima blok dan memverifikasi agregasi tanda tangan BLS12-381 pada QC tersebut untuk memastikan keaslian historis.</span>
+                </div>
+                <div class="flow-stage">
+                    <span class="stage-badge cons">2. VOTING & PENGUMPULAN SUARA</span>
+                    <span class="stage-desc">Setelah QC terverifikasi valid, node memberikan suaranya (*casting vote*). Leader ronde tersebut mengumpulkan (*collect*) suara dari staker di jaringan. Begitu terkumpul minimal 3 dari 4 staker (supermayoritas 2f + 1), sebuah **Quorum Certificate (QC)** baru terbentuk!</span>
+                </div>
+                <div class="flow-stage">
+                    <span class="stage-badge exec">3. PARALLEL EXECUTION (BLOCK-STM)</span>
+                    <span class="stage-desc">Blok yang telah mencapai Quorum diaplikasikan ke State. Transaksi dieksekusi secara spekulatif paralel menggunakan algoritma **Block-STM** dalam hitungan mikrosekon (Validate, Execute, Commit, Flush).</span>
+                </div>
+                <div class="flow-stage">
+                    <span class="stage-badge final">4. FINALITAS (3-CHAIN RULE)</span>
+                    <span class="stage-desc">Berdasarkan aturan finalitas HotStuff BFT, ketika Quorum Certificate terbentuk untuk blok dengan ketinggian <strong>H</strong> pada Round 0, maka finalitas jaringan otomatis maju ke blok <strong>H - 2</strong> secara instan dan permanen!</span>
+                </div>
+            </div>
+
+            <h2>3. Bedah Detail Baris Log Demi Baris (Log-by-Log Walkthrough)</h2>
+            <p>Mari kita bedah secara mendalam proses apa saja yang terjadi di balik setiap baris logs di atas:</p>
+
+            <div class="explain-card">
+                <h4>📥 1. Penerimaan Proposal Blok & Pengumpulan Suara Pertama</h4>
+                <p>
+                    <code>🗳️ Collected Vote from lumina1u68q... for Block #2108 (Total: 1 votes)</code><br>
+                    <code>📥 Received NEXT Block #2108 from network! Hash: Hash(0xb4f12487...)</code><br>
+                    <strong>Penjelasan:</strong> Node bertindak sebagai *Leader* atau pengumpul suara. Node menerima suara (*Vote*) pertama dari validator staker <code>lumina1u68q...</code> untuk blok `#2108`. Seketika setelahnya, node juga menerima data proposal blok `#2108` secara lengkap dari peer jaringan P2P dengan *latency* 0 milidetik (koneksi jaringan lokal/ultra-cepat).
+                </p>
+            </div>
+
+            <div class="explain-card">
+                <h4>🛡️ 2. Verifikasi Kriptografi Agregasi BLS12-381</h4>
+                <p>
+                    <code>✅ QC Verification Success: BLS aggregated signature is VALID for hash Hash(0xb28ec719...)</code><br>
+                    <strong>Penjelasan:</strong> Sebelum memproses proposal blok baru `#2108`, sistem konsensus Lumina harus memvalidasi Quorum Certificate (QC) dari blok induknya (blok `#2107` dengan hash <code>0xb28ec719...</code>) yang ditempelkan di dalam proposal. Lumina menggunakan skema tanda tangan **BLS12-381 teragregasi**. Ratusan tanda tangan validator disatukan oleh leader menjadi satu tanda tangan biner tunggal. Proses verifikasi agregasi BLS ini sukses dalam mikrosekon, membuktikan blok induk telah disetujui secara sah oleh supermayoritas staker.
+                </p>
+            </div>
+
+            <div class="explain-card">
+                <h4>🗳️ 3. Memberikan Suara & Terbentuknya Quorum Pertama (3/4)</h4>
+                <p>
+                    <code>🗳️ Signer casting Vote for network Block #2108 | Hash: Hash(0xb4f12487...)</code><br>
+                    <code>🗳️ (Self-Vote) Collected our own Vote for Block #2108 (Total: 2 votes)</code><br>
+                    <code>🗳️ Collected Vote from lumina1g794... for Block #2108 (Total: 3 votes)</code><br>
+                    <code>🛡️ QUORUM CERTIFICATE FORMED! Height: 2108 | Total Voting Approval: 30000000000000000000000/40000000000000000000000</code><br>
+                    <strong>Penjelasan:</strong> Setelah blok dinyatakan aman dan valid, modul kunci rahasia (*Signer*) milik node kita menandatangani persetujuan dan mengirimkan suara (*casting vote*) ke jaringan. Node mengumpulkan suaranya sendiri (*self-vote*), lalu menerima suara dari validator staker ketiga <code>lumina1g794...</code>. 
+                    Karena jumlah staker yang setuju telah mencapai 3 dari total 4 validator aktif (dengan bobot voting staker 30,000,000,000,000,000,000,000 dari total 40,000,000,000,000,000,000,000 LUM), syarat supermayoritas BFT (<em>2f + 1</em>) terpenuhi. Sebuah **Quorum Certificate (QC)** baru untuk blok `#2108` resmi terbentuk!
+                </p>
+            </div>
+
+            <div class="explain-card">
+                <h4>⚡ 4. Eksekusi Paralel Spekulatif Block-STM & Commit Database</h4>
+                <p>
+                    <code>🛡️ QC formed from network votes! Applying Block #2108</code><br>
+                    <code>⚡ Block #2108 Executed in Parallel via Block-STM! (Count: 0)</code><br>
+                    <code>⏱️ Block #2108 Timing: Validate=1.9µs | Execute=500ns | Commit=325.6µs (Trie=300ns, Flush=169µs) | Total=328µs (0 TXs)</code><br>
+                    <strong>Penjelasan:</strong> Setelah QC terbentuk, blok langsung diaplikasikan ke world state lokal. Transaksi di dalam blok dieksekusi secara spekulatif paralel menggunakan mesin **Block-STM** (mirip dengan Aptos/Sui). Karena blok ini kosong (0 Transaksi / 0 TXs), waktu eksekusi berjalan instan: validasi hanya 1.9 mikrosekon, eksekusi VM 500 nanosekon, dan komitmen penulisan ke memori MPT trie serta disk flushing selesai dalam total **328 mikrosekon (0.000328 detik)!**
+                </p>
+            </div>
+
+            <div class="explain-card">
+                <h4>✅ 5. Kemajuan Finalitas Instan (3-Chain Rule) & Suara Tambahan</h4>
+                <p>
+                    <code>✅ [FINALITY] Finalized height advanced to #2106 (from QC at #2108 round 0)</code><br>
+                    <code>🗳️ Collected Vote from lumina14auu... for Block #2108 (Total: 4 votes)</code><br>
+                    <code>🛡️ QUORUM CERTIFICATE FORMED! Height: 2108 | Total Voting Approval: 4/4</code><br>
+                    <strong>Penjelasan:</strong> Berdasarkan aturan formal konsensus HotStuff BFT, Lumina menerapkan **3-Chain Commit Rule**. Ketika Quorum Certificate terbentuk untuk blok tingkat <code>H</code> pada round 0, maka status finalitas mutlak (keadaan yang tidak dapat diganggu gugat atau di-rollback) otomatis maju ke blok <code>H - 2</code> (blok `#2106`). Setelah finalitas maju, suara dari staker terakhir <code>lumina14auu...</code> tiba, menyempurnakan QC blok `#2108` menjadi disetujui penuh 4 dari 4 validator (100% konsensus).
+                </p>
+            </div>
+
+            <div class="explain-card">
+                <h4>👑 6. Rotasi Slot Leader & Pembuatan Proposal Blok Baru #2109</h4>
+                <p>
+                    <code>🛡️ Attaching Quorum Certificate (QC) for parent height 2108 (round 0) to new block proposal!</code><br>
+                    <code>👑 We are the LEADER! Proposing Block #2109 | Hash: Hash(0x6207b414...)</code><br>
+                    <strong>Penjelasan:</strong> Sesuai jadwal dinamis, pada ronde berikutnya node kita terpilih sebagai **Slot Leader** (Proposer). Node mengambil QC blok `#2108` yang baru terbentuk dan menempelkannya ke dalam usulan blok baru `#2109`, lalu memancarkan proposal tersebut ke seluruh jaringan staker P2P. Proses pengumpulan suara berulang kembali dengan sangat cepat, meloloskan blok `#2109` dan memajukan finalitas absolut jaringan ke tingkat `#2107`.
+                </p>
+            </div>
+
+            <div class="explain-card">
+                <h4>🔄 7. Rotasi Leader ke Peer Lain (Blok #2110 & #2111)</h4>
+                <p>
+                    <code>Block #2110 | Round 0 | Leader: Address(lumina1g794...) | Waiting (0s/5s)...</code><br>
+                    <strong>Penjelasan:</strong> Konsensus Lumina berotasi secara dinamis dan adil. Pada blok `#2110`, kepemimpinan (*Leader*) berpindah ke staker lain <code>lumina1g794...</code>. Node kita kembali menjadi validator biasa yang menunggu proposal datang dari leader baru tersebut (dengan waktu tunggu maksimum 5 detik sebelum memicu liveness recovery timeout). Proposal diterima, divalidasi, state diaplikasikan, dan finalitas kembali dimajukan ke tingkat `#2108`.
+                </p>
+            </div>
+
+            <div class="tip-box">
+                <h3>💡 Keunggulan Utama Flow Konsensus Lumina BFT</h3>
+                <p>
+                    Aliran logs ini menunjukkan kinerja jaringan devnet Lumina L1 yang luar biasa stabil, efisien, dan berlatensi ultra-rendah. Kombinasi <strong>agregasi tanda tangan BLS12-381</strong> dengan <strong>eksekusi paralel Block-STM</strong> memungkinkan kluster validator menyelesaikan pembentukan Quorum Certificate, penulisan world state MPT trie, dan penetapan finalitas blockchain hanya dalam waktu kurang dari <strong>1.5 detik per blok</strong> dengan konsumsi bandwidth P2P seminimal mungkin!
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Network Foundation. Seri Bedah Protokol Konsensus BFT & Kriptografi L1.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validator Staking Masterclass: Panduan Lengkap Calon Staker Lumina L1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07090e;
+            --card-bg: rgba(13, 18, 30, 0.85);
+            --primary: #f59e0b; /* Cyberpunk Amber Gold */
+            --secondary: #22c55e; /* Neon Green */
+            --accent: #3b82f6; /* Cyber Blue */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(245, 158, 11, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(34, 197, 94, 0.06) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(245, 158, 11, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #fef08a; font-size: 1rem; }
+
+        .code-block {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        .visual-flow {
+            background: rgba(34, 197, 94, 0.03);
+            border: 1px dashed rgba(34, 197, 94, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 35px 0;
+            text-align: center;
+        }
+
+        .flow-step {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--secondary);
+            margin: 10px;
+        }
+        .flow-arrow {
+            display: inline-block;
+            color: var(--text-dim);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .info-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .info-card h3 { margin-top: 0; margin-bottom: 12px; }
+
+        .warning-card {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+        .warning-card h3 { color: #f87171; margin-bottom: 10px; }
+        .warning-card p { margin-bottom: 0; color: #fca5a5; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Validator Guide & BFT Consensus | May 2026</span>
+            <h1>Validator Staking Masterclass: Panduan Partisipasi Jaringan Lumina L1</h1>
+            <p>Panduan praktis langkah-demi-langkah bagi pemula untuk menjalankan node, mengekstrak identitas kriptografis (Node ID & BLS Public Key), dan menyetor stake secara dinamis menggunakan JavaScript SDK.</p>
+        </header>
+
+        <div class="content">
+            <p>Halo calon Staker Premium Lumina! Menjadi validator di jaringan blockchain Layer 1 modern adalah cara terbaik untuk berpartisipasi menjaga keamanan desentralisasi sekaligus mendapatkan bagi hasil keuntungan (*passive income*) dari biaya transaksi (*gas fee*). Namun, bagi orang awam, istilah teknis seperti "Node", "BLS Public Key", "HotStuff BFT", dan "Staking" sering kali terdengar menakutkan.</p>
+
+            <p>Kabar gembira! Lumina didesain dari awal untuk mengedepankan **keamanan mutlak** berstandar industri dengan implementasi konsensus **HotStuff BFT (Byzantine Fault Tolerance)** berbasis tanda tangan **BLS12-381 teragregasi**. Dokumen ini ditulis khusus dengan bahasa yang ramah pemula untuk membimbingmu dari nol hingga server validator-mu memproduksi blok pertamanya di internet!</p>
+
+            <div class="highlight-box">
+                <p><strong>💡 Keamanan Dana Dijamin Aman:</strong> Di Lumina L1, koin taruhan (stake) milikmu **TIDAK PERNAH dikirim ke server validator** yang online. Koinmu tetap tersimpan aman di alamat dompet pribadimu secara offline di bawah perlindungan Mnemonic master-mu. Server validator hanya memegang kunci jaringan kosong untuk melakukan verifikasi suara konsensus!</p>
+            </div>
+
+            <div class="highlight-box" style="background: rgba(59, 130, 246, 0.05); border-left-color: var(--accent);">
+                <p><strong>🛡️ Keandalan Konsensus BFT Desentralisasi:</strong> Di Lumina v1.4, pengumpulan suara (*vote*) dilakukan secara terdesentralisasi via Gossip P2P oleh seluruh node online secara lokal (*Local QC Aggregation*). Hal ini menjamin Quorum Certificate (QC) selalu terbentuk dan blok tetap BFT-verified walaupun ada validator staker lain yang sedang offline!</p>
+            </div>
+
+            <h2>1. Peta Jalan Partisipasi Validator (Konsep Dasar)</h2>
+            <p>Untuk bergabung sebagai validator staker di jaringan Lumina, kamu akan melalui 3 langkah sederhana berikut:</p>
+
+            <div class="visual-flow">
+                <div class="flow-step">1. Jalankan Server Node</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">2. Ambil Node ID & BLS Pubkey</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">3. Lakukan Transaksi STAKE (SDK/JS)</div>
+            </div>
+
+            <h2>Langkah 1: Menjalankan Validator Node Pertama Kali</h2>
+            <p>Server validator adalah sebuah komputer (bisa PC rumah atau sewa VPS Linux di cloud) yang menyala 24 jam sehari untuk mensinkronisasi data blok Lumina. Saat kamu menyalakan aplikasi node Lumina untuk pertama kalinya:</p>
+
+            <div class="code-block">
+<span class="comment"># Menjalankan node validator Lumina melalui terminal</span>
+cargo run --release --bin lumina-node
+            </div>
+
+            <p>Ketika perintah di atas dijalankan, node secara otomatis mendeteksi apakah kamu sudah memiliki file **`node.key`** (kunci rahasia identitas server). Jika belum punya, node akan **membuatkannya secara otomatis** di folder utama-mu! Berkas <code>node.key</code> inilah yang melambangkan "KTP elektronik" dari nodemu di internet.</p>
+
+            <h2>Langkah 2: Mengambil ID Node & BLS Public Key (Identitas Kriptografis)</h2>
+            <p>Setelah node menyala, lihat layar terminalmu atau gunakan perkakas CLI node untuk mengekstrak identitas kriptografis nodemu. Terdapat dua identitas penting yang wajib didaftarkan:</p>
+            
+            <p>1. **Node ID (Peer ID)**: Alamat publik jaringan peer-to-peer (P2P) nodemu untuk pengiriman pesan gossip.<br>
+            2. **BLS Public Key**: Kunci publik kriptografis BLS12-381 G1 (sepanjang 48-byte / 96 karakter heksadesimal) yang digunakan konsensus HotStuff BFT untuk memverifikasi keabsahan suara voting blok proposal secara matematis.</p>
+            
+            <p>Tampilannya saat dicetak di log terminal akan terlihat mirip seperti ini:</p>
+
+            <div class="code-block">
+INFO  🔑 Local Peer ID: <span class="string">12D3KooWJnboL7zfBUNStAvppwax1HefV829Amptq78omiViHHjX</span>
+INFO  🔑 BLS Public Key: <span class="string">ad59b0b8722ade3a926d26df1f7c66efead8cd6eb6a5367a4f287c3f35554c1152949b4df2966934bd91fccde0b66fd1</span>
+INFO  🚀 Node is syncing with Bootnode...
+            </div>
+
+            <p>Salin (*copy*) kedua teks tersebut ke dalam notepad-mu! Keduanya adalah identitas publik nodemu yang akan kita daftarkan di transaksi staking agar suaramu sah secara matematis di dalam agregator konsensus BFT.</p>
+            
+            <div class="highlight-box">
+                <p><strong>📂 Lokasi Kunci Rahasia:</strong> Di folder utama nodemu, file bernama <code>node.key</code> sekarang telah tercipta. File ini berisi *Private Key* dari server nodemu. Cadangkan file ini di tempat yang aman! Siapa pun yang memiliki file ini bisa menjalankan node atas namamu, namun mereka **TIDAK BISA mengambil koinmu**.</p>
+            </div>
+
+            <h2>Langkah 3: Melakukan Staking Menggunakan SDK Javascript</h2>
+            <p>Untuk mengajukan nodemu ke jaringan validator resmi, kamu harus mengunci minimal **10.000 LUM** sebagai modal komitmen staker. Kita bisa melakukannya secara instan menggunakan script JavaScript sederhana bernama **`test_stake.js`** yang memanfaatkan SDK resmi Lumina!</p>
+
+            <p>Di bawah ini adalah isi dari berkas <code>test_stake.js</code> yang sudah disiapkan di dalam folder proyekmu:</p>
+
+            <div class="code-block">
+<span class="keyword">import</span> { LuminaWallet, LuminaClient } <span class="keyword">from</span> <span class="string">'./lumina-blockchain-sdk/js/src/index.js'</span>;
+
+<span class="comment">// 1. Hubungkan ke server RPC resmi Lumina</span>
+<span class="keyword">const</span> client = <span class="keyword">new</span> <span class="type">LuminaClient</span>(<span class="string">'https://rpc1.bariscode.my.id'</span>);
+
+<span class="comment">// 2. Masukkan Private Key Dompet Pribadimu (Jangan taruh di server validator!)</span>
+<span class="keyword">const</span> nodeWallet = <span class="keyword">new</span> <span class="type">LuminaWallet</span>(<span class="string">"c37429dc912e4913b6..."</span>); 
+
+<span class="keyword">async</span> <span class="keyword">function</span> <span class="macro">runTest()</span> {
+    <span class="comment">// Salin Node ID dan BLS Public Key yang kamu dapatkan di Langkah 2 ke sini!</span>
+    <span class="keyword">const</span> NODE_ID = <span class="string">"12D3KooWJnboL7zfBUNStAvppwax1HefV829Amptq78omiViHHjX"</span>;
+    <span class="keyword">const</span> BLS_PUBKEY = <span class="string">"ad59b0b8722ade3a926d26df1f7c66efead8cd6eb6a5367a4f287c3f35554c1152949b4df2966934bd91fccde0b66fd1"</span>;
+
+    console.log(<span class="string">"🦾 Memulai penguncian dana (Staking)..."</span>);
+
+    <span class="keyword">try</span> {
+        <span class="comment">// 3. Buat transaksi stake sebesar 10.000 LUM terikat ke Node ID & BLS Public Key-mu</span>
+        <span class="keyword">const</span> stakeTx = <span class="keyword">await</span> nodeWallet.createStakeTransaction(client, {
+            amount: <span class="string">"10000000000000000000000"</span>, <span class="comment">// Satuan Lumlets (10,000 LUM)</span>
+            nodeId: NODE_ID,
+            blsPubKey: BLS_PUBKEY
+        });
+
+        <span class="comment">// 4. Kirim transaksi ke jaringan</span>
+        <span class="keyword">const</span> stakeRes = <span class="keyword">await</span> client.sendTransaction(stakeTx);
+        console.log(<span class="string">"✅ TRANSAKSI STAKING BERHASIL DIKIRIM!"</span>);
+        console.log(<span class="string">"📜 TX Hash:"</span>, stakeRes.hash);
+    } <span class="keyword">catch</span> (e) {
+        console.error(<span class="string">"🛑 GAGAL STAKING:"</span>, e.message);
+    }
+}
+
+runTest();
+            </div>
+
+            <p>Untuk menjalankan script di atas di laptopmu, pastikan Node.js telah ter-install, lalu jalankan perintah berikut di terminal:</p>
+
+            <div class="code-block">
+node test_stake.js
+            </div>
+
+            <h2>Langkah 4: Verifikasi Sukses (Selamat Bergabung!)</h2>
+            <p>Setelah script staking berjalan sukses, lihat kembali layar log terminal dari Server Validator Rust-mu. Dalam hitungan detik, node validator-mu akan menangkap transaksi staking-mu dari blockchain dan memunculkan notifikasi kemenangan ini:</p>
+
+            <div class="code-block">
+INFO  🦾 Validator Registered! Addr: lumina1xxxx...xxxx, NodeId: 12D3KooW...
+INFO  ✨ Node is now an Active Validator in HotStuff Consensus!
+            </div>
+
+            <p>Selamat! Server validator-mu sekarang secara resmi telah terdaftar di database blockchain Lumina. Setiap kali jaringan Lumina memproses transaksi, validator-mu akan ikut memverifikasi blok dan saldo biayanya akan masuk ke dompet pribadimu secara otomatis!</p>
+
+            <h2>Keuntungan & Hak Istimewa Staker</h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>💰 Pembagian Gas Fee Jaringan</h3>
+                    <p>Setiap blok yang diusulkan oleh validator staker akan mendapatkan alokasi bagi hasil sebesar **90% dari total biaya transaksi (Gas Fee)** di dalam blok tersebut.</p>
+                </div>
+                <div class="info-card">
+                    <h3>🏆 Staking Reward Elite</h3>
+                    <p>Secara berkala, top 30 staker dengan jumlah koin terkunci terbanyak akan masuk ke dalam jajaran validator elit dan berhak mendapatkan bonus inflasi minting tambahan.</p>
+                </div>
+            </div>
+
+            <div class="warning-card">
+                <h3>⚠️ Aturan Penting Validator:</h3>
+                <p>Pastikan server validator-mu memiliki koneksi internet yang stabil dan menyala 24/7. Jika server validator-mu sering mati (*downtime* tinggi) atau melakukan kecurangan data, sistem konsensus dapat memotong skor reputasi validator-mu demi menjaga kesehatan jaringan.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Core Devnet Security Series.
+        </div>
+    </div>
+</body>
+</html>

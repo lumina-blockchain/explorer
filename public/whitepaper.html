@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina Protocol: A High-Velocity Rust-Native Layer 1 Blockchain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Lora:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0d9488;
+            --text: #1e293b;
+            --muted: #64748b;
+        }
+
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        body {
+            font-family: 'Lora', serif;
+            line-height: 1.8;
+            color: var(--text);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 80px 60px;
+            background: white;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        .sans {
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            font-style: italic;
+            line-height: 1.1;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 4px solid var(--text);
+            padding-bottom: 60px;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 56px;
+            margin: 10px 0;
+        }
+
+        .header p {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--primary);
+            letter-spacing: 0.4em;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 28px;
+            color: var(--primary);
+            border-left: 12px solid var(--primary);
+            padding-left: 24px;
+            margin-top: 80px;
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            font-size: 20px;
+            color: var(--text);
+            margin-top: 40px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 24px;
+            text-align: justify;
+            font-size: 17px;
+        }
+
+        ul {
+            margin-bottom: 24px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .diagram-container {
+            background: #f8fafc;
+            padding: 40px;
+            border-radius: 30px;
+            margin: 50px 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .diagram {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+        }
+
+        .caption {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--muted);
+            margin-top: 20px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 50px 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .table th,
+        .table td {
+            padding: 18px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        .table th {
+            background: #0f172a;
+            color: white;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .table td {
+            font-size: 15px;
+        }
+
+        .footer-note {
+            margin-top: 100px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 12px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            h2 {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <p>LUMINA BLOCKCHAIN RESEARCH</p>
+        <h1>WHITEPAPER v1.0</h1>
+        <p style="color: #64748b; font-style: normal; margin-top: 15px; letter-spacing: 0.1em;">Scalability through
+            Rust-Native Concurrency and Velocity Consensus</p>
+    </div>
+
+    <h2>01. Abstract</h2>
+    <p>
+        Traditional blockchain networks face a critical bottleneck: the trade-off between decentralized integrity and
+        execution velocity. As decentralized finance (DeFi) and high-frequency on-chain applications evolve, the demand
+        for sub-second finality and near-zero transaction costs has become paramount.
+    </p>
+    <p>
+        Lumina presents a novel Layer 1 solution engineered from the ground up in <strong>Rust</strong>. By utilizing
+        the <strong>Proof of Velocity (PoV)</strong> consensus mechanism and an asynchronous multi-threaded state
+        machine, Lumina achieves a throughput exceeding 10,000 transactions per second (TPS) on standard validator
+        hardware. This document details the cryptographic foundations, network topology, and economic incentives that
+        power the Lumina ecosystem.
+    </p>
+
+    <h2>02. Technical Architecture</h2>
+    <p>
+        Lumina is not a fork of existing protocols; it is a clean-sheet implementation designed for maximum hardware
+        utilization. The core engine is built on the <strong>Tokio runtime</strong>, allowing the node to handle tens of
+        thousands of concurrent P2P connections and transaction validations without blocking the main execution thread.
+    </p>
+
+    <h3>2.1 Serialization & Data Efficiency</h3>
+    <p>
+        Data bloat is a common failure point in legacy chains. Lumina utilizes <strong>Bincode</strong>, a binary
+        serialization format that is up to 5x more compact than JSON and significantly faster to process than Protobuf.
+        This allows for ultra-thin block headers and smaller transaction payloads, reducing bandwidth requirements for
+        validators.
+    </p>
+
+    <div class="diagram-container">
+        <img src="arch.png" class="diagram" alt="Architecture Diagram">
+        <div class="caption">Figure 1: Multi-threaded State Management & Networking Layer</div>
+    </div>
+
+    <h3>2.2 Cryptographic Primitives</h3>
+    <ul>
+        <li><strong>BLAKE3 Hashing:</strong> Lumina utilizes BLAKE3 for all hashing operations, including block hashes
+            and transaction IDs. BLAKE3 is proven to be faster than SHA-256 and SHA-3 while maintaining high security
+            against collision attacks.</li>
+        <li><strong>Ed25519 Signatures:</strong> All user interactions are secured by Ed25519, a high-performance
+            elliptic curve signature scheme that provides the best balance between security, speed, and signature size.
+        </li>
+        <li><strong>Bech32m Addresses:</strong> Following the BIP350 standard, Lumina addresses (prefixed with
+            <em>lumina1</em>) incorporate advanced error detection to prevent accidental fund loss during manual
+            transfers.</li>
+    </ul>
+
+    <h2>03. Proof of Velocity (PoV)</h2>
+    <p>
+        Lumina's consensus, <strong>Proof of Velocity</strong>, is a high-performance variation of Delegated Proof of
+        Stake. In PoV, the network measures two primary metrics: <strong>Stake Weight</strong> and <strong>Node
+            Velocity</strong>.
+    </p>
+    <p>
+        Velocity is defined as the speed at which a validator can propagate and verify blocks. Validators with high
+        velocity and stable uptime are prioritized in the <strong>Leader Rotation</strong>, creating a natural incentive
+        for node operators to optimize their infrastructure and internet connectivity.
+    </p>
+
+    <div class="diagram-container">
+        <img src="flow.png" class="diagram" alt="Transaction Flow Diagram">
+        <div class="caption">Figure 2: Transaction Propagation and Consensus Finality Cycle</div>
+    </div>
+
+    <h3>3.1 Leader Selection & Block Production</h3>
+    <p>
+        A dedicated Leader is chosen every 2 seconds to propose a new block. This Leader aggregates transactions from
+        the <strong>Mempool</strong>, verifies nonces and balances, and broadcasts the proposed block to the Validator
+        Set. If a majority (2/3+1) of the active stake weight approves the block within the grace period, it is
+        committed to the global ledger.
+    </p>
+
+    <h2>04. Economic Framework</h2>
+    <p>
+        The Lumina economy is designed to be self-sustaining, rewarding honest participants while making malicious
+        actions prohibitively expensive.
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Component</th>
+                <th>Specification</th>
+                <th>Logic / Rationale</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Token Symbol</strong></td>
+                <td>LUM</td>
+                <td>Native utility and governance asset.</td>
+            </tr>
+            <tr>
+                <td><strong>Decimal Precision</strong></td>
+                <td>18 Decimals</td>
+                <td>Supports micro-transactions and granular fees.</td>
+            </tr>
+            <tr>
+                <td><strong>Dynamic Reward</strong></td>
+                <td>0.001 - 0.01 LUM</td>
+                <td>Scales linearly with block density to encourage high TPS.</td>
+            </tr>
+            <tr>
+                <td><strong>Transaction Fee</strong></td>
+                <td>0.00001 LUM</td>
+                <td>Base fee for standard transfers, adjusted by mempool congestion.</td>
+            </tr>
+            <tr>
+                <td><strong>Block Time</strong></td>
+                <td>~2.0 Seconds</td>
+                <td>Optimized for instant-feeling user experiences.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>4.1 Staking & Governance</h3>
+    <p>
+        Holders of LUM tokens can delegate their stake to any active validator. This delegation earns a portion of the
+        <strong>Block Rewards</strong> and <strong>Transaction Fees</strong> generated by the validator. This mechanism
+        ensures that the network security is backed by the community's capital.
+    </p>
+
+    <h2>05. Security & Anti-Spam</h2>
+    <p>
+        To protect against Denial of Service (DoS) attacks, Lumina implements a <strong>Dynamic Fee Adjustment</strong>.
+        As the Mempool fills up, the minimum gas price required for inclusion increases exponentially. This makes
+        spamming the network extremely costly while keeping prices low for legitimate users during normal periods.
+    </p>
+
+    <div class="footer-note">
+        &copy; 2026 Lumina Foundation. All rights reserved. <br>
+        This document is for technical informational purposes only and does not constitute financial advice.
+    </div>
+
+    <div class="no-print"
+        style="position: fixed; bottom: 20px; right: 20px; background: #0d9488; color: white; padding: 15px 25px; border-radius: 50px; font-weight: 900; box-shadow: 0 10px 30px rgba(13,148,136,0.4); cursor: pointer;"
+        onclick="window.print()">
+        PRINT TO PDF
+    </div>
+</body>
+
+</html>

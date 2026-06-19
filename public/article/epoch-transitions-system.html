@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epoch Transitions, Persistent Accumulator & Scheduled Payouts | Lumina Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #06090e;
+            --card-bg: rgba(11, 17, 26, 0.9);
+            --primary: #06b6d4; /* Electric Cyan */
+            --secondary: #fbbf24; /* Amber Gold */
+            --accent: #10b981; /* Emerald Green */
+            --purple: #a855f7; /* Royal Purple */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(6, 182, 212, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(168, 85, 247, 0.06) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--purple), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(6, 182, 212, 0.04);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #a5f3fc; font-size: 1rem; }
+
+        .success-box {
+            background: rgba(16, 185, 129, 0.04);
+            border-left: 4px solid var(--accent);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .success-box p { margin-bottom: 0; color: #a7f3d0; font-size: 1rem; }
+
+        .code-block {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.6;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+        .code-block .number { color: #f43f5e; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .info-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .info-card h3 { margin-top: 0; margin-bottom: 12px; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+        ol, ul {
+            margin-left: 25px;
+            margin-bottom: 25px;
+            color: #cbd5e1;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Consensus & Tokenomics | May 2026</span>
+            <h1>Epoch Transitions, Persistent Accumulator & Scheduled Payouts</h1>
+            <p>Bagaimana Lumina L1 menunda dan merapalkan bagi hasil (Block Reward & Gas Fee) ke titik transisi terjadwal setiap 100 blok sekali untuk performa TPS ekstrem dan mencegah State Bloat.</p>
+        </header>
+
+        <div class="content">
+            <p>Dalam desain blockchain tradisional (seperti Ethereum atau Bitcoin), reward penambangan dan biaya gas didistribusikan secara instan pada setiap blok yang sukses dimasukkan ke dalam rantai. Walaupun terlihat sederhana, pendekatan eceran ini memiliki dampak buruk yang sangat fatal bagi performa throughput (TPS) jaringan jangka panjang: <strong>State Bloat & High Database Write Overhead</strong>.</p>
+
+            <p>Setiap blok baru mengharuskan mesin eksekusi melakukan pembagian receh (*dust balance updates*) ke puluhan validator. Hal ini memicu antrean panjang operasi tulis (*disk writes*) pada database state RocksDB/Sled, memperlambat pemrosesan transaksi pengguna, dan membuang-buang bandwidth konsensus secara sia-sia.</p>
+
+            <div class="highlight-box">
+                <p><strong>💡 Pendekatan Lumina L1:</strong> Memperkenalkan sistem <strong>Epoch Transitions</strong>. Seluruh jatah gaji validator (Leader & Top 30 Elite Stakers) diakumulasikan secara aman di latar belakang, lalu dibayarkan secara <em>rapelan (batch)</em> otomatis tepat saat masa transisi setiap <strong>100 blok sekali</strong>.</p>
+            </div>
+
+            <h2>1. Arsitektur Brankas Akumulasi (Persistent Accumulator)</h2>
+            <p>Untuk mengamankan reward dan fee selama Epoch berjalan tanpa memicu pembaharuan saldo langsung pada akun dompet pengguna, Lumina mengimplementasikan sistem celengan persistent di database <code>"validator_keys"</code> menggunakan kunci khusus:</p>
+            <ul>
+                <li><code>epoch_leader_reward:&lt;address&gt;</code>: Menyimpan total jatah block reward + 10% gas fee bonus untuk masing-masing leader yang memproposalkan blok selama Epoch tersebut.</li>
+                <li><code>epoch_accumulated_shared_pool</code>: Mengumpulkan total 90% porsi sisa gas fee transaksi untuk didistribusikan ke staker elite.</li>
+                <li><code>epoch_leaders_list</code>: Menyimpan daftar alamat leader yang berkontribusi aktif memproposalkan blok pada Epoch ini.</li>
+            </ul>
+
+            <p>Tipe data celengan disimpan secara efisien dalam format representasi byte big-endian <code>u128</code> untuk integritas data yang kokoh:</p>
+            <div class="code-block">
+<span class="comment">// Helper Method Celengan di crates/state/src/lib.rs</span>
+<span class="keyword">pub fn</span> <span class="type">get_accumulated_value</span>(&amp;self, key: &amp;<span class="type">str</span>) -> <span class="type">u128</span> {
+    <span class="keyword">if let</span> Ok(Some(bytes)) = self.db.get(<span class="string">"validator_keys"</span>, key.as_bytes()) {
+        <span class="keyword">if</span> bytes.len() == 16 {
+            <span class="keyword">return</span> <span class="type">u128</span>::from_be_bytes(bytes.try_into().unwrap());
+        }
+    }
+    0
+}
+
+<span class="keyword">pub fn</span> <span class="type">set_accumulated_value</span>(&amp;self, key: &amp;<span class="type">str</span>, val: <span class="type">u128</span>) {
+    <span class="keyword">let</span> _ = self.db.put(<span class="string">"validator_keys"</span>, key.as_bytes(), &amp;val.to_be_bytes());
+}
+            </div>
+
+            <h2>2. Protokol Tutup Buku Otomatis (Epoch Transition Block)</h2>
+            <p>Saat tinggi blok menyentuh kelipatan 100 (misalnya blok #100, #200, dst.), State Engine secara otomatis mengaktifkan siklus tutup buku desentralisasi di akhir tahap finalisasi blok:</p>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>💸 1. Gajian Rapelan Leader</h3>
+                    <p>Sistem memproses daftar leader di <code>epoch_leaders_list</code>, mentransfer seluruh reward akumulatif ke saldo wallet mereka, lalu membersihkan datanya dari database.</p>
+                </div>
+                <div class="info-card">
+                    <h3>👑 2. Distribusi Pool Elite (Top 30)</h3>
+                    <p>Sistem mengambil saldo <code>epoch_accumulated_shared_pool</code>, lalu membagikannya secara proporsional ke Top 30 staker aktif berdasarkan bobot staked mereka saat transisi terjadi.</p>
+                </div>
+            </div>
+
+            <div class="success-box">
+                <p><strong>🛡️ Nol Downtime & Keamanan Desentralisasi:</strong> Transaksi user (seperti kirim koin & deploy contract) di blok transisi tetap diproses instan tanpa delay! Seluruh proses bagi hasil diselesaikan secara deterministik oleh seluruh node validator pada tahap akhir eksekusi blok.</p>
+            </div>
+
+            <h2>3. Sampel Log Eksekusi Real-Time</h2>
+            <p>Ketika masa transisi Epoch terpicu, logs node akan mencetak rentetan proses pembagian hasil secara sangat elegan dan transparan:</p>
+
+            <div class="code-block" style="background: #020408; color: #a7f3d0;">
+2026-05-18T20:45:01.125Z  INFO lumina_state: 📥 Block #99 processed! Accumulated Leader Reward: 1001000000000000 Lumlets, Shared Pool: 9000000000000 Lumlets
+2026-05-18T20:45:02.348Z  INFO lumina_state: ✨ [EPOCH TRANSITION] Height #100 reached! Processing 'gajian' for validators...
+2026-05-18T20:45:02.355Z  INFO lumina_state: 💸 Paid leader reward: 100.1 LMN to Leader lumina1u68qksp3jf6pqe9wf6sayshr64cfk5ptxfv5yr
+2026-05-18T20:45:02.362Z  INFO lumina_state: 💸 Distributed Elite share: 50.25 LMN to Validator lumina1rlnjrlke3uff992eexch6zyvphld4d4puv9za8
+2026-05-18T20:45:02.370Z  INFO lumina_state: 💸 Distributed Elite share: 25.12 LMN to Validator lumina19waax5n0tggpemtfhmhg26fm4mych9859n4hrp
+2026-05-18T20:45:02.375Z  INFO lumina_state: ✅ [EPOCH TRANSITION COMPLETE] Paid all leaders and Top 30 elite shared pools successfully!
+            </div>
+
+            <h2>4. Kode Pengujian Unit (Unit Test Showcase)</h2>
+            <p>Untuk membuktikan keandalan logika, kami menyertakan unit test <code>test_epoch_transitions</code> komprehensif di dalam <code>crates/state/src/lib.rs</code> untuk mensimulasikan proposal 100 blok dari genesis hingga transisi penuh:</p>
+
+            <div class="code-block">
+<span class="keyword">#[test]</span>
+<span class="keyword">fn</span> <span class="type">test_epoch_transitions</span>() {
+    <span class="keyword">let</span> path = get_temp_db_path(<span class="string">"epoch"</span>);
+    <span class="keyword">let</span> db = Arc::new(LuminaDB::open(&amp;path).unwrap());
+    <span class="keyword">let</span> state = StateManager::new(db.clone());
+
+    <span class="comment">// Setup leader dan validator staker</span>
+    <span class="keyword">let</span> leader_addr = Address::from_bytes([9u8; 20]);
+    <span class="keyword">let</span> staker_addr = Address::from_bytes([8u8; 20]);
+    ...
+    <span class="comment">// Apply Block #0 (Genesis)</span>
+    <span class="keyword">let</span> block0 = Block { ... };
+    state.apply_block(block0, vec![]);
+
+    <span class="comment">// Di blok #1 s/d #99, jatah reward hanya dikumpulkan di celengan database</span>
+    <span class="keyword">for</span> i <span class="keyword">in</span> 1..100 {
+        <span class="keyword">let</span> block = Block { ... };
+        state.apply_block(block, vec![]);
+        <span class="comment">// Saldo wallet leader & staker tetap diam konstan (Nol overhead tulis!)</span>
+        <span class="macro">assert_eq!</span>(state.get_account(&amp;leader_addr).balance, initial_bal);
+    }
+
+    <span class="comment">// Apply Block #100 - Memicu transisi Epoch kelipatan 100!</span>
+    <span class="keyword">let</span> block100 = Block { ... };
+    state.apply_block(block100, vec![]);
+
+    <span class="comment">// Saldo wallet staker & leader sekarang bertambah secara massal! Celengan direset!</span>
+    <span class="macro">assert!</span>(state.get_account(&amp;leader_addr).balance > initial_bal);
+    <span class="macro">assert_eq!</span>(state.get_accumulated_value(&amp;format!(<span class="string">"epoch_leader_reward:{}"</span>, leader_addr)), 0);
+}
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Consensus & Tokenomics Series.
+        </div>
+    </div>
+</body>
+</html>

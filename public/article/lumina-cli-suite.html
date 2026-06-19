@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Guide: Mastering Lumina CLI Suite | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07090e;
+            --card-bg: rgba(13, 18, 30, 0.85);
+            --primary: #ec4899; /* Electric Coral */
+            --secondary: #fbbf24; /* Amber Gold */
+            --accent: #10b981; /* Emerald Green */
+            --blue: #3b82f6; /* Cyber Blue */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --code-bg: #04060a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(236, 72, 153, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(251, 191, 36, 0.08) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .cli-box {
+            background: var(--code-bg);
+            border: 1px solid rgba(236, 72, 153, 0.2);
+            padding: 25px;
+            border-radius: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            color: #f3f4f6;
+            margin: 35px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        .cli-box::before {
+            content: 'Terminal';
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .cli-prompt { color: var(--accent); font-weight: bold; user-select: none; }
+        .cli-cmd { color: #ffffff; font-weight: 600; }
+        .cli-arg { color: var(--primary); font-weight: 600; }
+        .cli-val { color: var(--secondary); }
+        .cli-comment { color: #64748b; font-style: italic; display: block; margin-bottom: 8px; }
+
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .param-table th, .param-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem;
+        }
+        .param-table th {
+            background: rgba(236, 72, 153, 0.08);
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+        }
+        .param-table tr:hover td {
+            background: rgba(255,255,255,0.01);
+        }
+
+        .highlight-box {
+            background: rgba(245, 158, 11, 0.05);
+            border-left: 4px solid var(--secondary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #fef08a; font-size: 1rem; }
+
+        .blue-box {
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 4px solid var(--blue);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .blue-box p { margin-bottom: 0; color: #93c5fd; font-size: 1rem; }
+
+        .tip-box {
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+        .tip-box h3 { color: var(--accent); margin-bottom: 10px; }
+        .tip-box p { margin-bottom: 0; color: #a7f3d0; }
+
+        .flow-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.08);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 35px 0;
+        }
+        .flow-step {
+            margin-bottom: 20px;
+            border-left: 3px solid var(--secondary);
+            padding-left: 20px;
+        }
+        .flow-step:last-child { margin-bottom: 0; }
+        .flow-step h4 { color: #fde047; font-size: 1.1rem; margin-bottom: 5px; }
+
+        .visual-flow {
+            background: rgba(236, 72, 153, 0.02);
+            border: 1px dashed rgba(236, 72, 153, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 35px 0;
+            text-align: center;
+        }
+        .flow-block {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--primary);
+            margin: 10px;
+        }
+        .flow-arrow {
+            display: inline-block;
+            color: var(--text-dim);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Developer Tools & Governance | May 2026</span>
+            <h1>Mastering Lumina CLI Suite: Navigasi, Staking & Tata Kelola Banding Validator</h1>
+            <p>Panduan lengkap menguasai antarmuka baris perintah (CLI) Lumina untuk mengelola aset, memantau integritas validator pool, hingga berpartisipasi dalam proses banding konsensus BFT.</p>
+        </header>
+
+        <div class="content">
+            <p>Halo para Pengembang dan Operator Node Lumina! Selain menyediakan SDK Javascript dan API gRPC/WebSocket yang canggih, tim inti Lumina juga menyediakan perangkat utama terintegrasi untuk berinteraksi langsung dengan blockchain dari terminal kesayanganmu: <strong>Lumina CLI (<code>lumina-cli</code>)</strong>.</p>
+
+            <p>Lumina CLI ditulis menggunakan Rust untuk performa dan keamanan optimal, memungkinkan penandatanganan transaksi secara lokal tanpa memaparkan private key ke internet. Melalui artikel ini, kita akan bedah habis setiap fiturnya secara detail: mulai dari manajemen dompet offline, melakukan staking, melakukan kueri status validator pool secara real-time, hingga mekanisme penyelamatan validator saat terkena masa jeling (jailing) akibat pelanggaran BFT.</p>
+
+            <div class="blue-box">
+                <p><strong>💡 Mengapa Transaksi CLI Sangat Aman?</strong> Di Lumina L1, seluruh private key yang dimasukkan ke CLI diolah dan ditandatangani <strong>100% di memori lokal laptop/mesin-mu</strong> sebelum dikirim sebagai signed transaction ke RPC endpoint node. Kunci rahasiamu tidak pernah dikirim melintasi jaringan internet atau ditulis ke penyimpanan disk!</p>
+            </div>
+
+            <h2>1. Instalasi dan Opsi Global CLI</h2>
+            <p>Secara default, binary CLI dapat dipanggil menggunakan nama <code>lumina-cli</code>. Perangkat ini mendukung konfigurasi parameter global yang mempermudah koneksi ke node jaringan mana saja:</p>
+
+            <div class="cli-box">
+                <span class="cli-comment"># Menampilkan bantuan menu utama dan seluruh subcommand</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli</span> --help
+
+                <span class="cli-comment"># Menghubungkan CLI ke Custom RPC Endpoint (misalnya Testnet publik)</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli</span> <span class="cli-arg">--rpc</span> <span class="cli-val">https://rpc.testnet.lumina.tech</span> latest
+            </div>
+
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Global Parameter</th>
+                        <th>Keterangan</th>
+                        <th>Nilai Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>--rpc &lt;URL&gt;</code></td>
+                        <td>URL endpoint RPC HTTP node Lumina yang ditargetkan untuk query/kirim transaksi.</td>
+                        <td><code>http://127.0.0.1:9098</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>--api-key &lt;KEY&gt;</code></td>
+                        <td>Token otentikasi opsional jika node target menerapkan proteksi rate-limiting.</td>
+                        <td><em>None</em></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>2. Manajemen Dompet Offline (Subcommand: <code>wallet</code>)</h2>
+            <p>Untuk bertransaksi di jaringan Lumina, kamu memerlukan sebuah dompet (wallet) yang diwakili oleh kunci rahasia (private key) dan alamat publik berbasis format Bech32m dengan prefix <code>lumina1...</code>.</p>
+
+            <h3>A. Membuat Wallet Baru</h3>
+            <p>Kamu bisa membuat wallet acak yang baru secara aman dan offline menggunakan perintah berikut:</p>
+            <div class="cli-box">
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli wallet generate</span>
+            </div>
+            <p>Perintah di atas akan mencetak tiga data penting di terminalmu:</p>
+            <ul>
+                <li><strong>Address:</strong> Alamat publik penerima koin (berawalan <code>lumina1...</code>).</li>
+                <li><strong>Public Key:</strong> Representasi publik kunci dalam format hex.</li>
+                <li><strong>Private Key:</strong> Kunci rahasia dompetmu dalam format hex. Simpan ini di tempat teraman!</li>
+            </ul>
+
+            <h3>B. Memulihkan Wallet</h3>
+            <p>Jika kamu sudah memiliki kunci rahasia atau seed phrase sebelumnya, kamu bisa memulihkannya secara instan:</p>
+            <div class="cli-box">
+                <span class="cli-comment"># Memulihkan wallet dari Private Key Hex (64 karakter)</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli wallet from-secret</span> <span class="cli-val">"c37429dc912e4913b6..."</span>
+
+                <span class="cli-comment"># Memulihkan wallet dari 12 atau 24 kata Mnemonic master seed phrase</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli wallet from-mnemonic</span> <span class="cli-val">"apple banana cherry dog elephant fox grape horse ice jacket kangaroo lemon"</span> <span class="cli-arg">--index</span> <span class="cli-val">0</span>
+            </div>
+
+            <h3>C. Mendaftarkan Alias Dompet On-Chain (Subcommand: <code>wallet set-name</code>)</h3>
+            <p>Lumina mendukung pendaftaran alias nama dompet unik secara on-chain. Nama alias ini akan mempermudah pelacakan identitas validator milikmu di penelusur scan:</p>
+            <div class="cli-box">
+                <span class="cli-comment"># Mendaftarkan nama alias on-chain untuk alamat dompet Anda</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli wallet set-name</span> <span class="cli-arg">--secret</span> <span class="cli-val">"c3742..."</span> <span class="cli-arg">--name</span> <span class="cli-val">"Gamer-Node"</span>
+            </div>
+
+            <h2>3. Transfer, Saldo & Penelusuran Jaringan</h2>
+            <p>Setelah wallet siap, kamu bisa melakukan pengecekan saldo, nonce, dan memindahkan aset dengan cepat.</p>
+
+            <h3>A. Memeriksa Saldo & Nonce Akun (Subcommand: <code>balance</code>)</h3>
+            <p>Memeriksa saldo (dalam satuan Lumlets) dan nonce aktif dari alamat dompet tertentu:</p>
+            <div class="cli-box">
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli balance</span> <span class="cli-val">lumina1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq4fdvjl</span>
+            </div>
+
+            <h3>B. Mengecek Nonce Akun Secara Mandiri (Subcommand: <code>nonce</code>)</h3>
+            <p>Nonce menunjukkan jumlah transaksi keluar dari akun Anda, sangat berguna untuk melacak antrean transaksi:</p>
+            <div class="cli-box">
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli nonce</span> <span class="cli-val">lumina1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq4fdvjl</span>
+            </div>
+
+            <h3>C. Mengirim Transfer Koin (Subcommand: <code>transfer</code>)</h3>
+            <p>Mengirim koin ke dompet lain dengan fee transaksi yang dapat diatur secara opsional:</p>
+            <div class="cli-box">
+                <span class="cli-comment"># Mengirim transfer koin (100.000.000.000 Lumlets = 0.0001 LUM)</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli transfer</span> <span class="cli-arg">--secret</span> <span class="cli-val">"c3742..."</span> <span class="cli-arg">--to</span> <span class="cli-val">"lumina1abc..."</span> <span class="cli-arg">--amount</span> <span class="cli-val">100000000000</span>
+            </div>
+
+            <h3>D. Mengambil Data Blok Terbaru & Tertentu (Subcommand: <code>block</code> & <code>latest</code>)</h3>
+            <p>Mendapatkan data informasi struktur blok (seperti hash transaksi, state root, block height) secara langsung:</p>
+            <div class="cli-box">
+                <span class="cli-comment"># Melihat tinggi blok terbaru di jaringan saat ini</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli latest</span>
+
+                <span class="cli-comment"># Melihat detail data blok pada ketinggian tertentu</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli block</span> <span class="cli-val">420</span>
+            </div>
+
+            <h3>E. Melakukan Pencarian Global (Subcommand: <code>search</code>)</h3>
+            <p>Mencari transaksi berdasarkan hash, blok berdasarkan tinggi, atau info akun berdasarkan alamat dompet secara dinamis:</p>
+            <div class="cli-box">
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli search</span> <span class="cli-val">"lumina1abc..."</span>
+            </div>
+
+            <h2>4. Melakukan Staking Ke Validator Pool</h2>
+            <p>Untuk mendaftarkan server validator-mu agar berhak memproduksi blok dan memperoleh imbal hasil <em>gas fee</em>, kamu wajib mengunci minimal 10.000 LUM (setara <code>10,000,000,000,000,000,000,000 Lumlets</code>) sebagai jaminan modal komitmen:</p>
+
+            <div class="cli-box">
+                <span class="cli-comment"># Melakukan transaksi STAKE untuk mendaftarkan validator</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli stake</span> <span class="cli-arg">--secret</span> <span class="cli-val">"c3742..."</span> <span class="cli-arg">--amount</span> <span class="cli-val">10000000000000000000000</span>
+            </div>
+            
+            <p>Di balik layar, perintah <code>stake</code> ini secara otomatis memformat transaksi khusus dengan tujuan <strong>Zero Address</strong> (seluruh byte bernilai nol) dan menyisipkan payload pesan biner <code>STAKE</code> ke dalam field data transaksi yang akan diverifikasi oleh aturan konsensus secara on-chain.</p>
+
+            <h2>5. Memantau Status Jaringan Validator</h2>
+            <p>Operator node wajib memantau kesehatan kolam validator agar tidak kehilangan hak partisipasi konsensus. Perintah <code>validator</code> menyediakan informasi live tersebut:</p>
+
+            <div class="cli-box">
+                <span class="cli-comment"># Menampilkan daftar seluruh validator di jaringan beserta statusnya</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli validator list</span>
+            </div>
+
+            <p>Perintah di atas akan mencetak tabel live cantik yang menyajikan profil validator dengan status:</p>
+            <ul>
+                <li><span style="color: var(--accent); font-weight: bold;">🟩 Active</span> : Validator aktif memproduksi blok dan meraup reward.</li>
+                <li><span style="color: #ef4444; font-weight: bold;">🟥 Jailed</span> : Validator sedang dihukum (ditangguhkan) karena sering absen memvalidasi blok.</li>
+                <li><span style="color: var(--text-dim); font-weight: bold;">⬜ Inactive</span> : Staking terdaftar namun modal di bawah ambang batas minimal atau ditarik keluar.</li>
+            </ul>
+
+            <p>Untuk melihat rekam jejak performa detail validator tertentu:</p>
+            <div class="cli-box">
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli validator info</span> <span class="cli-val">lumina1abc...</span>
+            </div>
+
+            <div class="highlight-box">
+                <p><strong>💡 Pantau Missed Blocks:</strong> Jika total kegagalan memvalidasi blok (<code>missed_blocks</code>) validator milikmu bertambah terus mendekati batas ambang toleransi sistem, bersiaplah! Node-mu akan dijatuhi hukuman <strong>Jailed</strong> secara otomatis oleh protokol BFT demi menjaga keandalan konsensus.</p>
+            </div>
+
+            <h2>6. Fitur Elite: Tata Kelola Banding BFT (Governance Appeal)</h2>
+            <p>Apabila jaringan mendeteksi performa validator menurun drastis, statusnya akan bergeser menjadi <strong>Jailed</strong>. Pada status ini, hak memproduksi blok dicabut sementara, dan validator tidak menerima porsi pendapatan gas fee.</p>
+            <p>Namun jangan panik! Lumina menyediakan alur banding demokratis berbasis on-chain menggunakan sub-menu <code>governance</code>.</p>
+
+            <div class="visual-flow">
+                <div class="flow-block">1. Validator Jailed</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-block" style="border-color: var(--secondary); color: var(--secondary);">2. Kirim APPEAL via CLI</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-block" style="border-color: var(--blue); color: var(--blue);">3. Voting Validator Aktif</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-block" style="border-color: var(--accent); color: var(--accent);">4. Quorum Terpenuhi -> Active Kembali</div>
+            </div>
+
+            <h3>Langkah 1: Mengajukan Banding (Appeal)</h3>
+            <p>Jika servermu telah kembali online dengan koneksi internet yang stabil dan sinkronisasi data yang sempurna, ajukan banding untuk mengembalikan status validator ke <strong>Active</strong>:</p>
+            <div class="cli-box">
+                <span class="cli-comment"># Mengirimkan transaksi permohonan banding (Appeal)</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli governance appeal</span> <span class="cli-arg">--secret</span> <span class="cli-val">"c3742..."</span>
+            </div>
+
+            <p>Di balik layar, transaksi ini dikirim ke alamat tata kelola sistem resmi (System Address):</p>
+            <p style="text-align: center; font-family: 'Fira Code', monospace; background: var(--code-bg); padding: 12px; border-radius: 12px; margin: 15px 0; border: 1px solid rgba(255,255,255,0.05); color: var(--secondary);">
+                lumina1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq4fdvjl
+            </p>
+            <p>Dengan menyisipkan payload instruksi biner <code>APPEAL</code>, status banding validator yang bersangkutan akan berubah menjadi <span style="color: #fbbf24; font-weight: 600;">🟡 PENDING</span> pada profil database on-chain.</p>
+
+            <h3>Langkah 2: Proses Voting Banding (Vote-Appeal)</h3>
+            <p>Seluruh komunitas validator aktif lainnya berkewajiban untuk memeriksa apakah validator terdakwa sudah layak aktif kembali. Sebagai validator yang baik, kamu bisa memberikan hak suaramu (Setuju atau Menolak) banding milik validator lain melalui CLI:</p>
+            <div class="cli-box">
+                <span class="cli-comment"># Memberikan suara menyetujui (APPROVE) banding validator terdakwa</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli governance vote-appeal</span> <span class="cli-arg">--secret</span> <span class="cli-val">"c3742_punya_kamu"</span> <span class="cli-arg">--target</span> <span class="cli-val">"lumina1_terdakwa..."</span> <span class="cli-arg">--decision</span> <span class="cli-val">APPROVE</span>
+
+                <span class="cli-comment"># Atau memberikan suara menolak (REJECT) karena server terdakwa masih offline</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli governance vote-appeal</span> <span class="cli-arg">--secret</span> <span class="cli-val">"c3742_punya_kamu"</span> <span class="cli-arg">--target</span> <span class="cli-val">"lumina1_terdakwa..."</span> <span class="cli-arg">--decision</span> <span class="cli-val">REJECT</span>
+            </div>
+
+            <p>Setiap transaksi <code>vote-appeal</code> ini dikirim langsung menuju System Address dengan membawa data terstruktur biner berformat: <code>VOTE_APPEAL:alamat_terdakwa:KEPUTUSAN</code>. Konsensus secara otomatis menghitung akumulasi suara secara real-time. Apabila batas quorum setuju terpenuhi, terdakwa akan terbebas dari jerat jailing dan diaktifkan kembali!</p>
+
+            <div class="tip-box">
+                <h3>⚖️ Catatan Penting Mengenai Klasifikasi Pelanggaran</h3>
+                <p>Apakah semua jenis pelanggaran bisa diajukan banding secara manual melalui CLI? <strong>Tidak, Bro!</strong> Protokol konsensus Lumina mengklasifikasikan kejahatan menjadi dua tingkatan severity:</p>
+                <ul style="margin: 15px 0 0 20px; color: #a7f3d0;">
+                    <li style="margin-bottom: 8px;"><strong>1. Pelanggaran Sedang (Medium Severity):</strong> Seperti tingginya tingkat downtime atau kegagalan memproduksi blok (missed blocks). Jenis pelanggaran inilah yang berstatus <strong>Jailed</strong> dan <strong>bisa diajukan banding (Appeal)</strong> agar pulih.</li>
+                    <li><strong>2. Pelanggaran Berat (High Severity):</strong> Seperti double-voting (menandatangani dua blok berbeda di tinggi blok yang sama), memicu pemisahan jaringan sengaja (split-brain), atau kebocoran kunci konsensus secara ilegal. Pelanggaran berat ini akan dideteksi oleh modul Sentinel, memicu <strong>slashing permanen 98% modal stake</strong>, dan validator diasingkan secara permanen <strong>tanpa hak pengajuan banding</strong>!</li>
+                </ul>
+            </div>
+
+            <h2>7. Fitur Notifikasi & Telegram Alert (Subcommand: <code>alert</code>)</h2>
+            <p>Untuk memastikan operator node selalu mendapatkan informasi terbaru mengenai kesehatan dan kesalahan yang terjadi pada node, Lumina CLI kini dilengkapi dengan fitur manajemen alert terintegrasi dengan Telegram.</p>
+
+            <h3>A. Menguji Konektivitas Telegram</h3>
+            <p>Anda dapat menguji apakah Token Bot Telegram dan Chat ID Anda valid dengan mengirimkan pesan tes:</p>
+            <div class="cli-box">
+                <span class="cli-comment"># Mengirim pesan pengujian ke Telegram Anda</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli alert test</span> <span class="cli-arg">--token</span> <span class="cli-val">"123456789:ABCdefGhI..."</span> <span class="cli-arg">--chat-id</span> <span class="cli-val">"987654321"</span>
+            </div>
+
+            <h3>B. Menyimpan Konfigurasi Alert (Setup)</h3>
+            <p>Agar node dapat mengirimkan notifikasi secara otomatis, Anda bisa menyimpan kredensial ke dalam file konfigurasi <code>telegram.json</code> lokal:</p>
+            <div class="cli-box">
+                <span class="cli-comment"># Menyimpan konfigurasi Telegram secara lokal</span>
+                <span class="cli-prompt">$</span> <span class="cli-cmd">lumina-cli alert setup</span> <span class="cli-arg">--token</span> <span class="cli-val">"123456789:ABCdefGhI..."</span> <span class="cli-arg">--chat-id</span> <span class="cli-val">"987654321"</span>
+            </div>
+            <p>Setelah file <code>telegram.json</code> berhasil dibuat, node Lumina yang dijalankan pada folder yang sama akan secara otomatis memuat kredensial tersebut dan mengaktifkan integrasi pemberitahuan Telegram tanpa memerlukan konfigurasi variabel lingkungan (env) manual!</p>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Core Devnet Security Series.
+        </div>
+    </div>
+</body>
+</html>

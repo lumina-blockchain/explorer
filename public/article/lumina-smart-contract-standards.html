@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Guide: Smart Contract Standards & Security Library | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030712;
+            --card-bg: rgba(17, 24, 39, 0.85);
+            --primary: #10b981; /* Neon Emerald */
+            --secondary: #3b82f6; /* Cyber Blue */
+            --accent: #a855f7; /* Purple Power */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --code-bg: #090d16;
+            --border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.06) 0%, transparent 40%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+        
+        .badge {
+            background: var(--accent);
+            color: #ffffff;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            vertical-align: middle;
+            margin-left: 15px;
+            letter-spacing: 0.05em;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #a5f3fc; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.55;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .method { color: #5eead4; }
+        .code-block .number { color: #f59e0b; }
+
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .param-table th, .param-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem;
+        }
+        .param-table th {
+            background: rgba(168, 85, 247, 0.08);
+            color: var(--accent);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+        }
+        .param-table tr:hover td {
+            background: rgba(255,255,255,0.01);
+        }
+
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.03);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #a7f3d0; font-size: 1rem; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Kembali ke Search Portal</a>
+        
+        <header>
+            <span class="meta">Smart Contracts & Security | Mei 2026</span>
+            <h1>Lumina Standards Library <span class="badge">lsl-v0.1.0</span></h1>
+            <p>Panduan arsitektur keamanan dan standar pembuatan token pintar (LTS-20/LTS-721) menggunakan pustaka standar resmi Lumina Standards Library (LSL).</p>
+        </header>
+
+        <div class="content">
+            <p>Dalam ekosistem blockchain modern, keamanan dan standarisasi adalah pilar terpenting untuk mencegah eksploitasi kode. Lumina Protocol menyediakan <strong>Lumina Standards Library (LSL)</strong>, sebuah pustaka kontrak pintar berkinerja tinggi, modular, dan hemat gas yang setara dengan OpenZeppelin di jaringan EVM. Pustaka ini dikompilasi mulus di lingkungan <code>#![no_std]</code> WebAssembly (WASM).</p>
+
+            <div class="code-block" style="border-color: rgba(255,255,255,0.1);">
+                <span class="comment">// Cara mengimpor pustaka standar di atas kontrak pintar Rust Lumina</span>
+                <span class="keyword">use</span> lumina_std::standards::ownable::Ownable;
+                <span class="keyword">use</span> lumina_std::standards::pausable::Pausable;
+                <span class="keyword">use</span> lumina_std::standards::lts20::Lts20;
+                <span class="keyword">use</span> lumina_std::standards::lts721::Lts721;
+                <span class="keyword">use</span> lumina_std::standards::reentrancy_guard::ReentrancyGuard;
+                <span class="keyword">use</span> lumina_std::standards::access_control::AccessControl;
+            </div>
+
+            <h2>1. Pilar Keamanan & Standarisasi LSL</h2>
+            <p>Pustaka standar ini dirancang untuk mengatasi risiko keamanan dan menyederhanakan kode boilerplate pengembang:</p>
+
+            <h3>🔒 ReentrancyGuard (Anti-Exploit Vault)</h3>
+            <p>Mencegah serangan pemanggilan ulang rekursif (Reentrancy) yang sering mengeksploitasi fungsi finansial pada dApps DeFi. Modul ini menyediakan status <em>mutex lock</em> stateful:</p>
+            <ul>
+                <li><code>ReentrancyGuard::enter()</code>: Memastikan kontrak tidak sedang dikunci sebelum melanjutkan, kemudian mengunci kontrak.</li>
+                <li><code>ReentrancyGuard::exit()</code>: Membuka kembali kunci di akhir eksekusi fungsi.</li>
+            </ul>
+
+            <h3>🔑 AccessControl (Tata Kelola Multi-Role / RBAC)</h3>
+            <p>Menggantikan sistem kepemilikan tunggal <code>Ownable</code> yang kaku dengan sistem peran berbasis identitas multi-level. Sempurna untuk dApps skala enterprise:</p>
+            <ul>
+                <li>Mendefinisikan peran asimetris seperti <code>ADMIN_ROLE</code>, <code>MINTER_ROLE</code>, dan <code>ORACLE_ROLE</code>.</li>
+                <li>Mendukung fungsi pemberian (<code>grant_role</code>), pencabutan (<code>revoke_role</code>), dan pelepasan mandiri (<code>renounce_role</code>).</li>
+            </ul>
+
+            <h3>🛑 Pausable (Emergency Circuit Breaker)</h3>
+            <p>Menyediakan fungsi sakelar darurat global untuk menghentikan transaksi mutasi aset ketika bug atau exploit terdeteksi di dApp.</p>
+
+            <h3>📦 LTS-20 (Standard Token Fungible)</h3>
+            <p>Standar representasi token fungible (seperti ERC-20) yang aman untuk pembuatan token utilitas, koin stabil (stablecoins), maupun tata kelola (governance tokens).</p>
+
+            <h3>🖼️ LTS-721 (Standard NFT / Non-Fungible Token)</h3>
+            <p>Logika aman untuk kepemilikan token unik (seperti ERC-721) yang dilengkapi metadata URI untuk representasi aset digital unik/NFT.</p>
+
+            <h2>2. Contoh Smart Contract Komplit (example-sc.rs)</h2>
+            <p>Di bawah ini adalah implementasi nyata dari kontrak token <strong>USDT LTS-20</strong> resmi yang menggunakan LSL untuk meminimalkan boilerplate hingga 50% serta menyematkan logika <strong>Blacklist</strong> kustom di luar standar library:</p>
+
+            <div class="code-block">
+<span class="comment">// ============================================================================</span>
+<span class="comment">//  LTS-20 Token Standard — Lumina Protocol</span>
+<span class="comment">//  Adapted to use the official Lumina Standards Library (LSL)</span>
+<span class="comment">//  Features: Transfer, Approve, Mint, Burn, Pause, Ownership, Custom Blacklist</span>
+<span class="comment">// ============================================================================</span>
+
+<span class="keyword">#![no_std]</span>
+<span class="keyword">use</span> lumina_std::*;
+<span class="keyword">use</span> lumina_std::standards::ownable::Ownable;
+<span class="keyword">use</span> lumina_std::standards::pausable::Pausable;
+<span class="keyword">use</span> lumina_std::standards::lts20::Lts20;
+
+<span class="type">#[lumina_contract]</span>
+<span class="keyword">pub mod</span> <span class="method">lts20_token</span> {
+    <span class="keyword">use super</span>::*;
+
+    <span class="comment">// ────────────── CONSTANTS ──────────────</span>
+    <span class="keyword">const</span> NAME: &amp;<span class="type">str</span> = <span class="string">"Tether USDT"</span>;
+    <span class="keyword">const</span> SYMBOL: &amp;<span class="type">str</span> = <span class="string">"USDT"</span>;
+    <span class="keyword">const</span> DECIMALS: <span class="type">u8</span> = <span class="number">18</span>;
+    <span class="keyword">const</span> MAX_SUPPLY: <span class="type">u128</span> = <span class="number">1_000_000_000</span> * <span class="number">10u128</span>.<span class="method">pow</span>(<span class="number">18</span>);
+
+    <span class="comment">// ────────────── CUSTOM STORAGE KEYS ──────────────</span>
+    <span class="keyword">fn</span> <span class="method">key_blacklist</span>(addr: &amp;Address) -&gt; <span class="type">String</span> {
+        format!(<span class="string">"blacklist:{}"</span>, addr)
+    }
+
+    <span class="keyword">fn</span> <span class="method">key_minter</span>(addr: &amp;Address) -&gt; <span class="type">String</span> {
+        format!(<span class="string">"minter:{}"</span>, addr)
+    }
+
+    <span class="comment">// ────────────── CUSTOM SECURITY GUARDS ──────────────</span>
+    <span class="keyword">fn</span> <span class="method">not_blacklisted</span>(addr: &amp;Address) {
+        <span class="keyword">let</span> banned: <span class="type">bool</span> = storage::<span class="method">read</span>(key_blacklist(addr)).<span class="method">unwrap_or</span>(<span class="keyword">false</span>);
+        assert!(!banned, <span class="string">"Address is blacklisted"</span>);
+    }
+
+    <span class="keyword">fn</span> <span class="method">valid_address</span>(addr: &amp;Address) {
+        assert!(!addr.<span class="method">is_zero</span>(), <span class="string">"Invalid zero address"</span>);
+    }
+
+    <span class="comment">// ────────────── INITIALIZE ──────────────</span>
+    <span class="type">#[init]</span>
+    <span class="keyword">pub fn</span> <span class="method">initialize</span>() {
+        <span class="keyword">let</span> initial_supply: <span class="type">u128</span> = <span class="number">1_000_000</span> * <span class="number">10u128</span>.<span class="method">pow</span>(<span class="number">18</span>);
+        <span class="keyword">let</span> owner = <span class="method">get_caller</span>();
+        <span class="method">valid_address</span>(&amp;owner);
+
+        <span class="comment">// Inisialisasi pustaka standar</span>
+        Ownable::<span class="method">initialize</span>(&amp;owner);
+        Pausable::<span class="method">initialize</span>(<span class="keyword">false</span>);
+
+        <span class="comment">// Minting suplai awal menggunakan LTS-20 standard</span>
+        Lts20::<span class="method">mint</span>(&amp;owner, initial_supply);
+    }
+
+    <span class="comment">// ────────────── CORE VIEWS ──────────────</span>
+    <span class="type">#[view]</span>
+    <span class="keyword">pub fn</span> <span class="method">name</span>() -&gt; <span class="type">String</span> { NAME.<span class="method">to_string</span>() }
+
+    <span class="type">#[view]</span>
+    <span class="keyword">pub fn</span> <span class="method">symbol</span>() -&gt; <span class="type">String</span> { SYMBOL.<span class="method">to_string</span>() }
+
+    <span class="type">#[view]</span>
+    <span class="keyword">pub fn</span> <span class="method">total_supply</span>() -&gt; <span class="type">u128</span> { Lts20::<span class="method">total_supply</span>() }
+
+    <span class="type">#[view]</span>
+    <span class="keyword">pub fn</span> <span class="method">balance_of</span>(account: Address) -&gt; <span class="type">u128</span> { Lts20::<span class="method">balance_of</span>(&amp;account) }
+
+    <span class="type">#[view]</span>
+    <span class="keyword">pub fn</span> <span class="method">owner</span>() -&gt; Address { Ownable::<span class="method">owner</span>().<span class="method">expect</span>(<span class="string">"Owner not initialized"</span>) }
+
+    <span class="comment">// ────────────── TRANSACTION ENDPOINTS ──────────────</span>
+    <span class="type">#[endpoint]</span>
+    <span class="keyword">pub fn</span> <span class="method">transfer</span>(to: Address, amount: <span class="type">u128</span>) {
+        Pausable::<span class="method">assert_not_paused</span>();
+        <span class="keyword">let</span> from = <span class="method">get_caller</span>();
+        <span class="method">not_blacklisted</span>(&amp;from);
+        <span class="method">not_blacklisted</span>(&amp;to);
+
+        Lts20::<span class="method">transfer</span>(&amp;from, &amp;to, amount);
+    }
+
+    <span class="type">#[endpoint]</span>
+    <span class="keyword">pub fn</span> <span class="method">mint</span>(to: Address, amount: <span class="type">u128</span>) {
+        Pausable::<span class="method">assert_not_paused</span>();
+        <span class="keyword">let</span> caller = <span class="method">get_caller</span>();
+        <span class="keyword">let</span> owner_addr = Ownable::<span class="method">owner</span>().<span class="method">unwrap</span>();
+        <span class="keyword">let</span> caller_is_minter = storage::<span class="method">read</span>(&amp;key_minter(&amp;caller)).<span class="method">unwrap_or</span>(<span class="keyword">false</span>);
+
+        assert!(caller == owner_addr || caller_is_minter, <span class="string">"Not authorized"</span>);
+        Lts20::<span class="method">mint</span>(&amp;to, amount);
+    }
+}
+            </div>
+
+            <h2>3. Manfaat Arsitektur Modular LSL</h2>
+            <div class="highlight-box">
+                <p><strong>💡 Keandalan Kode:</strong> Dengan mendelegasikan fungsionalitas inti (seperti pengelolaan kunci, pencatatan event, kalkulasi balance) ke perpustakaan resmi yang telah diaudit, pengembang eksternal terhindar dari bug <em>overflow</em>, kebocoran data state, atau penyalahgunaan izin administrasi.</p>
+            </div>
+
+            <h2>4. Metrik API Standar</h2>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Modul & Metode</th>
+                        <th>Penjelasan Fungsi Keamanan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Ownable::assert_only_owner()</code></td>
+                        <td>Memvalidasi bahwa penandatangan transaksi adalah pemilik sah kontrak. Abort jika gagal.</td>
+                    </tr>
+                    <tr>
+                        <td><code>Pausable::assert_not_paused()</code></td>
+                        <td>Menolak kelanjutan fungsi jika status kontrak pintar sedang di-pause oleh admin.</td>
+                    </tr>
+                    <tr>
+                        <td><code>ReentrancyGuard::enter()</code></td>
+                        <td>Mengaktifkan kunci rekursi di awal transaksi finansial sensitif.</td>
+                    </tr>
+                    <tr>
+                        <td><code>AccessControl::grant_role(role, account)</code></td>
+                        <td>Memberikan hak akses khusus bagi peran tertentu (dikendalikan oleh admin peran terkait).</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Smart Contract Series.
+        </div>
+    </div>
+</body>
+</html>

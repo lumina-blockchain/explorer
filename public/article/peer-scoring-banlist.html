@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security: Peer Scoring & Banlist Engine | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060810;
+            --card-bg: rgba(10, 15, 30, 0.85);
+            --primary: #10b981; /* Neon Emerald */
+            --secondary: #3b82f6; /* Cyber Blue */
+            --accent: #f43f5e; /* Cyber Rose */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(16, 185, 129, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(59, 130, 246, 0.06) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--primary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #a7f3d0; font-size: 1rem; }
+
+        .code-block {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        .penalty-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .penalty-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .penalty-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .penalty-card h3 { margin-top: 0; margin-bottom: 12px; }
+        .penalty-value {
+            color: var(--accent);
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .banlist-box {
+            background: rgba(244, 63, 94, 0.05);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+        .banlist-box h3 { color: #fda4af; margin-bottom: 10px; }
+        .banlist-box p { margin-bottom: 0; color: #fecdd3; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">P2P Network Security | May 2026</span>
+            <h1>Peer Scoring & Banlist Engine</h1>
+            <p style="color: var(--text-dim); font-size: 1.2rem;">Sistem Pertahanan Otonom & Reputasi Node untuk Melindungi Kedaulatan Jaringan P2P Lumina</p>
+        </header>
+
+        <main class="content">
+            <p>
+                Di dalam jaringan blockchain tanpa izin (permissionless), staker dan validator terus-menerus bertukar informasi melalui protokol P2P Gossipsub dan RequestResponse Sync. Namun, tidak semua node beroperasi dengan itikad baik. Serangan spamming transaksi sampah, blok palsu, hingga pengiriman data sinkronisasi yang rusak (corrupted data) berpotensi merusak kestabilan jaringan.
+            </p>
+
+            <p>
+                Untuk mengatasi hal tersebut, Lumina menerapkan <strong>Peer Scoring & Banlist Engine</strong>. Sistem ini memantau perilaku setiap Peer secara in-memory secara real-time, memberikan penilaian reputasi yang ketat, dan secara otomatis memutus serta memblokir (banning) node penyerang dari jaringan secara instan.
+            </p>
+
+            <div class="highlight-box">
+                <p><strong>Filosofi Keamanan:</strong> Lebih baik mendepak satu node nakal lebih cepat daripada menanggung resiko delay propagasi konsensus di seluruh jaringan staker!</p>
+            </div>
+
+            <h2>1. Struktur Data Reputasi (In-Memory)</h2>
+            <p>
+                Sistem penilaian melacak setiap node terhubung secara efisien di dalam memori menggunakan struktur data thread-safe <code>PeerScoringManager</code> yang dapat diakses simultan oleh event loop P2P Swarm dan Axum RPC Server.
+            </p>
+
+            <div class="code-block">
+<span class="keyword">pub struct</span> <span class="type">PeerScore</span> {
+    <span class="keyword">pub</span> score: <span class="type">i32</span>,                  <span class="comment">// Dimulai dari 100, min 0, max 100</span>
+    <span class="keyword">pub</span> bad_actions_count: <span class="type">usize</span>,     <span class="comment">// Frekuensi kesalahan yang dilakukan</span>
+    <span class="keyword">pub</span> last_penalty_reason: <span class="type">Option</span>&lt;<span class="type">String</span>&gt;, <span class="comment">// Catatan pelanggaran terakhir</span>
+}</div>
+
+            <h2>2. Matriks Pelanggaran & Poin Penalti</h2>
+            <p>
+                Setiap kali node lain mengirimkan paket data ke node kita, datanya akan divalidasi terlebih dahulu. Jika validasi gagal, pelaku (source peer) akan menerima pengurangan poin secara instan sesuai tingkat keparahan pelanggarannya:
+            </p>
+
+            <div class="penalty-grid">
+                <div class="penalty-card">
+                    <h3>Gossip Tx Signature Error</h3>
+                    <div class="penalty-value">-20 Poin</div>
+                    <p>Diberikan saat node mempropagasikan transaksi dengan tanda tangan kriptografi (signature) yang tidak valid atau palsu.</p>
+                </div>
+                <div class="penalty-card">
+                    <h3>Sync Corrupted Blocks</h3>
+                    <div class="penalty-value">-30 Poin</div>
+                    <p>Diberikan saat peer merespon permintaan sinkronisasi (SyncRequest) dengan deretan bytes blok yang rusak atau gagal didekode.</p>
+                </div>
+                <div class="penalty-card">
+                    <h3>Gossip Block Apply Failure</h3>
+                    <div class="penalty-value">-40 Poin</div>
+                    <p>Penalti terberat! Diberikan ketika staker mempropagasikan proposal blok baru lewat Gossipsub yang ilegal atau melanggar aturan konsensus state.</p>
+                </div>
+                <div class="penalty-card">
+                    <h3>Good Behavior Recovery</h3>
+                    <div class="penalty-value">+5 Poin (Recovery)</div>
+                    <p>Node yang berkelakuan baik dan terus berkontribusi memverifikasi data secara jujur secara bertahap akan dipulihkan skornya hingga kembali ke 100.</p>
+                </div>
+            </div>
+
+            <h2>3. Mekanisme Pemutusan & Banning Instan</h2>
+            <p>
+                Begitu skor reputasi peer menyentuh angka <strong>0 atau negatif</strong>, mesin penalti P2P Lumina akan memicu aksi pertahanan tingkat tinggi secara otomatis:
+            </p>
+
+            <div class="code-block">
+<span class="keyword">if</span> new_score &lt;= <span class="macro">0</span> {
+    <span class="macro">tracing::error!</span>(<span class="string">"🚫 PeerId {} is banned! Disconnecting..."</span>, peer_id);
+    <span class="keyword">let</span> _ = <span class="keyword">self</span>.swarm.disconnect_peer_id(peer_id);
+}</div>
+
+            <div class="banlist-box">
+                <h3>Sistem Proteksi Gerbang Masuk (Shield Mode)</h3>
+                <p>
+                    Tidak hanya memutus koneksi aktif, peer yang telah masuk ke daftar cekal (banlist) skor 0 akan langsung didepak saat pertama kali mencoba membangun jabat tangan (handshake) koneksi di event <code>ConnectionEstablished</code>. Hal ini menghemat resource CPU dan bandwidth node kita secara signifikan!
+                </p>
+            </div>
+
+            <h2>4. REST RPC API Endpoint (/network/peers)</h2>
+            <p>
+                Developer, staker, dan validator dapat memantau kesehatan jaringan serta daftar blacklist peer secara langsung melalui endpoint Axum HTTP RPC:
+            </p>
+            
+            <div class="code-block">
+<span class="comment">// GET http://127.0.0.1:9098/network/peers</span>
+{
+  <span class="string">"peers"</span>: [
+    {
+      <span class="string">"peer_id"</span>: <span class="string">"12D3KooWSC9k5sK1oXzDUjmm4q3rXk4Qok3D9nHsfM3actXRvj3N"</span>,
+      <span class="string">"score"</span>: 80,
+      <span class="string">"bad_actions"</span>: 1,
+      <span class="string">"last_penalty_reason"</span>: <span class="string">"Invalid transaction signature"</span>
+    }
+  ]
+}</div>
+
+            <p>
+                Mekanisme in-memory ini terintegrasi sempurna dengan launcher multi-node Lumina, memastikan performa maksimal dengan latensi mikrodetik pada sistem multi-thread rust tokio runtime.
+            </p>
+        </main>
+
+        <div class="footer">
+            <p>&copy; 2026 Lumina Node Ecosystem. Dokumen ini diperbarui secara otomatis dari sistem engine P2P.</p>
+        </div>
+    </div>
+</body>
+</html>

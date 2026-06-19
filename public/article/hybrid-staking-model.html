@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economics: Hybrid Elite Staker & Reward Distribution | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060509;
+            --card-bg: rgba(12, 10, 20, 0.85);
+            --primary: #8b5cf6; /* Royal Purple */
+            --secondary: #ec4899; /* Rose Pink */
+            --accent: #10b981; /* Emerald Green */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(139, 92, 246, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(236, 72, 153, 0.08) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--primary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(139, 92, 246, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #d8b4fe; font-size: 1rem; }
+
+        .code-block {
+            background: #030206;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        .split-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .split-card {
+            background: rgba(15, 12, 25, 0.5);
+            padding: 30px;
+            border-radius: 20px;
+            border-top: 4px solid var(--primary);
+            border-left: 1px solid rgba(255, 255, 255, 0.03);
+            border-right: 1px solid rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .split-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(139, 92, 246, 0.2);
+        }
+        .split-card.secondary { border-top-color: var(--secondary); }
+        
+        .percentage {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            display: block;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .split-card.secondary .percentage {
+            background: linear-gradient(to right, #fff, var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .math-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.15rem;
+            color: #a78bfa;
+            margin: 30px 0;
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Tokenomics & Consensus Rewards | May 2026</span>
+            <h1>Hybrid Elite Staker Model & Reward Distribution</h1>
+            <p>Evolusi alokasi reward di jaringan Lumina untuk menyelaraskan keadilan validator kecil dengan komitmen staker kelas kakap.</p>
+        </header>
+
+        <div class="content">
+            <p>Di dalam sistem blockchain Proof-of-Stake (PoS) tradisional, seluruh bagi-hasil keuntungan sering kali disapu bersih oleh staker raksasa yang memiliki modal tak terbatas. Validator dengan infrastruktur prima namun memiliki koin kecil sering kali terpinggirkan dan enggan berpartisipasi menjaga stabilitas jaringan.</p>
+
+            <p>Lumina memecahkan ketimpangan ini dengan menerapkan **Hybrid Elite Staker Model**. Model ini memisahkan insentif kerja keras validator (proposer blok) dengan keuntungan keamanan modal staker. Dengan model ini, kami menjamin **keadilan bagi pekerja (validator kecil)** dan tetap memberikan **insentif elite bagi staker utama (Top 30)**.</p>
+
+            <h2>1. Pembagian Alokasi Reward 90/10</h2>
+            <p>Dalam setiap pembuatan satu blok Lumina yang sukses, terdapat pembagian ekonomi yang sangat presisi:</p>
+
+            <div class="split-grid">
+                <div class="split-card">
+                    <span class="percentage">100% + 10%</span>
+                    <h3>Proposer / Leader Reward</h3>
+                    <p>Siapapun yang terpilih sebagai Leader dan sukses memproduksi blok akan menerima **100% Block Emission Reward** ditambah **10% dari total Gas Fees** di blok tersebut sebagai biaya upah operasional.</p>
+                </div>
+                <div class="split-card secondary">
+                    <span class="percentage">90% Pool</span>
+                    <h3>Elite Fee Pool (Top 30)</h3>
+                    <p>Sisa **90% dari total Gas Fees** dikumpulkan secara terpusat dan dibagikan secara proporsional **hanya kepada 30 Validator Teratas** (Top 30 Elite Stakers) dengan jumlah koin terkunci terbanyak.</p>
+                </div>
+            </div>
+
+            <h2>2. Formula Distribusi & Proteksi Overflow</h2>
+            <p>Biaya gas dari transaksi didistribusikan kepada masing-masing anggota dari Elite Group secara proporsional. Namun, dalam aritmatika integer di komputer, perkalian angka besar (u128) dapat memicu **Overflow Crash (System Panic)**.</p>
+
+            <p>Untuk mengatasinya, State Manager Lumina dilengkapi **Overflow Protection Scaling** di mana nilai stake akan dipangkas pembagi $10^9$ saat total elite stake melewati batas aman:</p>
+
+            <div class="math-box">
+                V_share = V_stake * SharedPool / EliteTotalStake
+            </div>
+
+            <h2>3. Kode Rust: Distribusi Hadiah Blok</h2>
+            <p>Di bawah ini adalah kode sumber riil dari engine distribusi state Lumina di dalam <code>crates/state/src/lib.rs</code> yang menghitung bagi hasil staker elit:</p>
+
+            <div class="code-block">
+<span class="comment">// 1. Berikan Upah Dasar + 10% Biaya Gas kepada Leader Proposer</span>
+<span class="keyword">let mut</span> leader_state = <span class="keyword">self</span>.get_account(&amp;leader);
+leader_state.balance += total_leader_reward;
+<span class="keyword">self</span>.update_account(leader.clone(), leader_state);
+
+<span class="comment">// 2. Ambil Sisa Pool Biaya Gas (90%) untuk Didistribusikan</span>
+<span class="keyword">let</span> shared_pool = total_gas_fees - leader_fee_bonus;
+
+<span class="comment">// 3. Ambil Semua Validator Aktif yang Memiliki Stake</span>
+<span class="keyword">let mut</span> all_validators = <span class="keyword">self</span>.get_active_validators_with_stake();
+
+<span class="comment">// 4. Urutkan Berdasarkan Stake Tertinggi & Ambil Top 30 (Elite Group)</span>
+all_validators.sort_by(|a, b| b.stake.cmp(&amp;a.stake));
+<span class="keyword">if</span> all_validators.len() &gt; MAX_ELITE_VALIDATORS {
+    all_validators.truncate(MAX_ELITE_VALIDATORS);
+}
+
+<span class="keyword">let</span> elite_total_stake: <span class="type">u128</span> = all_validators.iter().map(|v| v.stake).sum();
+
+<span class="keyword">if</span> elite_total_stake &gt; <span class="number">0</span> {
+    <span class="keyword">for</span> v <span class="keyword">in</span> all_validators {
+        <span class="comment">// --- SCALE DOWN JIKA OVERFLOW SAFEGUARD TERPAKU ---</span>
+        <span class="keyword">let</span> v_share = <span class="keyword">if</span> elite_total_stake &gt; <span class="number">1_000_000_000_000_000_000</span> {
+            <span class="keyword">let</span> scaled_stake = v.stake / <span class="number">1_000_000_000</span>;
+            <span class="keyword">let</span> scaled_total = elite_total_stake / <span class="number">1_000_000_000</span>;
+            scaled_stake * shared_pool / scaled_total
+        } <span class="keyword">else</span> {
+            v.stake * shared_pool / elite_total_stake
+        };
+
+        <span class="keyword">let mut</span> v_state = <span class="keyword">self</span>.get_account(&amp;v.address);
+        v_state.balance += v_share;
+        <span class="keyword">self</span>.update_account(v.address, v_state);
+    }
+}
+            </div>
+
+            <h2>4. Dampak Ekonomi Bagi Ekosistem</h2>
+            <ul style="margin-left: 30px; margin-bottom: 30px; line-height: 1.8;">
+                <li><strong>Gaji Adil Untuk Proposer Kecil:</strong> Validator kecil dengan stake minimum tetap mendapatkan imbalan 100% Block Reward saat giliran mereka mengusulkan blok, menjamin kelayakan biaya listrik & infrastruktur server.</li>
+                <li><strong>Penjaga Keamanan Kuat (Elite Group):</strong> Top 30 staker didorong secara ekonomi untuk terus meningkatkan staking modal mereka demi mendapatkan bagi hasil 90% gas fee yang berlipat ganda saat jaringan ramai transaksi.</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Core Economics Series.
+        </div>
+    </div>
+</body>
+</html>

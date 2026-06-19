@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post-Mortem: Byzantine Double-Voting & BFT Idempotency Protection | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060810;
+            --card-bg: rgba(10, 15, 30, 0.85);
+            --primary: #10b981; /* Neon Emerald */
+            --secondary: #3b82f6; /* Cyber Blue */
+            --accent: #f43f5e; /* Cyber Rose */
+            --warning: #fbbf24; /* Amber Gold */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            
+            --font-mono: 'Fira Code', monospace;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(244, 63, 94, 0.05) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(59, 130, 246, 0.06) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--primary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.0rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--accent), var(--secondary)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            line-height: 1.2;
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #a7f3d0; font-size: 1rem; }
+        
+        .alert-box {
+            background: rgba(244, 63, 94, 0.05);
+            border-left: 4px solid var(--accent);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .alert-box p { margin-bottom: 0; color: #fecdd3; font-size: 1rem; }
+
+        .code-block {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        /* VOTE FLOW DIAGRAM */
+        .flow-container {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .flow-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .flow-node {
+            background: #0d1326;
+            border: 1px solid var(--secondary);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+        }
+        .flow-node.crimson {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.15);
+        }
+        .flow-node.emerald {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        }
+        .flow-node h4 { font-size: 1rem; color: #fff; margin-bottom: 8px; font-family: var(--font-mono); }
+        .flow-node p { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0; }
+
+        .flow-arrow {
+            font-size: 2rem;
+            color: var(--text-dim);
+            animation: pulse-arrow 1.5s infinite;
+        }
+
+        @keyframes pulse-arrow {
+            0% { opacity: 0.4; transform: translateX(-3px); }
+            50% { opacity: 1; transform: translateX(3px); }
+            100% { opacity: 0.4; transform: translateX(-3px); }
+        }
+
+        /* PLAYGROUND */
+        .playground-box {
+            background: rgba(4, 6, 10, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 40px 0;
+            position: relative;
+        }
+        .playground-box::after {
+            content: 'BFT CONSENSUS SIMULATOR';
+            position: absolute;
+            top: -12px;
+            right: 24px;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.75rem;
+            padding: 2px 10px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 30px;
+        }
+        .parameter-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .parameter-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+        .parameter-item.alerted {
+            border-color: var(--accent);
+            background: rgba(244, 63, 94, 0.05);
+        }
+        .param-name {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+        .param-val {
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+        .param-val.rose {
+            color: var(--accent);
+        }
+        .param-val.emerald {
+            color: var(--primary);
+        }
+
+        .mpt-status-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            text-align: center;
+        }
+        .state-root-display {
+            background: #020408;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            padding: 14px;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            word-break: break-all;
+            margin-bottom: 20px;
+            color: var(--text-dim);
+            transition: var(--transition);
+        }
+        .state-root-display.success {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        }
+        .state-root-display.failed {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.15);
+        }
+        .btn-action {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            color: #ffffff;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(244, 63, 94, 0.25);
+        }
+
+        .footer-article {
+            margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 30px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Kembali ke Portal Artikel</a>
+        
+        <header>
+            <span class="meta">Post-Mortem / Keamanan &amp; Konsensus</span>
+            <h1>Penyelidikan Byzantine Double-Voting Pasca-Recovery &amp; Perisai Idempotensi BFT</h1>
+            <p style="font-size: 1.2rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 0;">
+                Analisis kegagalan konsensus HotStuff BFT pada validator Node-2 akibat balapan voting ganda saat catch-up sync, serta implementasi deteksi otonom dan mitigasi idempotensi.
+            </p>
+        </header>
+
+        <div class="content">
+            <h2>1. Pendahuluan &amp; Kronologi Kegagalan</h2>
+            <p>
+                Selama pengujian stabilitas dalam kondisi partisi jaringan ekstrem (**Split-Brain / Isolated P2P Network**), salah satu validator utama kita, **Node-2**, diputuskan komunikasinya dari mesh jaringan. Node-2 terus memproduksi blok secara terisolasi. Sementara itu, kelompok mayoritas validator (Node-1, Node-3, dan Node-4) melanjutkan konsensus dan menyepakati chain utama hingga ketinggian blok yang jauh lebih tinggi.
+            </p>
+            <p>
+                Setelah partisi jaringan dipulihkan, sistem penanganan fork otonom kita berhasil mendeteksi ketidaksesuaian parent hash pada tinggi blok #234. Node-2 secara anggun melakukan reorganisasi chain (*reorg*), memutar balik database lokal (*state rollback*) ke tinggi #232, memulihkan *snapshot* bersih, dan mulai memutar kembali (*replay*) riwayat blok untuk menyelaraskan diri.
+            </p>
+            
+            <div class="alert-box">
+                <p>
+                    <strong>🚨 INSIDEN KEAMANAN DETECTED:</strong> Tepat di tengah-tengah proses pemulihan (Height #233), Sentinel Agent yang berjalan di validator lain menangkap adanya tanda tangan ganda dari Node-2 pada tinggi yang sama, memicu log alarm otomatis dan menyuntikan transaksi *Slashing*.
+                </p>
+            </div>
+
+            <p>
+                Log sistem memancarkan galat fatal berikut secara serentak di seluruh node aktif:
+            </p>
+            <div class="code-block">
+2026-05-21T21:32:02.170437Z <span class="keyword">ERROR</span> lumina_node: 🛡️ [Sentinel Agent] DETECTED DOUBLE-VOTING! Validator lumina1g794qasrrnckc3vzy2g6mljgt3kv4kg658t7wx voted for both Hash(0x927ca56fc0cfb80bcf57af68850c9cf0606cc4532f1026f39cd4ca807c1ffc3e) and Hash(0x5e3568dc787913f01998fd6ef4c6f910745ada919e66580a799e86db9255d62a) at height #233!
+2026-05-21T21:32:02.170706Z <span class="keyword">WARN</span>  lumina_node: 🛡️ [Sentinel Agent] Slash transaction successfully generated and injected! Hash: 0xf9e54a65172937343728a31fc2ffd7a53cccc4b9c80ca443625d1a88fe7f4a35
+            </div>
+
+            <h2>2. Anatomi Bug: Byzantine Race Condition</h2>
+            <p>
+                Penyelidikan mendalam terhadap mesin konsensus HotStuff BFT Lumina L1 menyingkap sebuah **Race Condition** yang terjadi ketika node sedang sibuk memproses catch-up sync.
+            </p>
+            <p>
+                Secara default, ada dua jalur terpisah di mana node validator aktif dapat memberikan suara (*Vote*):
+            </p>
+            <div class="sync-grid">
+                <div class="sync-card classic">
+                    <h3>Jalur 1: Proposal Blok Mandiri</h3>
+                    <ul>
+                        <li>Terjadi di dalam generator interval <code>block_timer</code>.</li>
+                        <li>Jika node ditunjuk sebagai round leader atau mendeteksi timeout leader sebelumnya, ia merakit dan mengusulkan blok baru miliknya sendiri.</li>
+                        <li>Node kemudian secara otomatis menandatangani blok proposalnya sendiri (Self-Vote) untuk disebarkan.</li>
+                    </ul>
+                </div>
+                <div class="sync-card lumina">
+                    <h3>Jalur 2: Penerimaan Blok Jaringan</h3>
+                    <ul>
+                        <li>Terjadi ketika pesan Gossip berisi blok baru berukuran valid diterima dari jaringan P2P.</li>
+                        <li>Node memverifikasi QC blok tersebut, mengeksekusi state lokal, dan mengirimkan suara persetujuan (Vote) kepada leader putaran.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <p>
+                Ketika Node-2 sedang mengejar ketertinggalan blok #233, ia menerima blok #233 sah dari jaringan Gossip dan memberikan suara setuju untuk Hash <code>0x927ca5...</code>. Namun, pada detak milidetik yang sama, scheduler internal memicu event <code>block_timer</code>. Karena node belum menyelesaikan transisi database, ia merasa terpilih menjadi leader untuk tinggi #233 yang kosong, merakit blok usulannya sendiri dengan Hash <code>0x5e3568...</code>, menerapkan blok tersebut ke database lokalnya, dan memberikan suara setuju untuk proposalnya sendiri.
+            </p>
+            <p>
+                Akibat ketiadaan **memori penanda** mengenai ketinggian yang sudah pernah dipilih dalam eksekusi lokal, Node-2 menandatangani kedua suara tersebut. Hal ini melanggar kaidah keselamatan quorum (*quorum safety*), karena validator BFT tidak boleh memberikan suara untuk dua blok berbeda pada tinggi yang sama!
+            </p>
+
+            <h2>3. Alur Deteksi Sentinel Agent</h2>
+            <p>
+                Sentinel Agent adalah modul pertahanan berlapis di Lumina yang mendengarkan topik Gossip <code>lumina-votes</code> secara real-time. Sentinel mengumpulkan dan memetakan suara validator berdasarkan alamat BLS dan tinggi blok.
+            </p>
+            
+            <div class="flow-container">
+                <div class="flow-grid">
+                    <div class="flow-node">
+                        <h4>Menerima Vote A</h4>
+                        <p>Validator Node-2 memilih Hash 0x927ca5 di tinggi #233</p>
+                    </div>
+                    <div class="flow-arrow">➔</div>
+                    <div class="flow-node crimson">
+                        <h4>Menerima Vote B</h4>
+                        <p>Validator Node-2 memilih Hash 0x5e3568 di tinggi #233</p>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; font-weight: 700; color: var(--accent);">
+                    🚨 SENTINEL DETECTED: Validator melanggar aturan Quorum! Slash &amp; Jail disuntikkan!
+                </div>
+            </div>
+
+            <h2>4. Solusi: Implementasi Perisai Idempotensi BFT</h2>
+            <p>
+                Untuk mengatasi celah Byzantine ini secara permanen tanpa menambah overhead disk I/O yang berat, kita mengimplementasikan sistem pelacakan state **last_voted** lokal secara *thread-safe* di dalam event loop utama mesin konsensus.
+            </p>
+            <p>
+                Kita mendefinisikan penanda lokal in-memory sebelum event loop dijalankan:
+            </p>
+            <div class="code-block">
+<span class="keyword">let</span> <span class="keyword">mut</span> last_voted: Option&lt;(<span class="type">u64</span>, Hash)&gt; = None;
+            </div>
+
+            <p>
+                Sebelum tanda tangan BLS dibuat baik di Jalur 1 (Leader Self-Proposal) maupun Jalur 2 (Gossip Block Auto-Vote), kita menyuntikkan fungsi evaluasi keamanan berikut:
+            </p>
+            <div class="code-block">
+<span class="keyword">let</span> block_hash = block.hash();
+<span class="keyword">let</span> target_height = block.header.number;
+
+<span class="keyword">let</span> can_vote = <span class="keyword">match</span> last_voted {
+    Some((voted_h, voted_hash)) => {
+        target_height > voted_h || (target_height == voted_h && block_hash == voted_hash)
+    }
+    None => <span class="keyword">true</span>,
+};
+            </div>
+
+            <h3>Kaidah Keamanan Perisai:</h3>
+            <p>
+                1. **Ketinggian Lebih Baru (<code>target_height &gt; voted_h</code>)**: Validator diizinkan memberikan suara karena konsensus telah maju ke babak baru.<br>
+                2. **Keandalan &amp; Idempotensi (<code>target_height == voted_h &amp;&amp; block_hash == voted_hash</code>)**: Jika validator diminta mengirim ulang suaranya untuk blok yang sama (misalnya karena kehilangan paket P2P), ia diizinkan untuk mengirim ulang demi kelangsungan jaringan (*liveness*).<br>
+                3. **Blok Berbeda (Kondisi Gagal)**: Jika <code>target_height == voted_h</code> tetapi <code>block_hash != voted_hash</code>, ia terdeteksi sebagai upaya Double-Voting. Sistem akan membatalkan pemrosesan vote dan memancarkan log penolakan otonom.
+            </p>
+
+            <div class="highlight-box">
+                <p>
+                    <strong>✨ LOG PENANGANAN AKTIF:</strong> Saat balapan catch-up terjadi kembali pada pengujian stress-test berikutnya, Node-2 menolak suara proposal lokalnya dengan memancarkan log: <br>
+                    <code>🛡️ [Double-Voting Protection] PREVENTED double-voting! Already voted for height #233 | Ignored proposal vote for Hash(0x5e3568...)</code>
+                </p>
+            </div>
+
+            <h2>5. Simulator Keamanan BFT</h2>
+            <p>
+                Gunakan simulator interaktif di bawah ini untuk melihat bagaimana sistem pertahanan idempotensi Lumina mendeteksi dan menghentikan Byzantine Double-Voting secara instan:
+            </p>
+
+            <div class="playground-box">
+                <div class="playground-grid">
+                    <div class="parameter-list">
+                        <div class="parameter-item">
+                            <span class="param-name">Target Voting Height</span>
+                            <span class="param-val">#233</span>
+                        </div>
+                        <div class="parameter-item" id="param-vote-1">
+                            <span class="param-name">Vote 1 (Network Proposal)</span>
+                            <span class="param-val emerald">Voted (0x927ca5)</span>
+                        </div>
+                        <div class="parameter-item alerted" id="param-vote-2">
+                            <span class="param-name">Vote 2 (Local Proposal)</span>
+                            <span class="param-val rose" id="vote-2-status">Pending</span>
+                        </div>
+                    </div>
+                    <div class="mpt-status-panel">
+                        <div style="font-weight: 800; font-size: 0.85rem; letter-spacing: 0.5px; color: var(--text-dim); margin-bottom: 10px;">IDEMPOTENCY STATE</div>
+                        <div class="state-root-display success" id="state-root-box">
+                            last_voted: Some(233, 0x927ca5)
+                        </div>
+                        <button class="btn-action" onclick="triggerSimulate()">SIMULATE DOUBLE-VOTE</button>
+                    </div>
+                </div>
+            </div>
+
+            <h2>6. Kesimpulan</h2>
+            <p>
+                Kejadian post-mortem ini menegaskan kembali pentingnya pertahanan berlapis di tingkat mesin konsensus dan agen jaringan. Integrasi perisai idempotensi in-memory terbukti tangguh dalam menahan kondisi balapan tanpa mengurangi liveness validator, sekaligus Sentinel Agent tetap bersiaga memotong validator yang terbukti sengaja berbuat Byzantine jahat. Lumina L1 kini jauh lebih kokoh di bawah tekanan skenario sabotase paling ekstrem sekalipun!
+            </p>
+
+            <div class="footer-article">
+                Lumina L1 Technical Post-Mortem Report • Author: Antigravity AI Engine &amp; Lumina Core Devs
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function triggerSimulate() {
+            const vote2Status = document.getElementById('vote-2-status');
+            const stateBox = document.getElementById('state-root-box');
+            const paramVote2 = document.getElementById('param-vote-2');
+            
+            // Set state to rejected by protection
+            vote2Status.innerText = "PREVENTED (Blocked 🛡️)";
+            stateBox.innerText = "last_voted: Some(233, 0x927ca5) - Blocked 0x5e3568";
+            stateBox.className = "state-root-display failed";
+            paramVote2.style.borderColor = "var(--primary)";
+            paramVote2.style.background = "rgba(16, 185, 129, 0.05)";
+            
+            alert("🛡️ [Double-Voting Protection] PREVENTED double-voting!\n\nValidator has already cast a vote for height #233 with Hash(0x927ca5).\nThe local proposal with Hash(0x5e3568) is safely ignored to avoid jailing!");
+        }
+    </script>
+</body>
+</html>

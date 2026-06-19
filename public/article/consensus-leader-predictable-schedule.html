@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consensus Security: Mitigasi Predictable Leader Proposer Schedule dengan Blake3 Hashing | Dokumentasi Teknis Lumina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060913;
+            --card-bg: rgba(11, 17, 32, 0.85);
+            --primary: #8b5cf6; /* Purple Glow */
+            --secondary: #06b6d4; /* Electric Cyan */
+            --accent: #f59e0b; /* Amber Gold */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(139, 92, 246, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(6, 182, 212, 0.06) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--primary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 60px;
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 2rem; 
+            margin: 50px 0 20px; 
+            color: var(--secondary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+        }
+        h3 { font-size: 1.4rem; margin: 35px 0 15px; color: #fde047; }
+        p { margin-bottom: 26px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .analogy-box {
+            background: rgba(139, 92, 246, 0.04);
+            border-left: 4px solid var(--primary);
+            padding: 30px;
+            border-radius: 0 20px 20px 0;
+            margin: 40px 0;
+        }
+        .analogy-title {
+            color: #fde047;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .highlight-box {
+            background: rgba(6, 182, 212, 0.04);
+            border-left: 4px solid var(--secondary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #a5f3fc; font-size: 1rem; }
+
+        .danger-box {
+            background: rgba(239, 68, 68, 0.04);
+            border-left: 4px solid #ef4444;
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .danger-box p { margin-bottom: 0; color: #fca5a5; font-size: 1rem; }
+
+        .code-block {
+            background: #030509;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        .visual-flow {
+            background: rgba(139, 92, 246, 0.02);
+            border: 1px dashed rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 35px 0;
+            text-align: center;
+        }
+
+        .flow-step {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--accent);
+            margin: 10px;
+        }
+        .flow-arrow {
+            display: inline-block;
+            color: var(--text-dim);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .info-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .info-card h3 { margin-top: 0; margin-bottom: 12px; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Kembali ke Hub Dokumentasi</a>
+        
+        <header>
+            <span class="meta">Keamanan Konsensus BFT Series | Mei 2026</span>
+            <h1>Mencegah Prediksi Jadwal Proposer: Integrasi Hashing Blake3 dalam Pemilihan Leader</h1>
+            <p>Mengamankan jaringan Lumina L1 dari serangan DoS terarah (Targeted Denial-of-Service) dengan mengganti algoritma Round-Robin deterministik menjadi pemilihan leader berbasis pseudorandom hashing Blake3(parent_hash || height || round).</p>
+        </header>
+
+        <div class="content">
+            <p>Dalam blockchain dengan mekanisme konsensus Proof of Stake (PoS) berbasis Byzantine Fault Tolerance (BFT) seperti **Lumina L1**, validator terpilih secara bergiliran mengemban peran sebagai **Leader Proposer** untuk mengusulkan blok baru pada tinggi blok tertentu. Jadwal giliran ini haruslah adil, terdistribusi merata, namun yang paling penting: **tidak boleh dapat diprediksi secara transparan jauh sebelum waktunya**.</p>
+
+            <p>Hari ini, tim inti Lumina telah mengimplementasikan perbaikan keamanan kritis pada modul konsensus (Bug 12) dengan menyingkirkan mekanisme Round-Robin sederhana dan memperkenalkan skema **Pseudorandom Leader Selection** yang memanfaatkan kriptografi hash Blake3 berlatensi ultra-rendah.</p>
+
+            <div class="highlight-box">
+                <p><strong>💡 Catatan Sistem:</strong> Kode perubahan telah selesai diterapkan pada <code>crates/consensus/src/lib.rs</code>, node main loop di <code>node/src/main.rs</code>, serta skrip simulasi pengujian integrasi cluster multi-node. Pengujian berjalan sukses tanpa ada regresi.</p>
+            </div>
+
+            <h2>1. Apa Masalah Utama Jadwal Round-Robin Deterministik?</h2>
+            <p>Sebelum adanya perbaikan ini, Lumina menentukan indeks leader menggunakan rumus modulo sederhana:</p>
+            <div class="code-block" style="text-align: center; font-size: 1.1rem;">
+                <code>index = height % active_validators.len()</code>
+            </div>
+
+            <p>Sistem ini memiliki kelemahan keamanan fatal di jaringan publik yang terdistribusi:</p>
+
+            <div class="danger-box">
+                <p><strong>🚨 Kerentanan Keamanan: Serangan DoS Terarah (Targeted DoS Attack)</strong><br>
+                Karena daftar validator dan tinggi blok masa depan bersifat publik, siapa saja dapat menghitung secara presisi siapa yang akan menjadi leader pada ketinggian blok ke-10.000, 20.000, atau bahkan minggu depan. Penyerang jahat dapat melakukan serangan DDoS (Distributed Denial of Service) secara terarah ke alamat IP validator tersebut sesaat sebelum giliran mereka mengusulkan blok tiba. Akibatnya, produksi blok terhambat, transaksi macet, dan keandalan jaringan (liveness) merosot tajam.</p>
+            </div>
+
+            <!-- ANALOGI GAUL DAN PRESTISIUS -->
+            <div class="analogy-box">
+                <div class="analogy-title">
+                    <span>🛡️</span>
+                    <span>Analogi Dunia Nyata: Sistem Jaga Malam Satpam (Security Guard)</span>
+                </div>
+                <p>Bayangkan sebuah komplek perumahan mewah (blockchain Lumina) yang dijaga secara bergiliran oleh sekelompok petugas satpam (validator).</p>
+                
+                <p><strong>Sebelum Perbaikan (Deterministic Round-Robin) 🤦‍♂️:</strong><br>
+                Jadwal tugas satpam diumumkan secara terbuka dan kaku: Satpam A hari Senin, Satpam B hari Selasa, Satpam C hari Rabu, dan seterusnya.
+                Seorang pencuri (attacker) yang mengamati jadwal ini tahu pasti bahwa Satpam B bertugas hari Selasa. Jika pencuri ingin merampok komplek pada hari Selasa, mereka tinggal meneror, menculik, atau meracuni makanan Satpam B sesaat sebelum ia mulai bertugas. Pos penjagaan menjadi kosong, dan pencuri bebas menjarah komplek.</p>
+
+                <p><strong>Setelah Perbaikan (Blake3 Pseudorandom Selection) 🦾:</strong><br>
+                Sistem Lumina merancang mekanisme pengundian tugas jaga malam yang sangat cerdas:
+                Setiap kali pergantian shift, kita mengambil **segel kertas bekas gembok shift kemarin (parent_hash)** yang ditandatangani oleh satpam yang bertugas kemarin, digabungkan dengan **Nomor Hari (height)** dan **Nomor Putaran Cadangan (round)**.
+                Ketiganya dimasukkan ke dalam kotak pengocok acak super aman (Blake3 hash function). Angka acak hasil kocokan tersebut menunjuk siapa satpam yang berjaga untuk shift malam berikutnya.<br><br>
+                
+                <strong>Mengapa ini aman?</strong> Karena segel kertas (`parent_hash`) dari shift kemarin baru diketahui dan disahkan tepat di detik-detik terakhir shift kemarin selesai. Sebelum shift kemarin berakhir, tidak ada satu pun satpam atau pencuri yang tahu segelnya seperti apa. Alhasil, identitas satpam shift berikutnya baru bisa diketahui *sesaat* sebelum giliran dimulai. Pencuri tidak memiliki cukup waktu untuk merencanakan serangan terarah!</p>
+            </div>
+
+            <h2>2. Penanganan Kegagalan: Bagaimana Jika Leader Tiba-tiba Offline?</h2>
+            <p>Pertanyaan logis yang sering diajukan: *Bagaimana jika leader terpilih tiba-tiba mati lampu, offline, atau jaringannya terputus tepat saat gilirannya tiba?*</p>
+            
+            <p>Di bawah skema baru Lumina, jika dalam waktu 15 detik jaringan tidak menerima proposal blok dari leader utama (**Primary Leader - Round 0**), timeout konsensus akan terpicu di semua node secara paralel. Untuk memilih leader cadangan, sistem **tidak** beralih ke tetangga fisik terdekat (seperti <code>LeaderIndex + 1</code>) karena itu pun bisa ditebak.</p>
+            
+            <p>Sistem akan menghitung leader cadangan untuk **Putaran 1 (Round 1)** menggunakan rumus hashing yang sama, tetapi menaikkan nilai parameter <code>round</code> menjadi 1:</p>
+            
+            <div class="code-block" style="text-align: center; font-size: 1.1rem; background: #060e18; border-color: rgba(6, 182, 212, 0.2);">
+                <code>Blake3(parent_hash || height || round=1)</code>
+            </div>
+            
+            <p>Hal ini menghasilkan kocokan acak yang sepenuhnya baru dan adil, menunjuk validator cadangan lain yang berhak mengambil alih kepemimpinan. Jika validator cadangan tersebut offline juga, parameter <code>round</code> akan bertambah menjadi 2, 3, dan seterusnya, menjamin konsensus tetap dapat berjalan lancar (*liveness*) tanpa celah prediksi bagi musuh.</p>
+
+            <h2>3. Implementasi Rust: Pemilihan Leader Berbasis Blake3</h2>
+            <p>Berikut adalah cuplikan kode baru di dalam <code>crates/consensus/src/lib.rs</code> yang menggantikan algoritma penentuan leader:</p>
+            
+            <div class="code-block">
+<span class="comment">/// Dapatkan Leader untuk tinggi blok, hash induk, dan round tertentu secara pseudorandom.</span>
+<span class="keyword">pub fn</span> <span class="macro">get_leader</span>(&amp;<span class="keyword">self</span>, height: <span class="type">u64</span>, parent_hash: &amp;<span class="type">Hash</span>, round: <span class="type">u32</span>) -&gt; <span class="type">Address</span> {
+    <span class="comment">// 1. Ambil seluruh validator dari genesis registry & state manager</span>
+    <span class="keyword">let mut</span> all_validators: <span class="type">Vec</span>&lt;<span class="type">Address</span>&gt; = <span class="keyword">self</span>.staking.get_validators()
+        .iter().map(|v| v.address.clone()).collect();
+    <span class="keyword">for</span> entry <span class="keyword">in</span> <span class="keyword">self</span>.state.active_validators.iter() {
+        <span class="keyword">let</span> addr = entry.value().clone();
+        <span class="keyword">if</span> !all_validators.contains(&amp;addr) {
+            all_validators.push(addr);
+        }
+    }
+    <span class="keyword">if</span> all_validators.is_empty() {
+        <span class="keyword">return</span> Address([<span class="number">0u8</span>; <span class="number">20</span>]);
+    }
+    
+    <span class="comment">// 2. Urutkan secara alfabetis agar urutan array awal konsisten di semua node</span>
+    all_validators.sort_by(|a, b| a.to_string().cmp(&amp;b.to_string()));
+
+    <span class="comment">// 3. Buat entropy input: parent_hash (32 bytes) || height (8 bytes) || round (4 bytes)</span>
+    <span class="keyword">let mut</span> entropy_input = <span class="type">Vec</span>::with_capacity(<span class="number">32</span> + <span class="number">8</span> + <span class="number">4</span>);
+    entropy_input.extend_from_slice(parent_hash.as_bytes());
+    entropy_input.extend_from_slice(&amp;height.to_le_bytes());
+    entropy_input.extend_from_slice(&amp;round.to_le_bytes());
+
+    <span class="comment">// 4. Hitung hash Blake3 sebagai seed acak</span>
+    <span class="keyword">let</span> hash_res = <span class="macro">hash_blake3</span>(&amp;entropy_input);
+
+    <span class="comment">// 5. Ambil 8-byte pertama dari hash untuk dikonversi menjadi integer u64</span>
+    <span class="keyword">let mut</span> seed_bytes = [<span class="number">0u8</span>; <span class="number">8</span>];
+    seed_bytes.copy_from_slice(&amp;hash_res[<span class="number">0</span>..<span class="number">8</span>]);
+    <span class="keyword">let</span> seed_num = <span class="type">u64</span>::from_le_bytes(seed_bytes);
+
+    <span class="comment">// 6. Pilih leader secara acak berdasarkan sisa bagi indeks seed</span>
+    <span class="keyword">let</span> index = (seed_num % (all_validators.len() <span class="keyword">as</span> <span class="type">u64</span>)) <span class="keyword">as</span> <span class="type">usize</span>;
+    all_validators[index].clone()
+}
+            </div>
+
+            <h2>4. Verifikasi dan Pengujian Otomatis</h2>
+            <p>Untuk membuktikan keandalan logika pseudorandom leader selection ini, kami menambahkan unit test baru <code>test_pseudorandom_leader_selection</code> yang memvalidasi empat skenario utama:</p>
+
+            <div class="visual-flow">
+                <div class="flow-step">1. Determinisme Antar Node (Sama Input, Sama Hasil)</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">2. Unpredictability (Hash Beda, Output Beda)</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">3. Backup Rotation (Round Berubah, Leader Rotasi)</div>
+                <div class="flow-arrow">➔</div>
+                <div class="flow-step">4. Fair Distribution (Distribusi Adil di Seluruh Anggota)</div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🛡️ Deterministic & Safe</h3>
+                    <p>Meskipun hasilnya acak (*pseudorandom*), setiap validator yang menjalankan komputasi lokal dengan input blok yang sama akan menghasilkan keputusan leader yang 100% konsisten, mencegah perpecahan jaringan (*consensus fork*).</p>
+                </div>
+                <div class="info-card">
+                    <h3>⚡ Fast & Low Overhead</h3>
+                    <p>Blake3 hashing mengeksekusi data biner dalam waktu kurang dari beberapa nanodetik, memastikan performa proposisi blok Lumina L1 tidak terganggu sama sekali.</p>
+                </div>
+            </div>
+
+            <h2>Kesimpulan</h2>
+            <p>Mengamankan jadwal leader proposer dari prediksi publik merupakan lompatan krusial untuk ketahanan jaringan terhadap serangan terarah (DoS). Dengan memadukan Blake3 hashing dinamis berbasis hash blok sebelumnya, Lumina L1 melangkah maju mewujudkan arsitektur blockchain kelas industri yang solid, aman, dan siap tempur.</p>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Core Consensus Series.
+        </div>
+    </div>
+</body>
+</html>

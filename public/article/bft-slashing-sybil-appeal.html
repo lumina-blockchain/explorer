@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BFT Slashing, Sybil Key Protection & Governance Appeal | Lumina Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080c12;
+            --card-bg: rgba(13, 20, 30, 0.85);
+            --primary: #ef4444; /* Severe Red */
+            --secondary: #fbbf24; /* Amber Gold */
+            --accent: #10b981; /* Emerald Green */
+            --blue: #06b6d4; /* Electric Cyan */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(239, 68, 68, 0.05) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(6, 182, 212, 0.05) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--blue);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--blue); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(239, 68, 68, 0.04);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #fca5a5; font-size: 1rem; }
+
+        .success-box {
+            background: rgba(16, 185, 129, 0.04);
+            border-left: 4px solid var(--accent);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .success-box p { margin-bottom: 0; color: #a7f3d0; font-size: 1rem; }
+
+        .code-block {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.6;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+        .code-block .number { color: #f43f5e; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .info-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .info-card h3 { margin-top: 0; margin-bottom: 12px; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Security & Governance | May 2026</span>
+            <h1>BFT Slashing, Sybil Key Protection & Governance Appeal</h1>
+            <p>Bagaimana Lumina L1 menjaga keamanan konsensus dari kecurangan fatal validator nakal, penyerangan identitas ganda (Sybil), serta memfasilitasi pemulihan desentralisasi berbasis voting suara aktif 75%.</p>
+        </header>
+
+        <div class="content">
+            <p>Dalam sebuah jaringan blockchain Proof of Stake (PoS) publik terdesentralisasi, jaminan keamanan ekonomi adalah prioritas nomor satu. Tanpa adanya hukuman finansial yang tegas untuk pelanggaran konsensus, validator nakal dapat mencoba melakukan serangan pemalsuan sejarah transaksi atau manipulasi quorum tanpa resiko apa pun.</p>
+
+            <p>Lumina L1 memperkenalkan framework pertahanan keamanan terintegrasi tingkat lanjut: **BFT Slashing Engine**, **Sybil Key Protection**, dan **Decentralized Governance Appeal System** dengan ambang batas pemulihan **75%** kekuatan suara aktif.</p>
+
+            <div class="highlight-box">
+                <p><strong>🚨 Aturan Protokol:</strong> Validator yang terbukti melakukan pelanggaran fatal (seperti <em>double-voting</em>) akan langsung dijatuhkan hukuman pembekuan stake 98% selamanya dan 2% dibagikan sebagai hadiah Bounty kepada penemu bukti (Reporter)!</p>
+            </div>
+
+            <h2>1. Severe Slashing (Pemberantasan Double-Voting)</h2>
+            <p>Pelanggaran BFT paling fatal dalam sistem konsensus adalah **Double-Voting** (validator memberikan suara persetujuan untuk dua hash blok berbeda pada tinggi blok yang sama di putaran konsensus yang sama). Hal ini dapat memicu percabangan (fork) ilegal pada rantai.</p>
+
+            <h3>Deteksi Real-Time oleh Sentinel Agent</h3>
+            <p>Setiap node Lumina dilengkapi dengan **Sentinel Agent** yang berjalan di background dan memantau topik gossip suara (<code>lumina-votes</code>). Jika Sentinel mendeteksi dua vote sah yang bertentangan dengan tanda tangan BLS yang sama:</p>
+            <div class="code-block">
+<span class="comment">// Deteksi real-time Sentinel Agent di node/src/main.rs</span>
+<span class="keyword">if</span> let Some(prev_vote) = vote_collector.insert(vote.validator.clone(), vote.clone()) {
+    <span class="keyword">if</span> prev_vote.block_hash != vote.block_hash {
+        <span class="macro">tracing::warn!</span>(<span class="string">"🛡️ [Sentinel Agent] DETECTED DOUBLE-VOTING by {}!"</span>, vote.validator);
+        <span class="keyword">let</span> proof = SlashProof { vote_a: prev_vote, vote_b: vote.clone() };
+        <span class="comment">// Susun transaksi SLASH dan siarkan ke mempool</span>
+        ...
+    }
+}
+            </div>
+
+            <h3>Eksekusi Hukuman & Pembagian Bounty 2%</h3>
+            <p>Ketika transaksi <code>SLASH:</code> diproses oleh Execution Engine di <code>crates/state/src/lib.rs</code>:</p>
+            <ol style="margin-left: 25px; margin-bottom: 25px; color: #cbd5e1;">
+                <li style="margin-bottom: 10px;">Tanda tangan BLS pelaku diverifikasi secara matematis terhadap kedua pesan yang bertentangan.</li>
+                <li style="margin-bottom: 10px;">Status validator pelaku langsung diubah menjadi <strong>Jailed Severe</strong>.</li>
+                <li style="margin-bottom: 10px;">Status pencairan dana staker <code>allow_unstake</code> diset ke <strong>0 (False)</strong> secara permanen.</li>
+                <li style="margin-bottom: 10px;">Sebanyak <strong>2% dari total dana staker pelaku</strong> langsung diberikan sebagai <strong>Bounty</strong> ke reporter/penemu bukti.</li>
+                <li style="margin-bottom: 10px;">Sisa <strong>98% dana staker pelaku dibekukan selamanya</strong> di dalam kas sistem.</li>
+            </ol>
+
+            <h2>2. Proteksi Sybil Key (Duplicate BLS Registry Prevention)</h2>
+            <p>Serangan Sybil terjadi ketika satu pihak mencoba mengendalikan banyak node validator menggunakan satu kunci publik BLS yang sama untuk mendominasi kekuatan quorum secara tidak sah.</p>
+
+            <p>Di dalam transaksi <code>STAKE</code> Lumina L1, Execution Engine akan secara aktif memeriksa duplikasi registrasi kunci BLS:</p>
+            <div class="code-block">
+<span class="comment">// Pengecekan Sybil Key di crates/state/src/lib.rs</span>
+<span class="keyword">if</span> let Some(existing_owner) = self.bls_to_wallet.get(&amp;bls_key) {
+    <span class="keyword">if</span> existing_owner != sender_wallet {
+        <span class="comment">// Deteksi Duplikat! Jail keduanya immediately</span>
+        self.set_validator_status(existing_owner, ValidatorStatus::Jailed);
+        self.set_validator_status(sender_wallet, ValidatorStatus::Jailed);
+        self.set_unstake_allowed(existing_owner, false);
+        self.set_unstake_allowed(sender_wallet, false);
+        ...
+    }
+}
+            </div>
+
+            <h2>3. Tata Kelola Banding Desentralisasi (Governance Appeal)</h2>
+            <p>Untuk menghindari kesalahan hukuman akibat bug teknis atau desinkronisasi node pada pelanggaran tingkat menengah (seperti duplikasi BLS), Lumina menyediakan alur banding demokratis terdesentralisasi:</p>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>1. Registrasi APPEAL</h3>
+                    <p>Validator yang terkena jailing tingkat medium dapat mengirimkan transaksi <code>APPEAL</code>. Status validator berubah menjadi <code>PendingAppeal</code>.</p>
+                </div>
+                <div class="info-card">
+                    <h3>2. Dynamic Voting 75%</h3>
+                    <p>Validator aktif lainnya mengirimkan suara persetujuan <code>VOTE_APPEAL:APPROVE</code>. Banding disetujui jika rasio stake penolak/pendukung mencapai minimal <strong>75%</strong> dari total kekuatan stake aktif jaringan.</p>
+                </div>
+            </div>
+
+            <div class="success-box">
+                <p><strong>⚖️ Algoritma Persetujuan Deterministik:</strong> Perhitungan ambang batas 75% dievaluasi secara dinamis tanpa float division untuk menghindari kerentanan desinkronisasi State Root: <code>total_approve_stake * 4 >= total_active_stake * 3</code>.</p>
+            </div>
+
+            <h2>4. Hasil Uji Coba E2E & Sampel Log Sukses</h2>
+            <p>Sistem ini telah diverifikasi secara end-to-end langsung pada jaringan blockchain lokal Lumina yang sedang aktif berjalan:</p>
+
+            <h3>Hasil Uji Coba Severe Slashing</h3>
+            <div class="code-block" style="background: #020408; color: #a7f3d0;">
+--------------------------------------------------
+🛡️  LUMINA BFT SLASHING END-TO-END TEST
+--------------------------------------------------
+🎯 Reporter (Sultan): lumina1rlnjrlke3uff992eexch6zyvphld4d4puv9za8
+🎯 Target Validator to register & slash: lumina1srs2qymmapscgyfjere86fv2gnsa52gg0mmklj
+🌐 Targeting Node RPC Endpoint: http://localhost:9098
+
+💰 Step 1: Sending 11,000 LUM from Sultan to Validator so they can stake...
+✅ Transfer transaction sent! Hash: 0x3a4b87a909e083d646ae7e518425e7e6f5c2b4155a7aa16d36c7d5d4a70c7790
+
+🦾 Step 2: Staking 10,000 LUM to register Target Validator...
+📊 Target Validator Staked Amount: 10000000000000000000000 Lumlets
+
+🛡️  Step 3: Generating double-voting SlashProof signed by Target Validator...
+👤 Sultan Nonce for Slash TX: 2
+✅ SLASH transaction submitted successfully! Hash: 0x8b5915ea0aed477fe36d217d23e9a1c5a9f282
+
+🔍 Step 4: Verifying final states after severe slashing...
+📊 Target Validator Staked Remaining: 9800000000000000000000 Lumlets (Tepat 98%, sisa 2% didistribusikan!)
+📊 Reporter (Sultan) Balance: 979199021125416500000000 Lumlets (Bounty 2% / 200 LMN berhasil diterima!)
+
+🎉 SUCCESS: E2E SLASHING VALIDATION COMPLETE!
+            </div>
+
+            <h3>Hasil Uji Coba Proteksi Sybil & Pemulihan Appeal</h3>
+            <div class="code-block" style="background: #020408; color: #a7f3d0;">
+--------------------------------------------------
+🛡️  LUMINA SYBIL KEY & GOVERNANCE APPEAL TEST
+--------------------------------------------------
+👤 Sultan: lumina1rlnjrlke3uff992eexch6zyvphld4d4puv9za8
+👤 Validator A (Original Owner): lumina19waax5n0tggpemtfhmhg26fm4mych9859n4hrp
+👤 Validator B (Sybil Attacker): lumina12vkxm3hvksz6spcguzh20rpkqj604sqze5gxat
+
+🦾 Step 2: Validator A stakes 10,000 LUM with a unique BLS key...
+🚨 Step 3: Validator B tries to register with Validator A's BLS Key (Sybil attack)...
+
+🔍 Step 4: Verifying jailing and unstake blocking...
+📊 Validator A Staked Amount: 10000000000000000000000 Lumlets
+📊 Validator B Staked Amount: 10000000000000000000000 Lumlets
+
+⚖️  Step 5: Validator A submits APPEAL to clear their name...
+🗳️  Step 6: Sultan votes APPROVE on Validator A's Appeal...
+
+🔍 Step 7: Verifying Validator A is restored to Active status!
+📊 Validator A Final Staked Amount: 10000000000000000000000 Lumlets
+
+🎉 SUCCESS: E2E SYBIL AND GOVERNANCE APPEAL TEST COMPLETE!
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Security & Governance Series.
+        </div>
+    </div>
+</body>
+</html>

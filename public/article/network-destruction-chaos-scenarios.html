@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Kehancuran Jaringan: 5 Skenario Chaos Menguji Batas Resiliensi Lumina L1 | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060810;
+            --card-bg: rgba(10, 15, 30, 0.85);
+            --primary: #10b981; /* Neon Emerald */
+            --secondary: #3b82f6; /* Cyber Blue */
+            --accent: #f43f5e; /* Cyber Rose */
+            --warning: #fbbf24; /* Cyber Gold */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            
+            --font-mono: 'Fira Code', monospace;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(16, 185, 129, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(59, 130, 246, 0.07) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--primary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 2.8rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            line-height: 1.2;
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        @media(max-width: 768px) {
+            .content { padding: 30px 20px; }
+            h1 { font-size: 2.0rem; }
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 35px 0 15px; color: var(--warning); }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.04);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #a7f3d0; font-size: 1rem; }
+        
+        .alert-box {
+            background: rgba(244, 63, 94, 0.04);
+            border-left: 4px solid var(--accent);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .alert-box p { margin-bottom: 0; color: #fecdd3; font-size: 1rem; }
+
+        .code-block {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+        .code-block .keyword { color: #f472b6; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .type { color: #818cf8; }
+
+        /* GRID SYSTEM & CARDS */
+        .sync-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin: 30px 0;
+        }
+        @media(max-width: 600px) {
+            .sync-grid { grid-template-columns: 1fr; }
+        }
+
+        .sync-card {
+            background: rgba(5, 3, 8, 0.4);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .sync-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .sync-card h3 { margin-bottom: 12px; margin-top: 0; }
+        .sync-card ul { list-style: none; }
+        .sync-card li { font-size: 0.95rem; color: var(--text-dim); margin-bottom: 8px; position: relative; padding-left: 15px; }
+        .sync-card li::before { content: '•'; position: absolute; left: 0; color: inherit; }
+
+        /* PREMIUM CHAOS INTERACTIVE CONSOLE */
+        .chaos-panel {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 30px;
+            margin: 45px 0;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+        .chaos-panel::before {
+            content: '💥 CYBERPUNK CHAOS TESTING ENGINE';
+            position: absolute;
+            top: -12px;
+            left: 30px;
+            background: linear-gradient(135deg, var(--accent), var(--warning));
+            color: #000;
+            font-weight: 800;
+            font-size: 0.75rem;
+            padding: 4px 14px;
+            border-radius: 6px;
+            letter-spacing: 1px;
+        }
+        
+        .chaos-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 15px;
+        }
+        @media(max-width: 768px) {
+            .chaos-layout { grid-template-columns: 1fr; }
+        }
+
+        .viz-mesh {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            height: 260px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .viz-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls-col {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .control-group label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        select, button.inject-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        select:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+        }
+
+        button.inject-btn {
+            background: linear-gradient(135deg, var(--accent), #e11d48);
+            border: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 10px;
+        }
+        button.inject-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.4);
+        }
+        button.inject-btn:active {
+            transform: translateY(0);
+        }
+
+        /* LIVE TELEMETRY DISPLAY */
+        .metrics-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 25px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 20px;
+        }
+        @media(max-width: 480px) {
+            .metrics-bar { grid-template-columns: 1fr 1fr; }
+        }
+        .metric-card {
+            background: rgba(255,255,255,0.01);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 10px 14px;
+            text-align: center;
+        }
+        .metric-card .title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+        .metric-card .val {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            font-family: var(--font-mono);
+            margin-top: 4px;
+        }
+
+        .terminal-log {
+            background: #020305;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 15px 20px;
+            height: 180px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.8);
+        }
+        .log-entry {
+            display: flex;
+            gap: 10px;
+        }
+        .log-time { color: var(--text-dim); }
+        .log-tag { font-weight: 700; flex-shrink: 0; }
+        .log-tag.outage { color: var(--accent); }
+        .log-tag.sabotage { color: var(--warning); }
+        .log-tag.spam { color: var(--secondary); }
+        .log-tag.isolation { color: #a855f7; }
+        .log-tag.system { color: var(--primary); }
+
+        .viz-node {
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .viz-node:hover {
+            filter: brightness(1.3);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/article/" class="back-link">&larr; Kembali ke Search Portal</a>
+    
+    <header>
+        <span class="meta">Engineering Report &amp; Chaos Framework</span>
+        <h1>Simulasi Kehancuran Jaringan: 5 Skenario Chaos Menguji Batas Resiliensi Lumina L1</h1>
+    </header>
+
+    <div class="content">
+        <p>
+            Dalam sistem terdesentralisasi, stabilitas tidak diperoleh dengan berharap kegagalan tidak akan terjadi, melainkan dengan merekayasa sistem agar <strong>selamat dari kegagalan terburuk sekalipun</strong>. Untuk memverifikasi keandalan konsensus HotStuff BFT, mesin kompilasi WASM, dan database staker di Lumina L1, tim pengembang meluncurkan skenario <strong>Chaos Testing Framework</strong>.
+        </p>
+
+        <p>
+            Dengan mengintegrasikan 7 validator genesis baru, jaringan diperluas menjadi <strong>10-node cluster</strong>. Ini adalah ambang batas matematis minimum yang ideal untuk menjalankan stress test ekstrem, termasuk pemisahan wilayah jaringan (split-brain). Laporan ini merinci 5 skenario chaos ekstrem yang dirancang untuk merusak jaringan Lumina secara terkontrol dan bagaimana arsitektur otonom kami bertahan hidup.
+        </p>
+
+        <div class="highlight-box">
+            <p>
+                <strong>ℹ️ Catatan Rekayasa:</strong> Versi terbaru dari <code>launcher.py</code> kini telah dilengkapi dengan sub-menu interaktif <strong>Option 16 (💥 TRIGGER CHAOS SCENARIO)</strong> yang memungkinkan pengembang memicu pemadaman, sabotase basis data, banjir transaksi, atau isolasi peer secara dinamis dari konsol terminal.
+            </p>
+        </div>
+
+        <h2>Skenario 1: Power Outage (Hard Kill Process)</h2>
+        <p>
+            <strong>Simulasi:</strong> Pemadaman listrik mendadak atau kerusakan perangkat keras total pada salah satu atau beberapa validator node utama yang sedang memproses blok.
+        </p>
+        <p>
+            Dalam <code>launcher.py</code>, skenario ini direpresentasikan dengan mengirimkan perintah <code>taskkill /f /t /pid &lt;PID&gt;</code> secara native pada Windows. Hal ini mematikan seluruh pohon proses (process tree) dari node target secara instan, tanpa memberikan kesempatan bagi node untuk melakukan <em>graceful shutdown</em>, menyimpan cache state, atau mengirim pesan offline kepada peer lainnya.
+        </p>
+
+        <div class="sync-grid">
+            <div class="sync-card">
+                <h3>Respon Teoretis BFT</h3>
+                <ul>
+                    <li>Toleransi kesalahan BFT (f) menjamin jaringan tetap aman selama <strong>3f + 1 &ge; N</strong>. Dengan 10 node, konsensus tetap berjalan lancar meski 3 node mati serentak.</li>
+                    <li>Sistem otomatis melewati slot node mati (leader timeout) dan menunjuk leader berikutnya.</li>
+                </ul>
+            </div>
+            <div class="sync-card">
+                <h3>Mitigasi &amp; Pemulihan</h3>
+                <ul>
+                    <li>Jika node mati melebihi batas 3 node, <strong>Dynamic Quorum Self-Healing</strong> otonom mendeteksi keabsenan validator secara berturut-turut.</li>
+                    <li>Denominator quorum dipangkas secara adaptif setelah durasi timeout otonom tercapai.</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>Skenario 2: State Database Sabotage (DB Corruption)</h2>
+        <p>
+            <strong>Simulasi:</strong> Kerusakan media penyimpanan fisik (bad sector) atau manipulasi data biner secara ilegal pada berkas penyimpanan state lokal.
+        </p>
+        <p>
+            Skenario chaos ini mematikan node target, lalu membuka folder basis data otonom Sled (misal: <code>data/node5/</code>). Script rekayasa kemudian mencari berkas biner basis data di dalamnya dan menimpa 256 byte pertama dengan <strong>sampah byte acak (random entropy)</strong>.
+        </p>
+        <p>
+            Saat validator dihidupkan kembali, basis data Sled akan mengalami kegagalan <em>deserialisasi metadata</em> atau memicu <strong>State Root Mismatch</strong> ketika memvalidasi blok berikutnya terhadap world state yang rusak.
+        </p>
+
+        <div class="alert-box">
+            <p>
+                <strong>⚠️ Proteksi Fatal:</strong> Desain node Lumina memastikan bahwa jika terdeteksi inkonsistensi internal atau kegagalan pembacaan database, node akan segera masuk ke kondisi <strong>Panic State &amp; Safe Exit</strong> untuk mencegah pemancaran voting block invalid yang dapat berujung pada pemotongan saldo validator (slashing).
+            </p>
+        </div>
+
+        <h2>Skenario 3: Mempool Transaction Spam (Targeted RPC Attack)</h2>
+        <p>
+            <strong>Simulasi:</strong> Serangan Denial of Service (DoS) terkoordinasi yang membombardir mempool validator target dengan ribuan transaksi paralel bersponsor untuk menghabiskan sumber daya CPU dan RAM.
+        </p>
+        <p>
+            Skenario ini meluncurkan engine <code>tx_bot</code> asinkronus yang dikonfigurasi khusus untuk mengirimkan transaksi 0-koin bersponsor Sultan Alice langsung ke RPC port (misal: <code>9102</code>) milik node terpilih. Bot memotong pembatasan sequential nonce konvensional dengan memproduksi keypair transien acak secara real-time pada setiap transaksi.
+        </p>
+
+        <div class="sync-grid">
+            <div class="sync-card">
+                <h3>Mekanisme Pertahanan</h3>
+                <ul>
+                    <li><strong>Adaptive Gas Fee Market:</strong> Setiap lonjakan antrean mempool di node target memicu kenaikan harga gas minimum (priority fee) secara eksponensial.</li>
+                    <li><strong>Block-STM Concurrency:</strong> Mesin pemrosesan transaksi paralel spekulatif memproses transaksi non-konflik secara simultan untuk meloloskan kemacetan.</li>
+                </ul>
+            </div>
+            <div class="sync-card">
+                <h3>Hasil Pengujian</h3>
+                <ul>
+                    <li>Meski node target mengalami kelebihan beban pemrosesan RPC, sistem routing mesh P2P Gossipsub membagi beban (load-balancing) dan memancarkan transaksi valid ke validator pendamping lainnya.</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>Skenario 4: P2P Regional Isolation (Split-Brain / Network Partition)</h2>
+        <p>
+            <strong>Simulasi:</strong> Terputusnya kabel serat optik bawah laut antarbenua atau kesalahan konfigurasi firewall regional yang memisahkan kluster validator menjadi dua kelompok terpisah.
+        </p>
+        <p>
+            Skenario chaos ini menghentikan validator target dan meluncurkannya kembali dengan parameter <code>--bootnode</code> dummy palsu (beralamat port yang tidak aktif). Hal ini mengisolasi node tersebut secara fisik dari topologi Gossipsub peer mesh utama Lumina. Node target hanya dapat berkomunikasi dengan dirinya sendiri atau subset regional kecilnya sendiri.
+        </p>
+
+        <div class="highlight-box">
+            <p>
+                <strong>Hukum Quorum Dinamis &amp; Zero-Fork Safety:</strong> Karena HotStuff BFT mewajibkan 2/3 + 1 suara setuju dari staker aktif untuk memproduksi blok bergaransi (committed), kluster regional terisolasi yang tidak memiliki porsi staking mayoritas <em>tidak akan pernah bisa menyelesaikan konsensus</em>. Mereka akan memproduksi blok kosong atau terhenti total (liveness fault), namun <strong>nol risiko terjadinya percabangan (fork) blockchain</strong>.
+            </p>
+        </div>
+
+        <h2>Skenario 5: Sybil Key Takeover Attack (Slashing &amp; Jailing)</h2>
+        <p>
+            <strong>Simulasi:</strong> Penyerang sybil mencoba mendaftarkan beberapa validator staking dengan kunci BLS yang sama untuk merebut kendali consensus pool secara curang atau memancarkan suara ganda (double-voting).
+        </p>
+        <p>
+            Saat mesin pendeteksi kami (Sentinel Agent) mendeteksi adanya penandatanganan ganda di ketinggian blok yang sama oleh kunci BLS terdaftar, Sentinel segera menyiarkan bukti double-voting ke seluruh jaringan. Hal ini memicu fungsi <strong>Jailing &amp; Slashing</strong> secara real-time:
+        </p>
+
+        <div class="code-block">
+            <span class="comment">// Cuplikan Log Sentinel Agent saat Mendeteksi Double Voting</span>
+            <span class="keyword">let</span> evidence = DoubleVotingEvidence::new(vote_a, vote_b);
+            <span class="keyword">if</span> state.verify_evidence(&amp;evidence) {
+                <span class="comment">// Membekukan 98% stake milik pelaku di Sled Storage secara instan</span>
+                state.slash_validator(&amp;attacker_addr, <span class="string">0.98</span>);
+                <span class="comment">// Menjebloskan validator pelaku ke penjara (JAILED) permanen</span>
+                state.jail_validator(&amp;attacker_addr, BlockHeight::MAX);
+                <span class="macro">tracing::warn!</span>(<span class="string">"🚨 Sentinel: Double-voting detected! Validator slahsed and jailed."</span>);
+            }
+        </div>
+
+        <!-- STUNNING INTERACTIVE CHAOS ENGINE -->
+        <h2>Interactive Chaos Simulation Console</h2>
+        <p>
+            Gunakan panel kendali simulasi di bawah ini untuk melihat representasi visual bagaimana 10-node cluster Lumina merespon skenario chaos secara real-time. Klik tombol <strong>Inject Chaos</strong> untuk memicu simulasi log visual:
+        </p>
+
+        <div class="chaos-panel">
+            <div class="chaos-layout">
+                
+                <!-- Controls Column -->
+                <div class="controls-col">
+                    <div class="control-group">
+                        <label for="chaos-node">Target Validator Node</label>
+                        <select id="chaos-node">
+                            <option value="1">NODE-1 (BOOTNODE) - Port 61688 (RPC: 9098)</option>
+                            <option value="2">NODE-2 - Port 61689 (RPC: 9099)</option>
+                            <option value="3">NODE-3 - Port 61690 (RPC: 9100)</option>
+                            <option value="4">NODE-4 - Port 61691 (RPC: 9101)</option>
+                            <option value="5" selected>NODE-5 - Port 61692 (RPC: 9102)</option>
+                            <option value="6">NODE-6 - Port 61693 (RPC: 9103)</option>
+                            <option value="7">NODE-7 - Port 61694 (RPC: 9104)</option>
+                            <option value="8">NODE-8 - Port 61695 (RPC: 9105)</option>
+                            <option value="9">NODE-9 - Port 61696 (RPC: 9106)</option>
+                            <option value="10">NODE-10 - Port 61697 (RPC: 9107)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="chaos-scenario">Chaos Scenario</label>
+                        <select id="chaos-scenario">
+                            <option value="outage">⚡ Power Outage (Hard Process Kill)</option>
+                            <option value="sabotage">💾 State Database Sabotage (DB Corruption)</option>
+                            <option value="spam">🤖 Mempool Transaction Spam (RPC DoS)</option>
+                            <option value="isolation">🌐 P2P Regional Isolation (Split-Brain)</option>
+                        </select>
+                    </div>
+
+                    <button class="inject-btn" onclick="injectChaosScenario()">Inject Chaos Scenario</button>
+                    
+                    <button class="inject-btn" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); margin-top: -5px;" onclick="resetNetworkSim()">Recover &amp; Reset Network</button>
+                </div>
+
+                <!-- Visual Mesh Column -->
+                <div class="controls-col">
+                    <div class="control-group">
+                        <label>Active P2P Validator Mesh Map</label>
+                        <div class="viz-mesh" id="mesh-container">
+                            <svg class="viz-svg" id="mesh-svg" viewBox="0 0 300 240">
+                                <!-- Connection lines -->
+                                <g id="mesh-links" stroke="rgba(59, 130, 246, 0.25)" stroke-width="1.5"></g>
+                                <!-- Nodes -->
+                                <g id="mesh-nodes"></g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Live Metrics -->
+            <div class="metrics-bar">
+                <div class="metric-card">
+                    <div class="title">Network TPS</div>
+                    <div class="val" id="met-tps">1,248</div>
+                </div>
+                <div class="metric-card">
+                    <div class="title">BFT Quorum</div>
+                    <div class="val" id="met-quorum">10 / 10</div>
+                </div>
+                <div class="metric-card">
+                    <div class="title">Avg Node Ping</div>
+                    <div class="val" id="met-ping">12 ms</div>
+                </div>
+                <div class="metric-card">
+                    <div class="title">Jailed Nodes</div>
+                    <div class="val" id="met-jailed" style="color: var(--accent);">0</div>
+                </div>
+            </div>
+
+            <!-- Terminal output -->
+            <div class="terminal-log" id="term-log">
+                <div class="log-entry">
+                    <span class="log-time">[03:15:00]</span>
+                    <span class="log-tag system">[SYSTEM]</span>
+                    <span>Jaringan Lumina L1 10-node cluster berjalan optimal. Consensus: HotStuff BFT active.</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-time">[03:15:01]</span>
+                    <span class="log-tag system">[SYSTEM]</span>
+                    <span>Semua validator (NODE-1 hingga NODE-10) tersambung ke Gossipsub Mesh.</span>
+                </div>
+            </div>
+        </div>
+
+        <h2>Kesimpulan Uji Ketahanan</h2>
+        <p>
+            Hasil dari simulasi chaos menunjukkan bahwa Lumina L1 memiliki rancangan arsitektur yang kokoh. Batas toleransi kesalahan <strong>BFT (Fault Tolerance)</strong> bekerja secara presisi ketika diuji dengan Power Outage dan Regional Isolation. Penerapan Adaptive Gas Fee dan sistem auto-panic pada korupsi database membuktikan bahwa protokol mendahulukan <strong>keamanan state (safety)</strong> di atas segalanya, menjamin Lumina bebas dari kerentanan garpu data (zero-fork safety) sebelum diluncurkan di Testnet publik.
+        </p>
+    </div>
+</div>
+
+<script>
+    // Mesh Node Coordinates
+    const nodeCoords = [
+        { id: 1, name: "NODE-1", x: 150, y: 35, status: "healthy" },
+        { id: 2, name: "NODE-2", x: 215, y: 55, status: "healthy" },
+        { id: 3, name: "NODE-3", x: 255, y: 110, status: "healthy" },
+        { id: 4, name: "NODE-4", x: 245, y: 175, status: "healthy" },
+        { id: 5, name: "NODE-5", x: 195, y: 215, status: "healthy" },
+        { id: 6, name: "NODE-6", x: 105, y: 215, status: "healthy" },
+        { id: 7, name: "NODE-7", x: 55, y: 175, status: "healthy" },
+        { id: 8, name: "NODE-8", x: 45, y: 110, status: "healthy" },
+        { id: 9, name: "NODE-9", x: 85, y: 55, status: "healthy" },
+        { id: 10, name: "NODE-10", x: 150, y: 125, status: "healthy" } // center
+    ];
+
+    let tpsInterval = null;
+
+    function renderMesh() {
+        const nodesGroup = document.getElementById('mesh-nodes');
+        const linksGroup = document.getElementById('mesh-links');
+        
+        // Render lines (fully connected mesh)
+        let linksHTML = '';
+        for (let i = 0; i < nodeCoords.length; i++) {
+            for (let j = i + 1; j < nodeCoords.length; j++) {
+                const n1 = nodeCoords[i];
+                const n2 = nodeCoords[j];
+                
+                // If one of the nodes is down/dead or isolated, break link representation
+                let opacity = 0.25;
+                let color = "rgba(59, 130, 246, 0.25)";
+                
+                if (n1.status === "dead" || n2.status === "dead") {
+                    opacity = 0;
+                } else if (n1.status === "isolated" || n2.status === "isolated") {
+                    if (n1.id !== 10 && n2.id !== 10) { // Isolated nodes break standard mesh links
+                        opacity = 0.03;
+                    }
+                } else if (n1.status === "spammed" || n2.status === "spammed") {
+                    color = "rgba(244, 63, 94, 0.4)";
+                }
+                
+                if (opacity > 0) {
+                    linksHTML += `<line x1="${n1.x}" y1="${n1.y}" x2="${n2.x}" y2="${n2.y}" stroke="${color}" stroke-opacity="${opacity}" />`;
+                }
+            }
+        }
+        linksGroup.innerHTML = linksHTML;
+
+        // Render nodes
+        let nodesHTML = '';
+        nodeCoords.forEach(node => {
+            let color = "#10b981"; // healthy green
+            let shadow = "rgba(16, 185, 129, 0.6)";
+            
+            if (node.status === "dead") {
+                color = "#f43f5e"; // dead red
+                shadow = "rgba(244, 63, 94, 0.6)";
+            } else if (node.status === "isolated") {
+                color = "#a855f7"; // purple isolated
+                shadow = "rgba(168, 85, 247, 0.6)";
+            } else if (node.status === "spammed") {
+                color = "#fbbf24"; // orange spammed
+                shadow = "rgba(251, 191, 36, 0.6)";
+            }
+
+            nodesHTML += `
+                <g class="viz-node" onclick="selectNodeFromMap(${node.id})">
+                    <circle cx="${node.x}" cy="${node.y}" r="8" fill="${color}" style="filter: drop-shadow(0px 0px 6px ${shadow});" />
+                    <text x="${node.x}" y="${node.y - 12}" fill="#fff" font-size="7" font-weight="700" font-family="'Inter', sans-serif" text-anchor="middle">${node.name}</text>
+                </g>
+            `;
+        });
+        nodesGroup.innerHTML = nodesHTML;
+    }
+
+    function selectNodeFromMap(id) {
+        document.getElementById('chaos-node').value = id;
+    }
+
+    function appendLog(tag, styleClass, msg) {
+        const term = document.getElementById('term-log');
+        const now = new Date();
+        const timeStr = `[${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}]`;
+        
+        term.innerHTML += `
+            <div class="log-entry">
+                <span class="log-time">${timeStr}</span>
+                <span class="log-tag ${styleClass}">[${tag}]</span>
+                <span>${msg}</span>
+            </div>
+        `;
+        term.scrollTop = term.scrollHeight;
+    }
+
+    function injectChaosScenario() {
+        const nodeId = parseInt(document.getElementById('chaos-node').value);
+        const scenario = document.getElementById('chaos-scenario').value;
+        const node = nodeCoords.find(n => n.id === nodeId);
+        
+        if (!node) return;
+
+        // Reset previous node state if any
+        nodeCoords.forEach(n => {
+            if (n.id === nodeId && n.status !== "healthy") {
+                n.status = "healthy";
+            }
+        });
+
+        if (scenario === "outage") {
+            node.status = "dead";
+            appendLog("OUTAGE", "outage", `⚡ HARD KILL: Mengirim taskkill pada ${node.name} (PID: ${Math.floor(Math.random() * 5000) + 1200}).`);
+            
+            setTimeout(() => {
+                appendLog("SYSTEM", "system", `🛡️ [Sentinel] ALERT: Validator ${node.name} terdeteksi offline secara mendadak.`);
+                appendLog("CONSENSUS", "isolation", `⚙️ [Consensus] Slot leader ${node.name} terlewati. Memutar pacemaker ke slot berikutnya.`);
+                updateLiveMetrics();
+            }, 1000);
+
+        } else if (scenario === "sabotage") {
+            node.status = "dead";
+            appendLog("SABOTAGE", "sabotage", `💾 DB CORRUPT: Menyabotase folder ${node.name.toLowerCase()} di data/ database.`);
+            appendLog("SABOTAGE", "sabotage", `💾 DB CORRUPT: 256 byte metadata biner Sled ditimpa byte entropy acak.`);
+            
+            setTimeout(() => {
+                appendLog("SYSTEM", "outage", `🚨 [${node.name}] FATAL: Sled DB page corruption detected! Magic bytes mismatch.`);
+                appendLog("SYSTEM", "outage", `🛑 [${node.name}] Node memasuki Panic State & Safe Exit. Proses dihentikan.`);
+                updateLiveMetrics();
+            }, 1200);
+
+        } else if (scenario === "spam") {
+            node.status = "spammed";
+            appendLog("SPAM", "spam", `🤖 MEMPOOL SPAM: Meluncurkan parallel spammer bot menyerang ${node.name} di port RPC.`);
+            appendLog("SPAM", "spam", `🤖 MEMPOOL SPAM: Banjir 1,200 transaksi concurrent per detik dengan fee sponsor.`);
+            
+            setTimeout(() => {
+                appendLog("SYSTEM", "system", `⚙️ [${node.name}] Mempool terisi penuh (Priority Queue Active).`);
+                appendLog("SYSTEM", "sabotage", `📈 [GasFee] Tarif prioritas melonjak ke 45,000,000,000,000 LUM.`);
+                appendLog("SYSTEM", "system", `⚡ [${node.name}] Parallel Block-STM spekulatif aktif menyaring gas.`);
+                updateLiveMetrics();
+            }, 1000);
+
+        } else if (scenario === "isolation") {
+            node.status = "isolated";
+            appendLog("ISOLATION", "isolation", `🌐 P2P ISOLATE: Memutuskan peer ${node.name} dari Gossipsub mesh.`);
+            appendLog("ISOLATION", "isolation", `🌐 P2P ISOLATE: Node direstart dengan bootnode dummy palsu.`);
+            
+            setTimeout(() => {
+                appendLog("CONSENSUS", "isolation", `⚠️ [${node.name}] Mengalami Liveness Fault (Gagal mengumpulkan quorum votes).`);
+                appendLog("CONSENSUS", "system", `🛡️ [Quorum] Jaringan utama tetap aman (9/10 stakers aktif). Zero-fork safety aktif.`);
+                updateLiveMetrics();
+            }, 1000);
+        }
+
+        renderMesh();
+    }
+
+    function resetNetworkSim() {
+        nodeCoords.forEach(n => n.status = "healthy");
+        renderMesh();
+        appendLog("SYSTEM", "system", "♻️ Jaringan dipulihkan. Semua validator tersambung kembali.");
+        updateLiveMetrics();
+    }
+
+    function updateLiveMetrics() {
+        const deadNodes = nodeCoords.filter(n => n.status === "dead").length;
+        const isolatedNodes = nodeCoords.filter(n => n.status === "isolated").length;
+        const spammedNodes = nodeCoords.filter(n => n.status === "spammed").length;
+        
+        const activeNodes = 10 - deadNodes;
+        
+        // Quorum
+        const quorEl = document.getElementById('met-quorum');
+        quorEl.innerHTML = `${activeNodes - isolatedNodes} / 10`;
+        if (activeNodes - isolatedNodes < 7) {
+            quorEl.style.color = "var(--accent)";
+        } else {
+            quorEl.style.color = "var(--primary)";
+        }
+
+        // Jailed
+        const jailEl = document.getElementById('met-jailed');
+        jailEl.innerHTML = deadNodes + isolatedNodes;
+
+        // TPS
+        const tpsEl = document.getElementById('met-tps');
+        if (deadNodes > 3) {
+            tpsEl.innerHTML = "0 (Halted)";
+            tpsEl.style.color = "var(--accent)";
+        } else if (spammedNodes > 0) {
+            tpsEl.innerHTML = "4,820 (Spamming)";
+            tpsEl.style.color = "var(--warning)";
+        } else {
+            tpsEl.innerHTML = "1,248";
+            tpsEl.style.color = "var(--primary)";
+        }
+
+        // Ping
+        const pingEl = document.getElementById('met-ping');
+        if (spammedNodes > 0) {
+            pingEl.innerHTML = "240 ms (Lag)";
+            pingEl.style.color = "var(--warning)";
+        } else if (deadNodes > 3) {
+            pingEl.innerHTML = "N/A";
+            pingEl.style.color = "var(--accent)";
+        } else {
+            pingEl.innerHTML = "12 ms";
+            pingEl.style.color = "var(--primary)";
+        }
+    }
+
+    // Dynamic TPS noise generator
+    function startTPSNoise() {
+        if (tpsInterval) clearInterval(tpsInterval);
+        tpsInterval = setInterval(() => {
+            const deadNodes = nodeCoords.filter(n => n.status === "dead").length;
+            const spammedNodes = nodeCoords.filter(n => n.status === "spammed").length;
+            const tpsEl = document.getElementById('met-tps');
+            
+            if (deadNodes > 3) {
+                tpsEl.innerHTML = "0 (Halted)";
+            } else if (spammedNodes > 0) {
+                tpsEl.innerHTML = (4800 + Math.floor(Math.random() * 200)) + " (Spamming)";
+            } else {
+                tpsEl.innerHTML = (1200 + Math.floor(Math.random() * 80));
+            }
+        }, 1500);
+    }
+
+    // Initialize
+    window.onload = function() {
+        renderMesh();
+        startTPSNoise();
+    }
+</script>
+
+</body>
+</html>

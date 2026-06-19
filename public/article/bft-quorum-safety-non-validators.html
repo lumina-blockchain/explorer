@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Securing BFT Quorum: Strict Validator Filtering in P2P Gossip & Consensus | Lumina Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07090e;
+            --card-bg: rgba(13, 18, 30, 0.85);
+            --primary: #ec4899; /* Electric Coral */
+            --secondary: #fbbf24; /* Amber Gold */
+            --accent: #10b981; /* Emerald Green */
+            --blue: #3b82f6; /* Cyber Blue */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --code-bg: #04060a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(236, 72, 153, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(251, 191, 36, 0.08) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--secondary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 1.8rem; 
+            margin: 45px 0 20px; 
+            color: var(--primary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.3rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .code-box {
+            background: var(--code-bg);
+            border: 1px solid rgba(236, 72, 153, 0.15);
+            padding: 25px;
+            border-radius: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            color: #f3f4f6;
+            margin: 35px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        .code-box::before {
+            content: 'Rust Code';
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .highlight-box {
+            background: rgba(245, 158, 11, 0.05);
+            border-left: 4px solid var(--secondary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #fef08a; font-size: 1rem; }
+
+        .accent-box {
+            background: rgba(16, 185, 129, 0.05);
+            border-left: 4px solid var(--accent);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .accent-box p { margin-bottom: 0; color: #a7f3d0; font-size: 1rem; }
+
+        ul, ol { margin-left: 25px; margin-bottom: 25px; color: #cbd5e1; }
+        li { margin-bottom: 10px; }
+
+        /* Custom Diagram styling */
+        .diagram-container {
+            background: rgba(4, 6, 10, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .node-row {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            gap: 15px;
+        }
+        .network-node {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px 20px;
+            text-align: center;
+            flex: 1;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .network-node.validator {
+            border-color: var(--accent);
+            background: rgba(16, 185, 129, 0.05);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+        }
+        .network-node.non-validator {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.05);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.1);
+        }
+        .flow-arrow {
+            color: var(--text-dim);
+            font-size: 1.5rem;
+            margin: 10px 0;
+        }
+        .diagram-status {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Kembali ke Artikel Teknikal</a>
+        
+        <header>
+            <span class="meta">Analisis Keamanan Konsensus BFT • Lumina Network</span>
+            <h1>Securing BFT Quorum: Strict Validator Filtering in P2P Gossip & Consensus</h1>
+            <p style="font-size: 1.2rem; color: var(--text-dim); font-weight: 300;">Analisis teknikal bug "Sok-Sokan" Node 4: Mengapa node tanpa stake dilarang keras ikut campur dalam voting konsensus, dan bagaimana perbaikannya menjaga integritas Quorum Certificate (QC) jaringan.</p>
+        </header>
+
+        <main class="content">
+            <h2>1. Pendahuluan & Latar Belakang Masalah</h2>
+            <p>Pada jaringan blockchain berbasis konsensus <strong>BFT (Byzantine Fault Tolerance)</strong> seperti Lumina, <strong>Quorum Certificate (QC)</strong> adalah bukti sah bahwa sebuah blok telah disetujui oleh mayoritas super-mayoritas (<strong>> 2/3</strong>) validator terdaftar. Integritas dari setiap suara (*vote*) yang membentuk QC bersifat mutlak.</p>
+            
+            <p>Masalah timbul ketika sebuah simpul non-validator (misalnya, <strong>Node 4</strong> yang dijalankan dengan opsi <code>--secret</code> tetapi belum melakukan ikatan dana (*stake*) secara on-chain) secara otomatis ikut berpartisipasi dalam penandatanganan dan penyiaran suara konsensus. Node 4 ini secara tidak sah bertindak seolah-olah ia adalah validator aktif ("sok-sokan" ikut campur BFT) karena berhasil menurunkan kunci privat BLS secara lokal.</p>
+
+            <div class="highlight-box">
+                <p><strong>⚠️ Gejala Bug di Explorer UI:</strong><br>
+                Saat Node 4 bergabung tanpa stake, dasbor explorer mendeteksi visualisasi janggal berupa <code>VERIFIED QUORUM: 4/3 VALIDATORS</code>. Hal ini terjadi karena validator aktif keliru mengagregasikan suara Node 4 ke dalam Quorum Certificate, padahal total validator sah di genesis pool hanyalah 3 node.</p>
+            </div>
+
+            <h2>2. Ancaman Keamanan (Threat Analysis)</h2>
+            <p>Mengapa membiarkan node non-staked memberikan suara konsensus merupakan ancaman fatal?</p>
+            <ul>
+                <li><strong>Consensual Gridlock / Network Stall:</strong> Fungsi verifikasi QC (<code>verify_quorum_certificate</code>) di Lumina bertindak sangat ketat. Setiap kunci publik penandatangan di dalam QC wajib dicocokkan dengan daftar validator aktif resmi di DB. Jika terdapat <em>satu saja</em> pengirim tanda tangan yang tidak terdaftar/tidak aktif, verifikasi QC akan **gagal total** dan menyebabkan jaringan mogok (stall).</li>
+                <li><strong>Sybil Attack vulnerability:</strong> Tanpa filtrasi ketat pada gossip suara, penyerang dapat meluncurkan ribuan node non-staked instan untuk membanjiri P2P network dengan pesan voting palsu (*consensus pollution*), menguras daya CPU validator saat memverifikasi tanda tangan kriptografi BLS yang tidak valid.</li>
+            </ul>
+
+            <div class="diagram-container">
+                <span class="diagram-status">Alur Pesan BFT yang Aman (Setelah Perbaikan)</span>
+                <div class="node-row">
+                    <div class="network-node validator">Node 1 (Active)<br><span style="font-size: 0.75rem; color: var(--accent);">Voted ✅</span></div>
+                    <div class="network-node validator">Node 2 (Active)<br><span style="font-size: 0.75rem; color: var(--accent);">Voted ✅</span></div>
+                    <div class="network-node validator">Node 3 (Active)<br><span style="font-size: 0.75rem; color: var(--accent);">Voted ✅</span></div>
+                </div>
+                <div class="flow-arrow">↓↓↓ (P2P Gossip Subnet)</div>
+                <div class="network-node non-validator" style="width: 70%;">
+                    Node 4 (Tanpa Stake / Inactive)<br>
+                    <span style="font-size: 0.75rem; color: #ef4444;">SUARA DITOLAK & DIABAIKAN ❌</span>
+                </div>
+                <div class="flow-arrow">↓↓↓ (Pembentukan QC)</div>
+                <div class="network-node validator" style="width: 90%; background: rgba(16, 185, 129, 0.1);">
+                    <strong>Quorum Certificate Sukses Terbentuk! 🛡️</strong><br>
+                    <span style="font-size: 0.85rem; color: var(--text);">Hanya menggunakan tanda tangan dari 3/3 Validator Aktif</span>
+                </div>
+            </div>
+
+            <h2>3. Desain Solusi & Logika Baru</h2>
+            <p>Untuk menutup celah keamanan ini, kami menerapkan pengamanan ganda di dua gerbang utama P2P Gossip pada berkas <code>node/src/main.rs</code>:</p>
+
+            <h3>Gerbang 1: Pembatasan Penyiaran Suara Lokal (Auto-Vote Protection)</h3>
+            <p>Sebelum node menandatangani hash blok baru, node wajib memvalidasi identitas dirinya sendiri terhadap daftar validator aktif yang sah:</p>
+            
+            <div class="code-box">
+// 🗳️ Auto-vote untuk block yang diterima
+if let Some(ref sk) = bls_private_key {
+    let is_active = current_validators.iter().any(|v| 
+        v.address.to_string() == local_addr.to_string() && 
+        v.status == lumina_staking::ValidatorStatus::Active
+    );
+    if is_active {
+        // Lakukan penandatanganan BLS dan siarkan ke jaringan!
+        ...
+    } else {
+        // Tetap diam karena kita bukan validator aktif
+    }
+}</div>
+
+            <h3>Gerbang 2: Filtrasi Suara Masuk di Sisi Validator (Inbound Vote Filtering)</h3>
+            <p>Saat validator menerima suara konsensus dari jaringan P2P melalui topik <code>VOTES_TOPIC</code>, ia tidak boleh langsung menampungnya di memori kolektor. Validator harus menyaring pengirim secara ketat:</p>
+
+            <div class="code-box">
+} else if message.topic.as_str() == VOTES_TOPIC {
+    if let Ok((vote, _)) = bincode::decode_from_slice::<Vote, _>(&message.data, bincode_config) {
+        let active_validators = consensus.get_active_validators();
+        let is_active = active_validators.iter().any(|val| 
+            val.address.to_string() == vote.validator.to_string() && 
+            val.status == lumina_staking::ValidatorStatus::Active
+        );
+        if is_active {
+            // Proses deteksi double-voting dan kumpulkan ke vote_collector
+            ...
+        } else {
+            tracing::warn!("⚠️ Ignored vote from non-validator or inactive address: {}", vote.validator);
+        }
+    }
+}</div>
+
+            <h2>4. Verifikasi Keamanan Jaringan</h2>
+            <p>Setelah perbaikan ini diterapkan dan dikompilasi ulang:</p>
+            <ol>
+                <li><strong>Konsistensi Jumlah Validator:</strong> Quorum Certificate kini terbentuk secara presisi dengan rasio <code>3/3 VALIDATORS</code> (kembali normal). Suara dari Node 4 ditolak mentah-mentah sehingga tidak pernah masuk ke agregasi tanda tangan QC.</li>
+                <li><strong>Efisiensi Bandwidth & CPU:</strong> Validator tidak lagi membuang-buang siklus clock CPU untuk memverifikasi atau menggabungkan tanda tangan dari kunci publik yang tidak terdaftar di database on-chain Lumina.</li>
+                <li><strong>Stabilitas Tanpa Pengaruh Negatif:</strong> Semua integrasi pengujian (jailing, auto-resume, double-voting slashing, dan state transitions) berhasil diselesaikan dengan sukses 100% tanpa regresi logika apa pun.</li>
+            </ol>
+
+            <div class="accent-box">
+                <p><strong>💡 Kesimpulan:</strong><br>
+                Dengan arsitektur keamanan baru ini, Lumina Network menjamin batas konsensus (consensus boundary) yang kokoh. Hanya modal komitmen on-chain nyata (Staking) yang berhak memiliki hak suara di jaringan konsensus BFT.</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

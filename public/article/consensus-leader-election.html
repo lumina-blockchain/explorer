@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consensus: Leader Election & Hybrid Validator Registry | Lumina Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080c12;
+            --card-bg: rgba(13, 20, 30, 0.85);
+            --primary: #fbbf24; /* Amber Gold */
+            --secondary: #06b6d4; /* Electric Cyan */
+            --accent: #10b981; /* Emerald Green */
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(251, 191, 36, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 95% 95%, rgba(6, 182, 212, 0.06) 0%, transparent 45%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { transform: translateX(-5px); color: var(--primary); }
+
+        header { margin-bottom: 50px; }
+        h1 { 
+            font-size: 3.2rem; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .meta { color: var(--text-dim); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+
+        .content {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        h2 { 
+            font-size: 2rem; 
+            margin: 45px 0 20px; 
+            color: var(--secondary); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        h3 { font-size: 1.4rem; margin: 30px 0 15px; color: #fde047; }
+        p { margin-bottom: 24px; color: #cbd5e1; font-size: 1.05rem; }
+        
+        strong { color: #ffffff; }
+
+        .highlight-box {
+            background: rgba(6, 182, 212, 0.05);
+            border-left: 4px solid var(--secondary);
+            padding: 20px 25px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+        .highlight-box p { margin-bottom: 0; color: #22d3ee; font-size: 1rem; }
+
+        .code-block {
+            background: #04060a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword { color: #f472b6; }
+        .code-block .type { color: #818cf8; }
+        .code-block .comment { color: #64748b; font-style: italic; }
+        .code-block .string { color: #34d399; }
+        .code-block .macro { color: #fbbf24; }
+
+        .visual-merge {
+            background: rgba(251, 191, 36, 0.03);
+            border: 1px dashed rgba(251, 191, 36, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 35px 0;
+            text-align: center;
+        }
+
+        .merge-box {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 15px 25px;
+            border-radius: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 10px;
+            font-size: 1rem;
+        }
+        .box-genesis { border-color: var(--primary); color: #fde047; }
+        .box-dynamic { border-color: var(--accent); color: #6ee7b7; }
+        .box-unified { border-color: var(--secondary); color: #67e8f9; background: rgba(6, 182, 212, 0.1); }
+
+        .timeline {
+            position: relative;
+            margin: 40px 0;
+            padding-left: 30px;
+            border-left: 2px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -37px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            background: var(--secondary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--secondary);
+        }
+
+        .timeline-item.warning::before {
+            background: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
+        }
+
+        .timeline-content h4 { font-size: 1.2rem; margin-bottom: 5px; color: #ffffff; }
+        .timeline-content p { font-size: 0.95rem; margin-bottom: 0; color: #cbd5e1; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 35px 0;
+        }
+        .info-card {
+            background: rgba(5, 3, 8, 0.5);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .info-card h3 { margin-top: 0; margin-bottom: 12px; }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Docs Hub</a>
+        
+        <header>
+            <span class="meta">Consensus Engine | May 2026</span>
+            <h1>Consensus: Leader Election & Hybrid Validator Registry</h1>
+            <p>Bagaimana Lumina menjamin kelangsungan konsensus HotStuff BFT melalui penggabungan validator dinamis dan pemilihan leader deterministik tanpa overhead jaringan.</p>
+        </header>
+
+        <div class="content">
+            <p>Dalam jaringan blockchain terdesentralisasi Layer 1 (L1), kelangsungan produksi blok sangat bergantung pada penentuan **Leader** (validator yang bertugas memproses transaksi dan mengusulkan blok). Jika pemilihan leader memakan waktu lama atau melibatkan negosiasi antar node yang rumit, throughput transaksi jaringan akan anjlok drastis.</p>
+
+            <p>Lumina memecahkan masalah ini secara revolusioner melalui skema **Deterministic Round-Robin** dengan **Hybrid Validator Registry**. Sistem ini mampu menggabungkan validator statis bawaan sejak awal jaringan (Genesis) dengan staker baru yang mendaftar secara dinamis saat jaringan sedang berjalan, menjamin keadilan mutlak tanpa ada pesan komunikasi tambahan (*Zero Communication Overhead*).</p>
+
+            <div class="highlight-box">
+                <p><strong>⚡ Pembaruan Sistem:</strong> Mulai rilis v1.3, mekanisme penentuan leader telah ditingkatkan penuh untuk mengintegrasikan active staker dari StateManager secara dinamis dan real-time tanpa perlu me-restart node!</p>
+            </div>
+
+            <h2>1. Mesin Penggabung Validator Hibrida (Hybrid Merge Engine)</h2>
+            <p>Alih-alih hanya mengandalkan daftar validator statis yang kaku, Lumina menggabungkan dua sumber registrasi secara real-time di setiap putaran tinggi blok:</p>
+
+            <div class="visual-merge">
+                <div class="merge-box box-genesis">1. Genesis Validators<br><small>(StakingState / Founder)</small></div>
+                <div class="flow-arrow" style="display: inline-block; vertical-align: middle;">➕</div>
+                <div class="merge-box box-dynamic">2. Dynamic Active Stakers<br><small>(StateManager / Live Deposit)</small></div>
+                <br>
+                <div class="flow-arrow" style="margin: 15px 0;">▼ (Dihubungkan & Di-sort Alphabetical)</div>
+                <br>
+                <div class="merge-box box-unified">3. Unified Validator Registry<br><small>(Konsisten di Seluruh Node)</small></div>
+            </div>
+
+            <p>Gabungan daftar ini kemudian diurutkan secara **alfabetis** berdasarkan alamat Bech32 masing-masing validator. Hal ini wajib dilakukan agar seluruh node di seluruh dunia menghasilkan urutan baris antrean staker yang **100% identik dan konsisten**!</p>
+
+            <h2>2. Implementasi Rust: Penentuan Leader Deterministik</h2>
+            <p>Di bawah ini adalah kode sumber riil dari engine konsensus Lumina di dalam <code>crates/consensus/src/lib.rs</code> yang menangani pencarian leader untuk tinggi blok tertentu:</p>
+
+            <div class="code-block">
+<span class="comment">/// Tentukan siapa Leader untuk tinggi blok tertentu secara deterministik.</span>
+<span class="keyword">pub fn</span> <span class="macro">get_leader</span>(&amp;<span class="keyword">self</span>, height: <span class="type">u64</span>) -&gt; <span class="type">Address</span> {
+    <span class="comment">// 1. Ambil Validator Genesis dari StakingState</span>
+    <span class="keyword">let mut</span> all_validators: <span class="type">Vec</span>&lt;<span class="type">Address</span>&gt; = <span class="keyword">self</span>.staking.get_validators()
+        .iter().map(|v| v.address.clone()).collect();
+    
+    <span class="comment">// 2. Gabungkan dengan Validator Baru yang terdaftar dinamis di StateManager</span>
+    <span class="keyword">for</span> entry <span class="keyword">in</span> <span class="keyword">self</span>.state.active_validators.iter() {
+        <span class="keyword">let</span> addr = entry.value().clone();
+        <span class="keyword">if</span> !all_validators.contains(&amp;addr) {
+            all_validators.push(addr);
+        }
+    }
+
+    <span class="keyword">if</span> all_validators.is_empty() {
+        <span class="keyword">return</span> Address([<span class="number">0u8</span>; <span class="number">20</span>]);
+    }
+
+    <span class="comment">// 3. Urutkan alfabetis agar kocokannya 100% konsisten di semua node</span>
+    all_validators.sort_by(|a, b| a.to_string().cmp(&amp;b.to_string()));
+
+    <span class="comment">// 4. Pilih Leader menggunakan rumus matematika Round-Robin sisa bagi</span>
+    <span class="keyword">let</span> index = (height % (all_validators.len() <span class="keyword">as</span> <span class="type">u64</span>)) <span class="keyword">as</span> <span class="type">usize</span>;
+    all_validators[index].clone()
+}
+            </div>
+
+            <h2>3. Siklus Hidup Proposisi Blok HotStuff</h2>
+            <p>Setelah leader terhitung oleh rumus di atas, proses proposisi blok dikelola dengan jeda waktu yang presisi:</p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4>T + 0 detik (Round Start)</h4>
+                        <p>Tinggi blok baru dimulai. Leader yang sah langsung teridentifikasi oleh rumus matematika di atas. Seluruh validator mulai mengumpulkan transaksi dari mempool.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <h4>T + 5 detik (Block Proposal Phase)</h4>
+                        <p>Leader mulai membungkus transaksi mempool ke dalam blok baru, membubuhkan State Root, dan menyiarkannya (broadcast) ke seluruh validator di jaringan P2P.</p>
+                    </div>
+                </div>
+                <div class="timeline-item warning">
+                    <div class="timeline-content">
+                        <h4>T + 15 detik (Timeout & Skip Leader Phase)</h4>
+                        <p>Jika dalam 15 detik jaringan belum menerima proposal blok yang sah dari leader tersebut (misal karena server leader mati atau internet putus), sistem masuk ke mode darurat **Skip Leader**.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>4. Penanganan Kegagalan: Skip Leader Takeover</h2>
+            <p>Blockchain Lumina tidak boleh berhenti beroperasi hanya karena satu server validator staker mengalami mati lampu atau masalah teknis:</p>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Backup Leader Activating</h3>
+                    <p>Setelah timeout 15 detik terpicu di semua node secara paralel, node secara otomatis menunjuk validator urutan berikutnya: <code>(LeaderIndex + 1)</code> sebagai Backup Leader.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Zero Desynchronization</h3>
+                    <p>Backup Leader langsung mengambil alih kepemimpinan, menyusun proposal blok alternatif, dan menyebarkannya. Konsensus berjalan lancar tanpa desinkronisasi State Root!</p>
+                </div>
+            </div>
+
+            <h2>Pertanyaan Umum (FAQ)</h2>
+            <h3>Apakah staker baru langsung berhak jadi leader setelah mengirim koin?</h3>
+            <p><strong>Ya, langsung di blok berikutnya!</strong> Begitu transaksi <code>STAKE</code> terkonfirmasi masuk ke dalam blok, akun staker tersebut langsung terdaftar di <code>active_validators</code> StateManager dan ikut serta dalam kocokan leader di tinggi blok selanjutnya secara real-time.</p>
+
+            <h3>Apakah skema Alphabetical Sorting ini adil?</h3>
+            <p><strong>Sangat adil.</strong> Karena sisa bagi tinggi blok (`height % total_validators`) terus bertambah 1 di setiap blok, giliran menjadi leader akan terus berputar secara merata ke seluruh validator yang ada di dalam antrean terlepas dari urutan huruf nama alamat mereka.</p>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Lumina Foundation Technical Documentation. Core Consensus Series.
+        </div>
+    </div>
+</body>
+</html>
