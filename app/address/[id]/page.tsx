@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
@@ -163,7 +163,7 @@ export default function AddressPage() {
 
     if (/^\d+$/.test(query)) {
       router.push(`/block/${query}`)
-    } else if (query.toLowerCase().startsWith("lumina")) {
+    } else if (query.toLowerCase().startsWith("big")) {
       router.push(`/address/${query}`)
     } else if (query.length >= 60) {
       const clean = query.startsWith("0x") ? query.substring(2) : query
@@ -364,7 +364,7 @@ export default function AddressPage() {
           <div className="absolute inset-0 opacity-[0.1]" style={{ backgroundImage: 'radial-gradient(#512da8 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
           <div className="max-w-[1400px] mx-auto px-4 relative z-10 space-y-4">
             <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              Lumina <span className="text-teal-400 uppercase text-xs tracking-widest">{isContract ? "Contract Detail" : "Address Detail"}</span>
+              BigChain <span className="text-teal-400 uppercase text-xs tracking-widest">{isContract ? "Contract Detail" : "Address Detail"}</span>
             </h1>
 
             {!isContract && (accountName || isValidator) && (
@@ -1301,7 +1301,7 @@ export default function AddressPage() {
 
                         {/* Staking Rules explanation */}
                         <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl text-xs font-semibold text-slate-500 space-y-2">
-                          <p className="font-bold text-slate-700">💡 Aturan Staking Lumina:</p>
+                          <p className="font-bold text-slate-700">💡 Aturan Staking BigChain:</p>
                           <ul className="list-disc pl-5 space-y-1">
                             <li>Staking minimal membutuhkan dana yang terkunci selama 100 blok dari tinggi blok awal staking Anda.</li>
                             <li>Setelah melewati tinggi blok penguncian, status staking akan menjadi `Eligible for Unstake` dan Anda dapat mencairkan dana staking kapan saja.</li>
@@ -1317,12 +1317,12 @@ export default function AddressPage() {
                         </div>
                         <div className="space-y-1">
                           <h4 className="font-black text-slate-800 text-sm uppercase tracking-wider">No Active Staking</h4>
-                          <p className="text-xs text-slate-400 font-medium">Alamat ini tidak memiliki saldo staking aktif di Lumina Network saat ini.</p>
+                          <p className="text-xs text-slate-400 font-medium">Alamat ini tidak memiliki saldo staking aktif di BigChain Network saat ini.</p>
                         </div>
                         <div className="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl space-y-2 text-left font-mono text-[11px] text-slate-600">
                           <span className="font-sans font-bold text-slate-800 text-[10px] uppercase tracking-wider block mb-1">Staking via CLI command:</span>
                           <code className="block bg-slate-900 text-emerald-400 p-2.5 rounded border border-white/5 whitespace-normal break-all">
-                            lumina-cli staking register --amount 1000 --validator-key &lt;pubkey&gt;
+                            bigchain-cli staking register --amount 1000 --validator-key &lt;pubkey&gt;
                           </code>
                         </div>
                       </div>
