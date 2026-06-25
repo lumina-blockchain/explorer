@@ -182,7 +182,7 @@ export default function Home() {
    const [now, setNow] = useState(Date.now())
    const [showWalletModal, setShowWalletModal] = useState(false)
    const ws = useRef<WebSocket | null>(null)
-   const chainId = process.env.NEXT_PUBLIC_CHAIN_ID || "Lumina-Mainnet"
+   const chainId = process.env.NEXT_PUBLIC_CHAIN_ID || ""
    const [actualBlockTimeOccurred, setActualBlockTimeOccurred] = useState<number>(1000)
    const lastBlockReceivedAt = useRef<number>(0)
 
@@ -433,8 +433,8 @@ export default function Home() {
       if (/^\d+$/.test(query)) {
          router.push(`/block/${query}`)
       }
-      // 2. Jika lumina... -> Address
-      else if (query.toLowerCase().startsWith("lumina")) {
+      // 2. Jika big... -> Address
+      else if (query.toLowerCase().startsWith("big")) {
          router.push(`/address/${query}`)
       }
       // 3. Jika hash panjang (64 chars hex) -> Transaction ATAU Block
@@ -499,7 +499,7 @@ export default function Home() {
 
                   <div className="space-y-2">
                      <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
-                        Lumina
+                        BIGCHAIN
                         <span className="ml-3 bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">Explorer</span>
                      </h1>
                      <p className="text-sm text-white/40 font-medium tracking-wide max-w-md">
@@ -714,7 +714,7 @@ export default function Home() {
                         <Wallet className="w-8 h-8 text-white animate-bounce" style={{ animationDuration: '3s' }} />
                      </div>
                      <div>
-                        <h3 className="text-xl font-black italic uppercase tracking-tight">Lumina Wallet Extension</h3>
+                        <h3 className="text-xl font-black italic uppercase tracking-tight">Bigchain Wallet Extension</h3>
                         <p className="text-teal-50 text-sm font-medium opacity-80">Manage your assets, sign transactions, and interact with dApps directly from Chrome.</p>
                      </div>
                   </div>
@@ -960,7 +960,7 @@ export default function Home() {
                      <img src="/tutorial-wallet.png" className="h-full w-full object-cover opacity-60" alt="Tutorial" />
                      <div className="absolute inset-0 bg-gradient-to-t from-teal-900/40 to-transparent" />
                      <div className="relative z-10 text-center">
-                        <h2 className="text-3xl font-black italic uppercase text-white tracking-tighter">Install Lumina Wallet</h2>
+                        <h2 className="text-3xl font-black italic uppercase text-white tracking-tighter">Install Bigchain Wallet</h2>
                         <p className="text-teal-50/80 text-xs font-bold uppercase tracking-[0.3em]">Developer Mode Sideloading</p>
                      </div>
                      <button
@@ -995,7 +995,7 @@ export default function Home() {
                               <span className="text-[10px] font-black uppercase tracking-widest">Verified Package v1.0</span>
                            </div>
                            <a
-                              href="/lumina-wallet.zip"
+                              href="/bigchain-wallet.zip"
                               onClick={() => setShowWalletModal(false)}
                               className="w-full md:w-auto bg-teal-600 text-white px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-teal-700 transition-all shadow-xl shadow-teal-500/20 text-center"
                            >
