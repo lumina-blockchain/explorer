@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -135,7 +135,7 @@ export default function TransactionsPage() {
                 <Activity className="w-8 h-8 text-teal-400 fill-teal-400/20" />
                 Global <span className="text-teal-400">Transactions</span>
               </h1>
-              <p className="text-slate-400 text-sm mt-1 font-medium">Viewing all activity on Lumina Network</p>
+              <p className="text-slate-400 text-sm mt-1 font-medium">Viewing all activity on BigChain network</p>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-lg px-4 py-3 backdrop-blur-md">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Total Transactions</span>

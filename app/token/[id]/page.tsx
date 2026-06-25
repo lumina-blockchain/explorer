@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -121,7 +121,7 @@ export default function TokenDetailPage() {
     const [isCalling, setIsCalling] = useState<Record<string, boolean>>({});
     const [expandedFunc, setExpandedFunc] = useState<string | null>(null);
 
-    // Lumina Wallet Extension Integration states
+    // Bigchain Wallet Extension Integration states
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
     const [walletBalance, setWalletBalance] = useState<string>("0.000000");
     const [writeInputs, setWriteInputs] = useState<Record<string, string>>({});
@@ -129,10 +129,10 @@ export default function TokenDetailPage() {
     const [writeResults, setWriteResults] = useState<Record<string, string>>({});
 
     const updateBalance = async (addr: string) => {
-        if (!window.lumina) return;
+        if (!window.big) return;
         try {
-            const balanceRaw = await window.lumina.request({
-                method: 'lumina_getBalance',
+            const balanceRaw = await window.big.request({
+                method: 'big_getBalance',
                 params: { address: addr }
             });
             const balanceLUM = parseFloat(balanceRaw) / 1e18;
@@ -144,8 +144,8 @@ export default function TokenDetailPage() {
 
     // Auto-detect extension wallet on mount
     useEffect(() => {
-        if (window.lumina) {
-            const currentAddr = window.lumina.getAddress();
+        if (window.big) {
+            const currentAddr = window.big.getAddress();
             if (currentAddr) {
                 setWalletAddress(currentAddr);
                 updateBalance(currentAddr);
@@ -159,22 +159,22 @@ export default function TokenDetailPage() {
                     setWalletBalance("0.000000");
                 }
             };
-            window.lumina.on('accountsChanged', handleAccountsChanged);
+            window.big.on('accountsChanged', handleAccountsChanged);
             return () => {
-                if (window.lumina) {
-                    window.lumina.removeListener('accountsChanged', handleAccountsChanged);
+                if (window.big) {
+                    window.big.removeListener('accountsChanged', handleAccountsChanged);
                 }
             };
         }
     }, []);
 
     const connectWallet = async () => {
-        if (!window.lumina) {
-            alert("Lumina Wallet Extension not detected! Please install or sideload the extension.");
+        if (!window.big) {
+            alert("Bigchain Wallet Extension not detected! Please install or sideload the extension.");
             return;
         }
         try {
-            const accounts = await window.lumina.request({ method: 'lumina_requestAccounts' });
+            const accounts = await window.big.request({ method: 'big_requestAccounts' });
             const connectedAddr = accounts[0];
             setWalletAddress(connectedAddr);
             updateBalance(connectedAddr);
@@ -184,7 +184,7 @@ export default function TokenDetailPage() {
     };
 
     const callWriteFunction = async (method: string, inputs: any[]) => {
-        if (!window.lumina || !walletAddress) {
+        if (!window.big || !walletAddress) {
             alert("Please connect your wallet first!");
             return;
         }
@@ -197,8 +197,8 @@ export default function TokenDetailPage() {
             const payloadData = `CALL:${params.id}:${method}:${args.join(',')}`;
             const dataBytes = Array.from(new TextEncoder().encode(payloadData));
 
-            const resultHash = await window.lumina.request({
-                method: 'lumina_sendTransaction',
+            const resultHash = await window.big.request({
+                method: 'big_sendTransaction',
                 params: {
                     to: params.id as string,
                     amount: "0",
@@ -329,7 +329,7 @@ export default function TokenDetailPage() {
                     if (hexBytecode) {
                         const bytes = new Uint8Array(hexBytecode.match(/.{1,2}/g)!.map((byte: string) => parseInt(byte, 16)));
 
-                        // WASM Parser Sederhana untuk mencari Custom Section "lumina_abi"
+                        // WASM Parser Sederhana untuk mencari Custom Section "big_abi"
                         let offset = 8; // Lewati WASM Header
                         let foundAbi = null;
 
@@ -359,7 +359,7 @@ export default function TokenDetailPage() {
                                 const name = new TextDecoder().decode(bytes.slice(offset, offset + nameLen));
                                 offset += nameLen;
 
-                                if (name === "lumina_abi") {
+                                if (name === "big_abi") {
                                     const contentSize = sectionSize - (offset - sectionStart);
                                     const abiJson = new TextDecoder().decode(bytes.slice(offset, offset + contentSize));
                                     foundAbi = JSON.parse(abiJson);
@@ -665,7 +665,7 @@ export default function TokenDetailPage() {
                                                                             <div key={k} className="inline-flex items-center gap-1 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 text-[11px]">
                                                                                 <span className="font-semibold text-slate-400 uppercase text-[9px] tracking-tight">{k}:</span>
                                                                                 <span className="font-mono font-bold text-slate-700">
-                                                                                    {typeof v === 'string' && v.startsWith('lumina') ? formatAddr(v) : String(v)}
+                                                                                    {typeof v === 'string' && v.startsWith('big') ? formatAddr(v) : String(v)}
                                                                                 </span>
                                                                             </div>
                                                                         ))}
@@ -768,7 +768,7 @@ export default function TokenDetailPage() {
                                                 <div className="space-y-2">
                                                     <div className="p-3 bg-slate-50/50 rounded-md border border-slate-100 flex justify-between items-center">
                                                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Compiler</span>
-                                                        <span className="text-[10px] font-mono text-slate-600">Rust / WASM (Lumina SDK v1)</span>
+                                                        <span className="text-[10px] font-mono text-slate-600">Rust / WASM (BigChain SDK v1)</span>
                                                     </div>
                                                     <div className="p-3 bg-slate-50/50 rounded-md border border-slate-100 flex justify-between items-center">
                                                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Optimization</span>
@@ -931,7 +931,7 @@ export default function TokenDetailPage() {
                                                 </div>
                                                 <div>
                                                     <h5 className="text-[13px] font-bold">
-                                                        {walletAddress ? "Connected to Lumina Wallet" : "Lumina Wallet Disconnected"}
+                                                        {walletAddress ? "Connected to Bigchain Wallet" : "Bigchain Wallet Disconnected"}
                                                     </h5>
                                                     <p className="text-[11px] opacity-80 font-mono break-all max-w-xl">
                                                         {walletAddress

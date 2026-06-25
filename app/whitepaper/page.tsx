@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Shield, Zap, Cpu, Network, Lock, Coins, ArrowRight, BookOpen, Layers, BarChart3, Globe, Code2, ChevronRight, Share2, Download, Terminal, Check, Server, LockKeyhole, Search } from "lucide-react"
 import Navbar from "@/components/Navbar"
@@ -14,13 +14,13 @@ const SECTIONS = [
 ]
 
 export default function WhitepaperPage() {
-   const symbol = process.env.NEXT_PUBLIC_TOKEN_SYMBOL || "LUM"
+   const symbol = process.env.NEXT_PUBLIC_TOKEN_SYMBOL || "BIG"
 
    const handleShare = () => {
       if (navigator.share) {
          navigator.share({
-            title: 'Lumina Blockchain Whitepaper',
-            text: 'Check out the technical blueprint of Lumina Blockchain.',
+            title: 'BigChain Whitepaper',
+            text: 'Check out the technical blueprint of BigChain.',
             url: window.location.href,
          }).catch(console.error);
       } else {
@@ -46,10 +46,10 @@ export default function WhitepaperPage() {
                      <span className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Protocol Specification v1.0</span>
                   </div>
                   <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-[0.9]">
-                     Lumina <span className="text-teal-400">Whitepaper</span>
+                     BigChain <span className="text-teal-400">Whitepaper</span>
                   </h1>
                   <p className="text-slate-400 max-w-2xl mx-auto font-medium text-lg leading-relaxed">
-                     A comprehensive technical deep-dive into the Lumina protocol: High-performance, Rust-native, and built for sub-second finality.
+                     A comprehensive technical deep-dive into the BigChain protocol: High-performance, Rust-native, and built for sub-second finality.
                   </p>
                   <div className="flex gap-4 pt-4">
                      <a
@@ -94,7 +94,7 @@ export default function WhitepaperPage() {
                   <div className="bg-[#1e293b] rounded-2xl p-6 text-white shadow-xl shadow-black/20 space-y-4">
                      <Server className="w-8 h-8 text-teal-400 opacity-50" />
                      <h5 className="font-black italic text-lg leading-tight uppercase">Network Status</h5>
-                     <p className="text-slate-400 text-[10px] font-medium leading-relaxed">The Lumina network is currently running on Mainnet-1 with 100% uptime.</p>
+                     <p className="text-slate-400 text-[10px] font-medium leading-relaxed">The BigChain network is currently running on Mainnet-1 with 100% uptime.</p>
                      <a href="/nodes" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-teal-400 hover:text-teal-300 transition-all">
                         Check Nodes <ChevronRight className="w-3 h-3" />
                      </a>
@@ -114,10 +114,10 @@ export default function WhitepaperPage() {
                   <h2 className="text-4xl font-black text-slate-900 tracking-tight italic uppercase">Introduction</h2>
                   <div className="prose prose-slate max-w-none text-slate-600 font-medium leading-relaxed space-y-6 text-lg">
                      <p>
-                        Lumina is a decentralized Layer 1 blockchain built from the ground up using <strong>Rust</strong>, designed to address the "Blockchain Trilemma" by optimizing for extreme performance without sacrificing security or decentralization.
+                        BigChain is a decentralized Layer 1 blockchain built from the ground up using <strong>Rust</strong>, designed to address the "Blockchain Trilemma" by optimizing for extreme performance without sacrificing security or decentralization.
                      </p>
                      <p>
-                        In an era where decentralized applications demand the same responsiveness as traditional web platforms, Lumina provides the infrastructure for a seamless transition. By leveraging modern cryptographic primitives like <strong>BLAKE3</strong> for hashing and <strong>Ed25519</strong> for digital signatures, Lumina achieves sub-second finality and the ability to process thousands of transactions per second (TPS) on commodity hardware.
+                        In an era where decentralized applications demand the same responsiveness as traditional web platforms, BigChain provides the infrastructure for a seamless transition. By leveraging modern cryptographic primitives like <strong>BLAKE3</strong> for hashing and <strong>Ed25519</strong> for digital signatures, Lumina achieves sub-second finality and the ability to process thousands of transactions per second (TPS) on commodity hardware.
                      </p>
                      <p>
                         Our mission is to enable a new generation of high-frequency DeFi, real-time gaming, and enterprise-grade decentralized solutions that are not hindered by high gas fees or slow confirmation times.
@@ -135,7 +135,7 @@ export default function WhitepaperPage() {
 
                   <div className="prose prose-slate max-w-none text-slate-600 font-medium mb-12">
                      <p>
-                        Lumina is built on a custom asynchronous engine powered by the <strong>Tokio</strong> framework. This allows our nodes to handle massive amounts of concurrent connections (Gossip Protocol) and transaction validations in parallel across all CPU cores.
+                        BigChain is built on a custom asynchronous engine powered by the <strong>Tokio</strong> framework. This allows our nodes to handle massive amounts of concurrent connections (Gossip Protocol) and transaction validations in parallel across all CPU cores.
                      </p>
                   </div>
 
@@ -145,7 +145,7 @@ export default function WhitepaperPage() {
                            <Terminal className="w-6 h-6" />
                         </div>
                         <h3 className="text-xl font-black uppercase italic">Rust-Native Engine</h3>
-                        <p className="text-slate-500 text-sm font-medium leading-relaxed">Unlike many chains that use interpreted VMs, Lumina executes state transitions natively in Rust. This results in minimal memory overhead and zero garbage collection pauses, which is critical for consistent block times.</p>
+                        <p className="text-slate-500 text-sm font-medium leading-relaxed">Unlike many chains that use interpreted VMs, BigChain executes state transitions natively in Rust. This results in minimal memory overhead and zero garbage collection pauses, which is critical for consistent block times.</p>
                      </div>
                      <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-4 hover:shadow-xl hover:border-teal-500/20 transition-all group">
                         <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-900 group-hover:bg-teal-500 group-hover:text-white transition-all">
@@ -196,7 +196,7 @@ export default function WhitepaperPage() {
                   <h2 className="text-4xl font-black text-slate-900 tracking-tight italic uppercase">Proof of Velocity (PoV)</h2>
                   <div className="prose prose-slate max-w-none text-slate-600 font-medium text-lg leading-relaxed space-y-6">
                      <p>
-                        Lumina utilizes a custom <strong>Proof of Velocity</strong> consensus mechanism—a variation of Delegated Proof of Stake (DPoS) optimized for throughput.
+                        BigChain utilizes a custom <strong>Proof of Velocity</strong> consensus mechanism—a variation of Delegated Proof of Stake (DPoS) optimized for throughput.
                      </p>
                      <p>
                         In traditional DPoS, stake weight is the only metric for leader selection. PoV introduces a second metric: <strong>Propagational Velocity</strong>. Validators are continuously measured on how quickly they can verify and gossip blocks. Nodes with higher velocity are given higher priority in the leader rotation, ensuring the network is always driven by its most efficient participants.
@@ -217,7 +217,7 @@ export default function WhitepaperPage() {
 
                   <div className="prose prose-slate max-w-none text-slate-600 font-medium text-lg leading-relaxed mb-8">
                      <p>
-                        The {symbol} token is the heartbeat of the Lumina ecosystem. It is used for transaction fees, staking collateral, and protocol governance.
+                        The {symbol} token is the heartbeat of the BigChain ecosystem. It is used for transaction fees, staking collateral, and protocol governance.
                      </p>
                   </div>
 
@@ -260,13 +260,13 @@ export default function WhitepaperPage() {
                   <h2 className="text-4xl font-black text-slate-900 tracking-tight italic uppercase">Network Integrity</h2>
                   <div className="prose prose-slate max-w-none text-slate-600 font-medium text-lg leading-relaxed space-y-6">
                      <p>
-                        Every byte in Lumina is protected by the <strong>BLAKE3</strong> hashing algorithm, which is significantly faster and more secure than traditional SHA-256. BLAKE3's parallelizable design allows validators to verify block integrity across multiple CPU cores simultaneously.
+                        Every byte in BigChain is protected by the <strong>BLAKE3</strong> hashing algorithm, which is significantly faster and more secure than traditional SHA-256. BLAKE3's parallelizable design allows validators to verify block integrity across multiple CPU cores simultaneously.
                      </p>
                      <p>
                         Security is further hardened by <strong>Quantum-Resistant considerations</strong> in our P2P stack and the use of the <strong>Ed25519</strong> signature scheme for all wallet operations.
                      </p>
                      <p>
-                        Lumina also implements a <strong>Decentralized Slashing</strong> mechanism: any validator attempting to sign two different blocks at the same height (double-signing) will have their entire staked balance permanently revoked and redistributed to honest participants.
+                        BigChain also implements a <strong>Decentralized Slashing</strong> mechanism: any validator attempting to sign two different blocks at the same height (double-signing) will have their entire staked balance permanently revoked and redistributed to honest participants.
                      </p>
                   </div>
                </section>

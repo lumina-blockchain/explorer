@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 // POLYFILL BUFFER UNTUK BROWSER
 if (typeof window !== 'undefined') {
@@ -17,8 +17,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Helper buat bikin alamat lumina1... dari hash (20 bytes)
-function toLuminaAddress(hashHex: any): string {
+// Helper buat bikin alamat big1... dari hash (20 bytes)
+function toBigAddress(hashHex: any): string {
     if (!hashHex) return "";
     try {
         if (typeof hashHex === 'string' && hashHex.includes('1')) return hashHex;
@@ -40,7 +40,7 @@ function toLuminaAddress(hashHex: any): string {
 
         const bytes = new Uint8Array(matches.map(byte => parseInt(byte, 16)));
         const words = bech32m.toWords(bytes.slice(0, 20));
-        return bech32m.encode('lumina', words);
+        return bech32m.encode('big', words);
     } catch (e) {
         return String(hashHex);
     }
@@ -48,8 +48,8 @@ function toLuminaAddress(hashHex: any): string {
 
 declare global {
   interface Window {
-    lumina?: {
-      isLumina: boolean;
+    big?: {
+      isBig: boolean;
       isConnected: () => boolean;
       getAddress: () => string | null;
       request: (req: { method: string; params?: any }) => Promise<any>;
@@ -67,21 +67,21 @@ export default function SmartContractStudio() {
     const compilerMapping: Record<string, string> = {
         'Local (9091)': 'http://localhost:9091',
         '1.95.0': 'https://compiler1950.bariscode.my.id',
-        '1.94.0': 'https://vps-194.lumina.network',
-        '1.93.0': 'https://vps-193.lumina.network',
-        '1.92.0': 'https://vps-192.lumina.network',
-        '1.91.0': 'https://vps-191.lumina.network',
-        '1.90.0': 'https://vps-190.lumina.network',
-        '1.89.0': 'https://vps-189.lumina.network',
-        '1.88.0': 'https://vps-188.lumina.network',
-        '1.87.0': 'https://vps-187.lumina.network',
-        '1.86.0': 'https://vps-186.lumina.network',
+        '1.94.0': 'https://vps-194.bigchain.network',
+        '1.93.0': 'https://vps-193.bigchain.network',
+        '1.92.0': 'https://vps-192.bigchain.network',
+        '1.91.0': 'https://vps-191.bigchain.network',
+        '1.90.0': 'https://vps-190.bigchain.network',
+        '1.89.0': 'https://vps-189.bigchain.network',
+        '1.88.0': 'https://vps-188.bigchain.network',
+        '1.87.0': 'https://vps-187.bigchain.network',
+        '1.86.0': 'https://vps-186.bigchain.network',
     };
     const rustVersions = Object.keys(compilerMapping).sort().reverse();
 
     // PATOKAN: Menggunakan isi dari example-sc.rs
     const [code, setCode] = useState(`// ============================================================================
-//  LTS-20 Token Standard — Lumina Protocol
+//  LTS-20 Token Standard — BigChain Protocol
 //  Adapted to use the official Lumina Standards Library (LSL)
 //  Features: Transfer, Approve, Mint, Burn, Pause, Ownership, Custom Blacklist
 // ============================================================================
@@ -370,7 +370,7 @@ pub mod lts20_token {
     // IDE Tab State
     const [openTabs, setOpenTabs] = useState<Array<{ id: string, name: string, content: string, isSdk: boolean }>>([
         { id: 'lib.rs', name: 'lib.rs', content: `// ============================================================================
-//  LTS-20 Token Standard — Lumina Protocol
+//  LTS-20 Token Standard — BigChain Protocol
 //  Adapted to use the official Lumina Standards Library (LSL)
 //  Features: Transfer, Approve, Mint, Burn, Pause, Ownership, Custom Blacklist
 // ============================================================================
@@ -759,10 +759,10 @@ pub mod lts20_token {
     };
 
     const updateBalance = async (addr: string) => {
-        if (!window.lumina) return;
+        if (!window.big) return;
         try {
-            const balanceRaw = await window.lumina.request({
-                method: 'lumina_getBalance',
+            const balanceRaw = await window.big.request({
+                method: 'big_getBalance',
                 params: { address: addr }
             });
             const balanceLUM = parseFloat(balanceRaw) / 1e18;
@@ -778,9 +778,9 @@ pub mod lts20_token {
 
         // Deteksi Extension Wallet otomatis
         const checkProvider = () => {
-            if (window.lumina) {
-                addLog("Lumina Extension Wallet detected! (window.lumina)", "success");
-                const currentAddr = window.lumina.getAddress();
+            if (window.big) {
+                addLog("Lumina Extension Wallet detected! (window.big)", "success");
+                const currentAddr = window.big.getAddress();
                 if (currentAddr) {
                     setWalletAddress(currentAddr);
                     updateBalance(currentAddr);
@@ -800,7 +800,7 @@ pub mod lts20_token {
                     }
                 };
 
-                window.lumina.on('accountsChanged', handleAccountsChanged);
+                window.big.on('accountsChanged', handleAccountsChanged);
             } else {
                 addLog("Wallet extension not detected. Sideload the extension to enable secure deploy!", "info");
             }
@@ -811,13 +811,13 @@ pub mod lts20_token {
     }, []);
 
     const connectWallet = async () => {
-        if (!window.lumina) {
+        if (!window.big) {
             alert("Lumina Wallet Extension not detected! Please install or sideload the extension.");
             return;
         }
         try {
             addLog("Requesting Lumina Extension connection...", "info");
-            const accounts = await window.lumina.request({ method: 'lumina_requestAccounts' });
+            const accounts = await window.big.request({ method: 'big_requestAccounts' });
             const connectedAddr = accounts[0];
             setWalletAddress(connectedAddr);
             updateBalance(connectedAddr);
@@ -933,12 +933,12 @@ pub mod lts20_token {
             fullPayload.set(enrichedBytecode, prefix.length);
 
             // JIKA MENGGUNAKAN WALLET EXTENSION CHROME
-            if (walletAddress && window.lumina) {
+            if (walletAddress && window.big) {
                 addLog("Initiating Secure Sideloaded Extension Transaction Signature...", "info");
                 try {
                     addLog("Broadcasting transaction through Chrome Extension Wallet...", "tech");
-                    const resultHash = await window.lumina.request({
-                        method: 'lumina_sendTransaction',
+                    const resultHash = await window.big.request({
+                        method: 'big_sendTransaction',
                         params: {
                             to: "lumina1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq4fdvjl",
                             amount: "0",
@@ -960,7 +960,7 @@ pub mod lts20_token {
                         if (txStatus && txStatus.status) {
                             const statusUpper = txStatus.status.toUpperCase();
                             if (statusUpper.includes("SUCCESS") || statusUpper.includes("CONFIRMED")) {
-                                const finalAddr = toLuminaAddress(resultHash);
+                                const finalAddr = toBigAddress(resultHash);
                                 addLog(`✓ DEPLOYMENT FINALIZED!`, "success");
                                 addLog(`Contract Live at: ${finalAddr}`, "success");
                                 setContractId(finalAddr);
@@ -1048,7 +1048,7 @@ pub mod lts20_token {
             console.log("Broadcast Result:", result);
 
             if (result && (result.status === 'ok' || result.status === 'success')) {
-                const txHash = typeof result.hash === 'string' ? result.hash : toLuminaAddress(result.hash);
+                const txHash = typeof result.hash === 'string' ? result.hash : toBigAddress(result.hash);
                 const rawHash = txHash.includes(':') ? txHash.split(':')[2] : txHash;
 
                 addLog(`📡 Broadcast Success. Hash: 0x${rawHash.substring(0, 16)}...`, "info");
@@ -1064,7 +1064,7 @@ pub mod lts20_token {
                     if (txStatus && txStatus.status) {
                         const statusUpper = txStatus.status.toUpperCase();
                         if (statusUpper.includes("SUCCESS") || statusUpper.includes("CONFIRMED")) {
-                            const finalAddr = toLuminaAddress(rawHash);
+                            const finalAddr = toBigAddress(rawHash);
                             addLog(`✓ DEPLOYMENT FINALIZED!`, "success");
                             addLog(`Contract Live at: ${finalAddr}`, "success");
                             setContractId(finalAddr);

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import { 
@@ -123,7 +123,7 @@ export default function ValidatorSetPage() {
             Validator <span className="bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">Set</span>
           </h1>
           <p className="text-slate-400 max-w-2xl mx-auto font-medium text-sm">
-            Active consensus nodes validating states, proposing blocks, and securing the decentralized Lumina protocol network.
+            Active consensus nodes validating states, proposing blocks, and securing the decentralized BigChain protocol network.
           </p>
         </div>
       </div>
