@@ -14,6 +14,7 @@ const NAV_ITEMS = [
     items: [
       { icon: Box, label: "Blocks", href: "/blocks", desc: "Browse all confirmed blocks" },
       { icon: Activity, label: "Transactions", href: "/txs", desc: "View latest transactions" },
+      { icon: BarChart2, label: "Latency Stats", href: "/stats", desc: "Real-time P2P latency & consensus charts" },
       { icon: Wallet, label: "Top Accounts", href: "/accounts", desc: "Richest addresses on-chain" },
       { icon: Layers, label: "Pending Txs", href: "/txs/pending", desc: "Mempool & pending queue" },
     ]
@@ -33,15 +34,15 @@ const NAV_ITEMS = [
       { icon: BookOpen, label: "Documentation", href: "/docs", desc: "Developer guides" },
       { icon: FileText, label: "Articles", href: "/article/index.html", desc: "System & engineering articles" },
       { icon: Code2, label: "RPC API", href: "/api", desc: "Public JSON-RPC endpoints" },
-      { icon: FileText, label: "Whitepaper", href: "/whitepaper", desc: "Lumina protocol paper" },
+      { icon: FileText, label: "Whitepaper", href: "/whitepaper", desc: "BigChain protocol paper" },
       { icon: Cpu, label: "Node Status", href: "/nodes", desc: "Network node health" },
-      { icon: Wallet, label: "Download Wallet", href: "/lumina-wallet.zip", desc: "Chrome Extension (Desktop)" },
+      { icon: Wallet, label: "Download Wallet", href: "/bigchain-wallet.zip", desc: "Chrome Extension (Desktop)" },
     ]
   },
 ]
 
 export default function Navbar() {
-  const chainId = process.env.NEXT_PUBLIC_CHAIN_ID || "Lumina-Mainnet"
+  const chainId = process.env.NEXT_PUBLIC_CHAIN_ID || "BigChain-Mainnet"
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -68,7 +69,7 @@ export default function Navbar() {
               <Zap className="w-5 h-5 text-teal-400 fill-teal-400" />
             </div>
             <span className="text-sm font-black tracking-tighter text-white uppercase italic">
-              LUMINA<span className="text-teal-400">SCAN</span>
+              BIGCHAIN<span className="text-teal-400">SCAN</span>
             </span>
           </Link>
 

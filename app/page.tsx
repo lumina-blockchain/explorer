@@ -152,6 +152,7 @@ export default function Home() {
    const [txs, setTxs] = useState<TxInfo[]>([])
    const [latestHeight, setLatestHeight] = useState(0)
    const [displayedConfirmedTps, setDisplayedConfirmedTps] = useState(0)
+   const [blocksPerSecond, setBlocksPerSecond] = useState(0)
    const tpsBuffer = useRef<number[]>([])
    const latestTpsRef = useRef<number>(0)
    const [stats, setStats] = useState<NetworkStats>({
@@ -171,6 +172,9 @@ export default function Home() {
       persistence_lag: 0,
       total_accounts: 0
    })
+   const [displayedAups, setDisplayedAups] = useState(0)
+   const aupsBuffer = useRef<number[]>([])
+   const latestAupsRef = useRef<number>(0)
    const [searchQuery, setSearchQuery] = useState("")
    const [searchResults, setSearchResults] = useState<any[]>([])
    const [isSearching, setIsSearching] = useState(false)
@@ -179,6 +183,8 @@ export default function Home() {
    const [showWalletModal, setShowWalletModal] = useState(false)
    const ws = useRef<WebSocket | null>(null)
    const chainId = process.env.NEXT_PUBLIC_CHAIN_ID || "Lumina-Mainnet"
+   const [actualBlockTimeOccurred, setActualBlockTimeOccurred] = useState<number>(1000)
+   const lastBlockReceivedAt = useRef<number>(0)
 
    useEffect(() => {
       const timer = setInterval(() => setNow(Date.now()), 1000)
@@ -187,16 +193,28 @@ export default function Home() {
 
    useEffect(() => {
       const interval = setInterval(() => {
-         const currentBuffer = tpsBuffer.current
-         if (currentBuffer.length > 0) {
-            const sum = currentBuffer.reduce((a, b) => a + b, 0)
-            const avg = sum / currentBuffer.length
-            setDisplayedConfirmedTps(avg)
+         // 1. Confirmed TPS
+         const currentTpsBuffer = tpsBuffer.current
+         const blockCount = currentTpsBuffer.length
+         setBlocksPerSecond(blockCount)
+         if (currentTpsBuffer.length > 0) {
+            const sum = currentTpsBuffer.reduce((a, b) => a + b, 0)
+            setDisplayedConfirmedTps(sum / currentTpsBuffer.length)
             tpsBuffer.current = []
          } else {
             setDisplayedConfirmedTps(latestTpsRef.current)
          }
-      }, 5000)
+
+         // 2. State AUPS
+         const currentAupsBuffer = aupsBuffer.current
+         if (currentAupsBuffer.length > 0) {
+            const sum = currentAupsBuffer.reduce((a, b) => a + b, 0)
+            setDisplayedAups(sum / currentAupsBuffer.length)
+            aupsBuffer.current = []
+         } else {
+            setDisplayedAups(latestAupsRef.current)
+         }
+      }, 1000)
 
       return () => clearInterval(interval)
    }, [])
@@ -277,8 +295,15 @@ export default function Home() {
                      ...sData,
                      active_nodes: sData.active_nodes > 0 ? sData.active_nodes : prev.active_nodes
                   }))
+                  if (sData.block_time_ms && sData.block_time_ms > 0) {
+                     setActualBlockTimeOccurred(sData.block_time_ms)
+                  }
                   setDisplayedConfirmedTps(sData.confirmed_tps || 0)
                   latestTpsRef.current = sData.confirmed_tps || 0
+                  if (sData.aups !== undefined) {
+                     setDisplayedAups(sData.aups)
+                     latestAupsRef.current = sData.aups
+                  }
                }
             }
          } catch (err) {
@@ -296,6 +321,15 @@ export default function Home() {
                const data = JSON.parse(event.data)
                if (data.type === "new_block") {
                   setLatestHeight(data.height)
+
+                  const nowTime = Date.now()
+                  if (lastBlockReceivedAt.current > 0) {
+                     const diff = nowTime - lastBlockReceivedAt.current
+                     if (diff > 100) {
+                        setActualBlockTimeOccurred(diff)
+                     }
+                  }
+                  lastBlockReceivedAt.current = nowTime
 
                   if (data.confirmed_tps !== undefined) {
                      tpsBuffer.current.push(data.confirmed_tps)
@@ -318,6 +352,11 @@ export default function Home() {
                      aups: data.aups !== undefined ? data.aups : prev.aups,
                      persistence_lag: data.persistence_lag !== undefined ? data.persistence_lag : prev.persistence_lag
                   }))
+
+                  if (data.aups !== undefined) {
+                     aupsBuffer.current.push(data.aups)
+                     latestAupsRef.current = data.aups
+                  }
 
                   const newBlock = {
                      height: data.height,
@@ -559,7 +598,7 @@ export default function Home() {
                {[
                   { label: "Circulating Supply", value: `${formatValue(stats.circulating_supply)} ${TOKEN_SYMBOL}`, sub: `Total: ${formatValue(stats.total_supply)} ${TOKEN_SYMBOL}`, icon: Globe },
                   { label: "Total Transactions", value: stats.total_transactions.toLocaleString(), sub: "All-Time", icon: Activity },
-                  { label: "Confirmed TPS", value: Math.round(displayedConfirmedTps).toLocaleString(), sub: "Block Speed", icon: Zap },
+                  { label: "Confirmed TPS", value: Math.round(displayedConfirmedTps).toLocaleString(), sub: `${blocksPerSecond} Block${blocksPerSecond === 1 ? "" : "s"}/sec`, icon: Zap },
                   { label: "Current Height", value: latestHeight.toLocaleString(), sub: chainId, icon: Layers },
                   { label: "Avg Fee", value: `${formatValue(stats.avg_fee)} ${TOKEN_SYMBOL}`, sub: "Dynamic Gas", icon: Cpu },
                   { label: "Validators", value: stats.active_nodes.toString(), sub: "Active Nodes", icon: ShieldCheck },
@@ -582,16 +621,16 @@ export default function Home() {
                      <div className="flex items-center gap-2 flex-wrap">
                         <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
                         <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Performance & Engine Diagnostics</h3>
-                        <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded shadow-sm">
+                        {/* <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200/50 px-2 py-0.5 rounded shadow-sm">
                            This stats testing is conducted across continents: California, Paris, Tokyo, Singapore AVG letency 500ms
-                        </span>
+                        </span> */}
                      </div>
                   </div>
 
                   {/* Hitung Active BFT Time & Slot Occupancy secara akurat dengan mengeliminasi delay proposer (900ms) */}
                   {(() => {
                      const activeBftTime = Math.max(1, (stats.consensus_time_ms ?? 901) - 900);
-                     const slotOccupancy = Math.max(0.1, Math.min(100, (activeBftTime / (stats.block_time_ms ?? 1000)) * 100));
+                     const slotOccupancy = Math.max(0.1, Math.min(100, (activeBftTime / actualBlockTimeOccurred) * 100));
 
                      return (
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
@@ -632,9 +671,9 @@ export default function Home() {
                                  icon: Activity
                               },
                               {
-                                 label: "State AUPS",
-                                 value: `${(stats.aups ?? 0).toFixed(1)} /s`,
-                                 sub: "Accounts Updated",
+                                 label: "State AUPS (Avg)",
+                                 value: `${(displayedAups).toFixed(1)} /s`,
+                                 sub: `Latest: ${(stats.aups ?? 0).toFixed(1)} /s`,
                                  pulse: "bg-teal-400",
                                  icon: Users
                               },

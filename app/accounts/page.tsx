@@ -127,56 +127,56 @@ export default function TopAccountsPage() {
                   accounts.map((acc, index) => (
                     <tr key={acc.address} className="hover:bg-slate-50/80 transition-colors group">
                       <td className="px-6 py-4 font-black text-slate-400">
-                         {(page * limit) + index + 1}
+                        {(page * limit) + index + 1}
                       </td>
                       <td className="px-6 py-4">
                         <Link href={`/address/${acc.address}`} className="font-mono text-slate-900 font-bold hover:text-teal-600 transition-colors flex items-center gap-2">
-                           <div className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center">
-                              {acc.is_validator ? (
-                                 <span className="text-[10px]">💎</span>
-                              ) : (
-                                 <User className="w-3.5 h-3.5 text-slate-400" />
+                          <div className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center">
+                            {acc.is_validator ? (
+                              <span className="text-[10px]">💎</span>
+                            ) : (
+                              <User className="w-3.5 h-3.5 text-slate-400" />
+                            )}
+                          </div>
+                          {acc.name ? (
+                            <span className="flex items-center gap-1.5">
+                              <span className="font-bold text-slate-800">{acc.name}</span>
+                              <span className="text-[10px] text-slate-400">({formatAddr(acc.address)})</span>
+                              {acc.is_validator && (
+                                <span className="inline-flex items-center bg-gradient-to-r from-amber-500 to-yellow-400 text-white text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm">
+                                  VAL
+                                </span>
                               )}
-                           </div>
-                           {acc.name ? (
-                              <span className="flex items-center gap-1.5">
-                                 <span className="font-bold text-slate-800">{acc.name}</span>
-                                 <span className="text-[10px] text-slate-400">({formatAddr(acc.address)})</span>
-                                 {acc.is_validator && (
-                                    <span className="inline-flex items-center bg-gradient-to-r from-amber-500 to-yellow-400 text-white text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm">
-                                       VAL
-                                    </span>
-                                 )}
-                              </span>
-                           ) : (
-                              <span className="flex items-center gap-1.5">
-                                 <span>{formatAddr(acc.address)}</span>
-                                 {acc.is_validator && (
-                                    <span className="inline-flex items-center bg-gradient-to-r from-amber-500 to-yellow-400 text-white text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm">
-                                       VAL
-                                    </span>
-                                 )}
-                              </span>
-                           )}
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1.5">
+                              <span>{formatAddr(acc.address)}</span>
+                              {acc.is_validator && (
+                                <span className="inline-flex items-center bg-gradient-to-r from-amber-500 to-yellow-400 text-white text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm">
+                                  VAL
+                                </span>
+                              )}
+                            </span>
+                          )}
                         </Link>
                       </td>
                       <td className="px-6 py-4 text-right">
-                         <span className="font-black text-slate-900">{formatValue(acc.balance)}</span>
-                         <span className="text-[10px] text-slate-400 font-bold ml-1">LUM</span>
+                        <span className="font-black text-slate-900">{formatValue(acc.balance)}</span>
+                        <span className="text-[10px] text-slate-400 font-bold ml-1">LUM</span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                         <span className="font-bold text-teal-600">{formatValue(acc.staked)}</span>
-                         <span className="text-[10px] text-teal-400 font-bold ml-1">LUM</span>
+                        <span className="font-bold text-teal-600">{formatValue(acc.staked)}</span>
+                        <span className="text-[10px] text-teal-400 font-bold ml-1">LUM</span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                         <span className="bg-slate-100 px-2 py-0.5 rounded text-[11px] font-bold text-slate-600">
-                            {acc.nonce}
-                         </span>
+                        <span className="bg-slate-100 px-2 py-0.5 rounded text-[11px] font-bold text-slate-600">
+                          {acc.nonce}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                         <Link href={`/address/${acc.address}`} className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-all inline-flex items-center gap-1 text-[11px] font-bold text-slate-600">
-                            View <ArrowUpRight className="w-3 h-3" />
-                         </Link>
+                        <Link href={`/address/${acc.address}`} className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-all inline-flex items-center gap-1 text-[11px] font-bold text-slate-600">
+                          View <ArrowUpRight className="w-3 h-3" />
+                        </Link>
                       </td>
                     </tr>
                   ))

@@ -156,7 +156,7 @@ export default function TxPage() {
 
    // Fetch token metadata if this is a CALL tx
    const callPayload = tx ? parseCallPayload(tx.data) : null;
-   const isTokenTransfer = tx?.token_info 
+   const isTokenTransfer = tx?.token_info
       ? tx.token_info.method === 'transfer' && tx.token_info.token_amount !== undefined
       : callPayload?.methodName === 'transfer' && callPayload.args.length >= 2;
    const tokenRecipient = tx?.token_info?.token_recipient || (isTokenTransfer ? callPayload!.args[0] : null);
@@ -189,14 +189,14 @@ export default function TxPage() {
                   const nameRes = await fetchRpc(`/contract/${cid}/call/name`);
                   const nameData = await nameRes.json();
                   if (nameData && nameData.result) name = nameData.result;
-               } catch {}
+               } catch { }
             }
             if (!symbol) {
                try {
                   const symRes = await fetchRpc(`/contract/${cid}/call/symbol`);
                   const symData = await symRes.json();
                   if (symData && symData.result) symbol = symData.result;
-               } catch {}
+               } catch { }
             }
 
             setTokenMeta({
@@ -483,9 +483,9 @@ export default function TxPage() {
                         } />
                         <DetailRow label="To (Receiver)" value={
                            <div className="flex items-center gap-2">
-                              {tx.to === "lumina1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq4fdvjl" ? (
+                              {tx.to === "big1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqfdz0q3" ? (
                                  <div className="flex items-center gap-2 px-2 py-1 bg-teal-50 border border-teal-100 rounded text-teal-600 font-bold text-[10px]">
-                                    <Database className="w-3 h-3" /> LUMINA SYSTEM (DEPLOY)
+                                    <Database className="w-3 h-3" /> BIGCHAIN SYSTEM (DEPLOY)
                                  </div>
                               ) : isTokenTransfer ? (
                                  <div className="flex flex-col gap-1">
@@ -520,35 +520,35 @@ export default function TxPage() {
                         } />
 
                         {callPayload?.methodName === 'mint' && callPayload.args.length >= 2 ? (
-                            <>
-                               <DetailRow label="Token Minted Value" value={
-                                  <span className="font-bold text-emerald-600">{formatValue(callPayload.args[1])} {tokenMeta?.symbol || 'TOKEN'}</span>
-                               } />
-                               <DetailRow label="Contract" value={
-                                  <Link href={`/token/${callPayload.contractId}`} className="text-teal-600 font-mono hover:underline flex items-center gap-2">
-                                     {callPayload.contractId} <ExternalLink className="w-3 h-3 opacity-30" />
-                                  </Link>
-                               } />
-                               <DetailRow label="Token Recipient" value={
-                                  <Link href={`/address/${callPayload.args[0]}`} className="text-teal-600 font-mono hover:underline flex items-center gap-2">
-                                     {callPayload.args[0]} <ExternalLink className="w-3 h-3 opacity-30" />
-                                  </Link>
-                               } />
-                               <DetailRow label="Native Value" value={<span className="text-slate-400">{formatValue(tx.value)} {TOKEN_SYMBOL}</span>} />
-                            </>
-                         ) : callPayload?.methodName === 'burn' && callPayload.args.length >= 1 ? (
-                            <>
-                               <DetailRow label="Token Burned Value" value={
-                                  <span className="font-bold text-rose-600">{formatValue(callPayload.args[0])} {tokenMeta?.symbol || 'TOKEN'}</span>
-                               } />
-                               <DetailRow label="Contract" value={
-                                  <Link href={`/token/${callPayload.contractId}`} className="text-teal-600 font-mono hover:underline flex items-center gap-2">
-                                     {callPayload.contractId} <ExternalLink className="w-3 h-3 opacity-30" />
-                                  </Link>
-                               } />
-                               <DetailRow label="Native Value" value={<span className="text-slate-400">{formatValue(tx.value)} {TOKEN_SYMBOL}</span>} />
-                            </>
-                         ) : isTokenTransfer ? (
+                           <>
+                              <DetailRow label="Token Minted Value" value={
+                                 <span className="font-bold text-emerald-600">{formatValue(callPayload.args[1])} {tokenMeta?.symbol || 'TOKEN'}</span>
+                              } />
+                              <DetailRow label="Contract" value={
+                                 <Link href={`/token/${callPayload.contractId}`} className="text-teal-600 font-mono hover:underline flex items-center gap-2">
+                                    {callPayload.contractId} <ExternalLink className="w-3 h-3 opacity-30" />
+                                 </Link>
+                              } />
+                              <DetailRow label="Token Recipient" value={
+                                 <Link href={`/address/${callPayload.args[0]}`} className="text-teal-600 font-mono hover:underline flex items-center gap-2">
+                                    {callPayload.args[0]} <ExternalLink className="w-3 h-3 opacity-30" />
+                                 </Link>
+                              } />
+                              <DetailRow label="Native Value" value={<span className="text-slate-400">{formatValue(tx.value)} {TOKEN_SYMBOL}</span>} />
+                           </>
+                        ) : callPayload?.methodName === 'burn' && callPayload.args.length >= 1 ? (
+                           <>
+                              <DetailRow label="Token Burned Value" value={
+                                 <span className="font-bold text-rose-600">{formatValue(callPayload.args[0])} {tokenMeta?.symbol || 'TOKEN'}</span>
+                              } />
+                              <DetailRow label="Contract" value={
+                                 <Link href={`/token/${callPayload.contractId}`} className="text-teal-600 font-mono hover:underline flex items-center gap-2">
+                                    {callPayload.contractId} <ExternalLink className="w-3 h-3 opacity-30" />
+                                 </Link>
+                              } />
+                              <DetailRow label="Native Value" value={<span className="text-slate-400">{formatValue(tx.value)} {TOKEN_SYMBOL}</span>} />
+                           </>
+                        ) : isTokenTransfer ? (
                            <>
                               <DetailRow label="Token Value" value={
                                  <span className="font-bold text-emerald-600">{formatValue(tokenAmountRaw!)} {tokenMeta?.symbol || 'TOKEN'}</span>

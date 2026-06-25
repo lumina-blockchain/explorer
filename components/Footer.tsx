@@ -26,16 +26,16 @@ const FOOTER_LINKS = [
     title: "Developers",
     links: [
       { label: "RPC Endpoints", href: "/api" },
-      { label: "Documentation", href: "https://docs.lumina.network" },
+      { label: "Documentation", href: "https://docs.bigchain.network" },
       { label: "Whitepaper", href: "/whitepaper" },
-      { label: "GitHub", href: "https://github.com/lumina" },
+      { label: "GitHub", href: "https://github.com/bigchain" },
     ]
   },
 ]
 
 export default function Footer() {
   const year = new Date().getFullYear()
-  const chainId = process.env.NEXT_PUBLIC_CHAIN_ID || "Lumina-Mainnet"
+  const chainId = process.env.NEXT_PUBLIC_CHAIN_ID || "BigChain-Mainnet"
 
   return (
     <footer className="mt-12 border-t border-slate-200 bg-white">
@@ -50,11 +50,11 @@ export default function Footer() {
                 <Zap className="w-5 h-5 text-teal-500 fill-teal-500" />
               </div>
               <span className="text-sm font-black tracking-tighter text-slate-900 uppercase italic">
-                LUMINA<span className="text-teal-500">SCAN</span>
+                BIGCHAIN<span className="text-teal-500">SCAN</span>
               </span>
             </div>
             <p className="text-[12px] leading-relaxed text-slate-400 font-medium max-w-xs">
-              LuminaScan is the leading search and analytics platform for the Lumina blockchain — a high-performance Layer-1 network built for the future of decentralized finance.
+              BigChainScan is the leading search and analytics platform for the BigChain blockchain — a high-performance Layer-1 network built for the future of decentralized finance.
             </p>
 
             {/* Live network badge */}
@@ -76,7 +76,7 @@ export default function Footer() {
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
               {/* Website */}
-              <a href="https://lumina.network" target="_blank" rel="noopener noreferrer" aria-label="Website"
+              <a href="https://bigchain.network" target="_blank" rel="noopener noreferrer" aria-label="Website"
                 className="w-8 h-8 rounded border border-slate-200 bg-slate-50 flex items-center justify-center hover:bg-teal-50 hover:border-teal-200 transition-all text-slate-400 hover:text-teal-600">
                 <Globe className="w-3.5 h-3.5" />
               </a>
@@ -111,7 +111,7 @@ export default function Footer() {
       <div className="border-t border-slate-100 bg-slate-50/50">
         <div className="max-w-[1400px] mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
           <span className="text-[11px] text-slate-400 font-medium">
-            © {year} LuminaScan Explorer. All rights reserved.
+            © {year} BigChainScan Explorer. All rights reserved.
           </span>
           <div className="flex items-center gap-4 text-[11px] text-slate-400">
             <Link href="/privacy" className="hover:text-teal-600 transition-colors font-medium">Privacy Policy</Link>
