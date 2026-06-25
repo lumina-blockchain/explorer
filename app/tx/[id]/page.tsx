@@ -225,9 +225,19 @@ export default function TxPage() {
    }, [tx?.status, params.id])
 
    // Helper buat bersihin status dan ambil CID
-   const parsedStatus = tx?.status.startsWith("SUCCESS:CID:")
-      ? { label: "SUCCESS", cid: tx.status.split(":")[2] }
-      : { label: tx?.status || "PENDING", cid: null };
+   // Format: SUCCESS:CID:<address> — gunakan indexOf agar aman dari colon di dalam address
+   const parsedStatus = (() => {
+      const s = tx?.status || "PENDING";
+      if (s.startsWith("SUCCESS:CID:")) {
+         const cid = s.substring("SUCCESS:CID:".length);
+         return { label: "SUCCESS", cid: cid || null };
+      }
+      // Juga handle lowercase variants
+      const upper = s.toUpperCase();
+      if (upper.startsWith("SUCCESS")) return { label: "SUCCESS", cid: null };
+      if (upper.startsWith("FAILED") || upper.startsWith("ERROR")) return { label: upper.split(":")[0], cid: null };
+      return { label: s, cid: null };
+   })();
 
    if (loading) {
       return (
@@ -429,11 +439,11 @@ export default function TxPage() {
                               </div>
                               {tx.block_height > 0 ? (
                                  <>
-                                    {(tx.status.toUpperCase() === "SUCCESS" || tx.status.toUpperCase() === "CONFIRMED") ? (
+                                    {(parsedStatus.label === "SUCCESS" || parsedStatus.label === "CONFIRMED") ? (
                                        <span className="text-[11px] text-slate-400 font-bold uppercase italic tracking-tighter">
                                           {tx.latest_height - tx.block_height + 1} Confirmations
                                        </span>
-                                    ) : tx.status.toUpperCase().includes("FAILED") ? (
+                                    ) : (parsedStatus.label.includes("FAILED") || parsedStatus.label.includes("ERROR")) ? (
                                        <span className="text-[11px] text-red-500 font-bold uppercase italic tracking-tighter flex items-center gap-1">
                                           <AlertCircle className="w-3 h-3" /> Execution Error
                                        </span>
