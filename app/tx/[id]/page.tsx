@@ -83,7 +83,7 @@ export default function TxPage() {
 
       if (/^\d+$/.test(query)) {
          router.push(`/block/${query}`)
-      } else if (query.toLowerCase().startsWith("lumina")) {
+      } else if (query.length >= 3 && /^[a-z0-9]+1[a-zA-HJ-NP-Z0-9]+$/.test(query)) {
          router.push(`/address/${query}`)
       } else if (query.length >= 60) {
          const clean = query.startsWith("0x") ? query.substring(2) : query
@@ -259,7 +259,7 @@ export default function TxPage() {
                <div className="absolute inset-0 opacity-[0.1]" style={{ backgroundImage: 'radial-gradient(#512da8 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
                <div className="max-w-[1400px] mx-auto px-4 relative z-10 space-y-4">
                   <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                     Lumina <span className="text-teal-400 uppercase text-xs tracking-widest">Transaction Detail</span>
+                     BigChain <span className="text-teal-400 uppercase text-xs tracking-widest">Transaction Detail</span>
                   </h1>
                   <form onSubmit={handleSearch} className="max-w-2xl relative group z-30">
                      <input
@@ -330,7 +330,7 @@ export default function TxPage() {
                <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Transaction Summary</span>
                   <p className="text-[13px] font-medium text-slate-700">
-                     {tx.to === "lumina1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq4fdvjl" ? (
+                     {tx.method === "DEPLOY" || (tx.status && tx.status.startsWith("SUCCESS:CID:")) || (tx.to && /^[a-z0-9]+1q{10,}/.test(tx.to)) ? (
                         <>Contract Deployment by <Link href={`/address/${tx.from}`} className="text-teal-600 hover:underline font-mono">{tx.from_name ? `${tx.from_name} (${formatAddr(tx.from)})` : formatAddr(tx.from)}</Link></>
                      ) : callPayload?.methodName === 'mint' && callPayload.args.length >= 2 ? (
                         <>Token Mint to <Link href={`/address/${callPayload.args[0]}`} className="text-teal-600 hover:underline font-mono">{formatAddr(callPayload.args[0])}</Link> of <span className="font-bold text-slate-900">{formatValue(callPayload.args[1])} {tokenMeta?.symbol || 'TOKEN'}</span> via contract <Link href={`/token/${callPayload.contractId}`} className="text-teal-600 hover:underline font-mono">{formatAddr(callPayload.contractId)}</Link></>
@@ -478,12 +478,12 @@ export default function TxPage() {
                               ) : (
                                  tx.from
                               )}
-                              <ExternalLink className="w-3 h-3 opacity-30" />
+                                    <ExternalLink className="w-3 h-3 opacity-30" />
                            </Link>
                         } />
                         <DetailRow label="To (Receiver)" value={
                            <div className="flex items-center gap-2">
-                              {tx.to === "big1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqfdz0q3" ? (
+                              {(tx.method === "DEPLOY" || (tx.status && tx.status.startsWith("SUCCESS:CID:")) || (tx.to && /^[a-z0-9]+1q{8,}/.test(tx.to))) ? (
                                  <div className="flex items-center gap-2 px-2 py-1 bg-teal-50 border border-teal-100 rounded text-teal-600 font-bold text-[10px]">
                                     <Database className="w-3 h-3" /> BIGCHAIN SYSTEM (DEPLOY)
                                  </div>
